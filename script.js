@@ -99,6 +99,7 @@ inputUrl.addEventListener("keydown", function (evento) {
 
     // 8. Se crea una nueva fila en la tabla
     const fila = document.createElement("tr");
+    fila.dataset.estado = estado.toLowerCase();
     fila.innerHTML = `
         <td><input type="checkbox"></td>
         <td>${texto}</td>
@@ -159,8 +160,3 @@ casillasViewport.forEach(function (casilla) {
 });
 
 
-const webshot = "main";
-
-function calcular (valor) {
-    // Aquí puedes agregar la lógica para calcular algo con el valor proporcionado
-}
