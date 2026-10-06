@@ -33,13 +33,10 @@ function mostrarPagina(idPagina){
 
 //======  PÁGINA1  ========
 
-// Array donde se guardan todas las URLs que el usuario va introduciendo.
-let urls = [];
 
-// Filtro de estado activo en la tabla (todas / ok / error).
+let urls = [];
 let activeFilter = "all";
 
-// 1. Cogemos los elementos del HTML
 const formulario = document.getElementById("search-form");
 const inputUrl = document.getElementById("url-input");
 const paginaInicio = document.getElementById("inicio");
@@ -48,30 +45,27 @@ const tabla = document.getElementById("results-body");
 const mensajeVacio = document.getElementById("empty-message");
 const total = document.getElementById("total-count");
 const totalAbajo = document.getElementById("bottom-total-count");
+const searchInput = document.getElementById("search-input");
+const filterButtons = document.querySelectorAll(".filter-button");
+const selectALL = document.getElementById("select-all");
+const bottomSelectedCount = document.getElementById("bottom-selected-count");
+const processButton = document.getElementById("process-button");
 
-// 2. Cuando se envía el formulario (botón Analizar)...
+
 formulario.addEventListener("submit", function (evento) {
-
-// 3. Evitamos que la página se recargue
 evento.preventDefault();
-mostrarPagina("pagina-1"); //AQUÍ HE AÑADIDO EL MOSTRAR PÁGINA para que se muestre el contenido, sin esta línea no se mostraba nada.
+mostrarPagina("pagina-1"); 
 });
 
-// 2. Cuando se pulsa una tecla, se hace lo que se pulsa
+
 inputUrl.addEventListener("keydown", function (evento) {
 
-    
-    //el evento "keydown" ocurre con cada letra que el usuario teclea, no solo al pulsar Enter. Si alguien empieza a escribir https://ejemplo.com, este código se ejecuta una vez por cada letra ("h", "ht", "htt"...), y como new URL("h") falla, se añadiría una fila con estado "Error" por cada letra escrita,
-    //Solución: comprobar que la tecla pulsada es, en concreto, Enter, con un if:
     if (evento.key !== "Enter") return;
     
-    // 3. Texto sin espacios
     const texto = inputUrl.value.trim();
-// 4. Si está vacío, no hacemos nada
-    if (texto === "") {return; }
+    if (texto === "") {return;}
 
 
-    // 5. Variables
     let dominio = "";
     let ruta = "";
     let parametros = "";
@@ -84,20 +78,13 @@ inputUrl.addEventListener("keydown", function (evento) {
         dominio = url.hostname;
         ruta = url.pathname;
         parametros = url.search === "" ? "-" : url.search;
-        // cantidad = Array.from(url.search).length;
-        //cantidad no cuenta parámetros, cuenta letras. url.search es el texto completo de la query, por ejemplo "?a=1&b=2". Array.from(...) sobre un texto separa cada carácter, así que .length te da cuántas letras/símbolos tiene esa cadena, no cuántos parámetros hay.
-        //Si querías contar parámetros (¿a y b, es decir 2?), es:
-
-        cantidad = url.searchParams.size;
-
+        cantidad = url.searchParams.size.length;
     } 
-    
-    // 7. Si no se analiza o no puede analizarse, se marca como error
     catch (Error) {
         estado = "Error";
     }
 
-    // 8. Se crea una nueva fila en la tabla
+
     const fila = document.createElement("tr")
     fila.dataset.estado = estado.toLowerCase();
     fila.innerHTML = `
@@ -110,13 +97,28 @@ inputUrl.addEventListener("keydown", function (evento) {
         <td>${estado}</td>
     `;
 
-    // 9. La añadimos a la tabla
     tabla.appendChild(fila);
 
-    // 10. Limpiamos el input
+    const checkboxFila = fila.querySelector('input[type="checkbox"]');
+    checkboxFila.addEventListener("change", actualizarcontadores);
+       
     inputUrl.value = "";
+    actualizarContadores();
+    aplicarFiltros();
 });
 
+function aplicarFiltros() {
+    const textoBuscado = inputFiltro.value.trim().toLowerCase();
+    const filas = tabla.querySelectorAll("tr");
+
+    filas.forEach(function (fila) {
+        const textoFila = fila.textContent.trim().toLowerCase();
+        const coincideBusqueda = textoFila.includes(textoBuscado);
+        const coincideFiltro = activeFilter === "all" || fila.dataset.estado === activeFilter;
+
+        fila.hidden = !(coincideBusqueda && coincideFiltro);
+    });
+}
 
 //======  PÁGINA2  ========
 
