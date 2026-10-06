@@ -159,4 +159,4 @@ casillasViewport.forEach(function (casilla) {
 });
 
 
-const webshot = "prueba";
+const webshot = "main";
