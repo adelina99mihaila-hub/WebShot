@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebShot</title>
+    <link rel="stylesheet" href="styles.css"> <link rel="icon" href="favicon-32x32.png" type="image/png">
+</head>
+<body>
+<section class="pagina inicio" id="inicio">
+    <header>
+        <h1>
+            <img src="logo.webshot.png" alt="logo webshot"> 
+            <span> WebShot</span>
+        </h1>
+        <p>Escoge una web, elige las paginas y crea capturas en diferentes puntos de scroll
+
+        </p>
+        
+    </header>
+    <div class="crawl-card">
+
+
+    <form class="search-box" id="search-box">
+        <input type="text" id="url-input" name="url" placeholder="Ingresa la URL de la web" required>
+        <button type="submit">Analizar</button>
+    </form>
+
+
+<details class="advanced-toggle-wrapper">
+    <summary class="advanced-toggle">
+    <span class="chevron">⌄</span> Ajustes avanzados
+    </summary>
+
+    
+    <div class="advanced-settings"> <!-- Panel que se abre/cierra -->
+
+    <div class="setting">
+        <label for="crawl-depth">Profundidad de crawl · <span id="depth-value">2</span></label>
+        <input type="range" id="crawl-depth" min="0" max="5" value="2">
+    </div>
+
+    <div class="setting">
+        <label for="url-limit">Límite de URLs</label>
+        <input type="number" id="url-limit" value="100">
+    </div>
+
+    <div class="setting">
+        <label for="allowed-domains">Dominios permitidos</label>
+        <input type="text" id="allowed-domains" placeholder="ejemplo.com">
+    </div>
+
+    <div class="setting setting-toggle">
+        <label class="switch">
+        <input type="checkbox" id="respect-robots" checked>
+        <span class="slider"></span>
+        </label>
+        <span>Respetar robots.txt</span>
+    </div>
+
+</div>
+</details>
+</div>
+<section class="historico">
+    <h2>HISTÓRICO</h2>
+
+    <div id="lista-historico" class="lista-historico">
+        <!-- Las búsquedas se añaden automáticamente aquí -->
+    </div>
+</section >
+
+</section>
+
+<!--   BLOQUE PÁGINA 1 -->
+
+<section class="pagina pagina-1" id="pagina-1" hidden> 
+
+    <div class="results-header">
+        <div>
+            <h2>URLs analizadas</h2>
+            <p><span id="total-count">0</span> URLs añadidas</p>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <input type="search" id="search-input" placeholder="Buscar por URL, dominio o parámetro...">
+
+        <div class="filters">
+            <button type="button" class="filter-button active" data-filter="all">Todas</button>
+            <button type="button" class="filter-button" data-filter="ok">OK</button>
+            <button type="button" class="filter-button" data-filter="error">Error</button>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th class="checkbox-column">
+                        <input type="checkbox" id="select-all">
+                    </th>
+                    <th>URL</th>
+                    <th>DOMINIO</th>
+                    <th>RUTA</th>
+                    <th>PARÁMETROS</th>
+                    <th>CANTIDAD</th>
+                    <th>ESTADO</th>
+                </tr>
+            </thead>
+
+            <tbody id="results-body">
+                <!-- Las filas se generan con JavaScript -->
+            </tbody>
+        </table>
+
+        <div id="empty-message" class="empty-message">
+            Todavía no se ha añadido ninguna URL.
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <p>
+            <strong id="bottom-selected-count">0</strong>
+            de
+            <span id="bottom-total-count">0</span>
+            URLs seleccionadas
+        </p>
+
+        <button type="button" id="process-button" disabled>
+            Procesar URLs seleccionadas
+        </button>
+    </div>
+
+</section>
+
+<!--   BLOQUE PÁGINA 2 -->
+
+
+<section class="pagina pag2" id="pag2" hidden> 
+<header>
+    <h2> Configuración por defecto</h2>
+    <p> Esta configuración se aplica a las paginas seleccionadas</p>
+</header>
+<div class="config-card">
+        <!-- Bloque 1: puntos de scroll -->
+    <div class="config-card__bloque">
+        <h3>Puntos de scroll (%)</h3>
+        <p> Posiciones verticales donde se hara cada captura.</p>
+        <div class="puntos" id="puntos">
+            <button type="button" class="puntos__anadir" id="btn-anadir-punto">+Añadir punto</button>
+        </div>
+    </div>
+        <!--Bloque 2: viewports-->
+        <div class="config-card__bloque">
+            <h3>Viewports</h3>
+            <p>Selecciona uno o varios. Cada punto de scroll se captura en cada viewport.</p>
+            <div class="viewports">
+                <label class="viewports__opcion">
+                    <input type="checkbox" name="viewport" value="1440" checked>
+                    Desktop
+                    <small>1440px</small>
+                </label>
+                <label class="viewports__opcion">
+                    <input type="checkbox" name="viewport" value="768">
+                    Tablet
+                    <small>768px</small>
+                </label>
+                <label class="viewports__opcion">
+                    <input type="checkbox" name="viewport" value="390">
+                    Móvil
+                    <small>390px</small>
+                </label>
+            </div>
+        </div>
+            <!--Bloque 3: tipo de captura-->
+        <div class="config-card__bloque">
+            <h3>Tipo de captura</h3>
+            <div class="opciones">
+                <label class="opciones__item">
+                    <input type="radio" name="tipo" value="viewport" checked>
+                    <strong>Solo viewport</strong>
+                    <small>Captura del área visible en cada punto de scroll</small>
+                </label>
+                <label class="opciones__item">
+                    <input type="radio" name="tipo" value="completa">
+                    <strong>Página completa</strong>
+                    <small>Una captura larga de toda la pagina</small>
+                </label>
+            </div>
+        </div>
+</div>
+<div class="acciones">
+    <button type="button" class="acciones__boton acciones__boton--secundario" id="btn-volver">← Atrás</button>
+    <button type="button" class="acciones__boton" id="btn-continuar">Continuar</button>
+</div>
+    </section>
+</body>
+<footer>
+    <script src="script.js"></script>
+</footer>
+</html>

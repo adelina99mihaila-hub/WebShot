@@ -1,0 +1,381 @@
+*{
+    text-align: center;
+    margin:0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: sans-serif;
+    color:#0F2F57
+    
+}
+#inicio header h1{
+    font-size: 100px;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 100px;
+    margin-right: 250px;
+    
+}
+#inicio img {
+    width: 500px;
+    height: auto;
+    margin-right: -180px;
+
+}
+#inicio header p{
+    font-size: 20px;
+    margin-top: -80px;
+    margin-bottom: 100px;
+}
+
+input {
+    flex: 1;              /* ocupa todo el hueco libre de la caja, empuja el botón al borde */
+    padding: 10px 14px;
+    height: 40px;
+    font-size: 18px;
+    border: none;
+    outline: none;
+    border-radius: 10px;
+    text-align: left;
+    background: transparent;
+}
+button {
+    padding: 10px 20px;
+    height: 40px;
+    font-size: 18px;
+    background-color: #0F2F57;
+    color: #ffff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    white-space: nowrap;  /* evita que "Analizar" se parta en dos líneas */
+}
+
+button:hover {
+    background-color: #0F2F57;
+}
+body{
+    min-height: 100vh;
+    background-image: url("fondo.png");
+    background-size: cover;        /* la imagen cubre todo el espacio */
+    background-position: center;   /* centra la imagen dentro del espacio */
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+.search-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: 0 10px 30px #a99b9b;
+    max-width: 750px;
+    margin: 40px auto 0;
+}
+.crawl-card {
+    max-width: 750px;
+    margin: 40px auto 0;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: 0 4px 16px #302f2f;
+}
+.crawl-card .search-box {
+    margin: 0;
+    max-width: 100%;
+    
+}
+.advanced-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: #5f5e5e;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor:pointer;
+    padding: 25px 4px 4px;
+}
+
+.advanced-toggle .chevron {
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+.advanced-toggle-wrapper[open] .chevron {
+    transform: rotate(180deg);
+}
+.advanced-settings {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 24px;
+    padding: 16px 4px 6px;
+    border-top: 1px solid #eee;
+    margin-top: 8px;
+}
+
+.setting label {
+    display: block;
+    font-size: 0.95rem;
+    color: #0F2F57;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.setting input[type="number"],
+.setting input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #e9e8ed;
+}
+
+.setting input[type="range"] {
+    width: 100%;
+}
+
+.setting-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    align-self: end; /* alinea el toggle con la base de la columna de al lado */
+}
+
+.advanced-toggle-wrapper summary {
+    list-style: none;
+    cursor: pointer;
+}
+
+.advanced-toggle-wrapper summary::-webkit-details-marker {
+    display: none;
+}
+.advanced-toggle-wrapper[open] .advanced-toggle {
+    color: #0F2F57;
+}
+.historico {
+    width: min(900px, 95%);
+    margin: 70px auto 0;
+    text-align: left;
+}
+.pagina[hidden] {
+    display: none;
+}
+
+/*  ================ PÁGINA 2  ================*/
+
+
+#pag2 header h2 {
+    font-size: 48px;
+    margin-top: 80px;
+}
+
+#pag2 header p {
+    font-size: 20px;
+    max-width: 600px;
+    margin: 16px auto 40px;
+}
+
+/* Bloque: config-card */
+#pag2 .config-card {
+    max-width: 750px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 4px 16px #302f2f;
+    overflow: hidden;
+}
+
+#pag2 .config-card * {
+    text-align: left;
+}
+
+#pag2 .config-card__bloque {
+    padding: 24px 28px;
+    border-bottom: 1px solid #eee;
+}
+
+#pag2 .config-card__bloque:last-child {
+    border-bottom: none;
+}
+
+#pag2 .config-card__bloque h3 {
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+}
+
+#pag2 .config-card__bloque p {
+    font-size: 0.9rem;
+    color: #6b7686;
+    margin: 0 0 16px;
+}
+
+/* Bloque: puntos */
+#pag2 .puntos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+#pag2 .puntos__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 36px;
+    padding: 0 10px;
+    background: #f1f2f4;
+    border-radius: 10px;
+}
+
+#pag2 .puntos__item input {
+    flex: none;
+    width: 3.4ch;
+    height: auto;
+    padding: 0;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: right;
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+#pag2 .puntos__item input::-webkit-outer-spin-button,
+#pag2 .puntos__item input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+#pag2 .puntos__item span {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+#pag2 .puntos__quitar {
+    height: auto;
+    padding: 0 2px;
+    margin-left: 4px;
+    font-size: 18px;
+    line-height: 1;
+    background: none;
+    color: #9aa3af;
+}
+
+#pag2 .puntos__quitar:hover {
+    background: none;
+    color: #0F2F57;
+}
+
+#pag2 .puntos__anadir {
+    height: 36px;
+    padding: 0 14px;
+    font-size: 15px;
+    font-weight: 600;
+    background: transparent;
+    color: #0F2F57;
+    border: 1px dashed #b8bfc9;
+}
+
+#pag2 .puntos__anadir:hover {
+    background: #f1f2f4;
+}
+
+/* Bloque: viewports */
+#pag2 .viewports {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+#pag2 .viewports__opcion {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 90px;
+    border: 1px solid #e3e6ea;
+    border-radius: 12px;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+}
+
+#pag2 .viewports__opcion small {
+    font-weight: 400;
+    color: #6b7686;
+}
+
+#pag2 .viewports__opcion input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    padding: 0;
+}
+
+#pag2 .viewports__opcion:has(input:checked) {
+    border-color: #0F2F57;
+    box-shadow: 0 0 0 1px #0F2F57;
+    background: #f0f4fa;
+}
+
+/* Bloque: opciones (tipo de captura) */
+#pag2 .opciones {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+#pag2 .opciones__item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 12px;
+    align-items: center;
+    padding: 14px 18px;
+    border: 1px solid #e3e6ea;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+#pag2 .opciones__item input {
+    grid-row: span 2;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    accent-color: #0F2F57;
+}
+
+#pag2 .opciones__item strong,
+#pag2 .opciones__item small {
+    grid-column: 2;
+}
+
+#pag2 .opciones__item small {
+    color: #6b7686;
+}
+
+#pag2 .opciones__item:has(input:checked) {
+    border-color: #0F2F57;
+    box-shadow: 0 0 0 1px #0F2F57;
+    background: #f0f4fa;
+}
+
+/* Bloque: acciones */
+#pag2 .acciones {
+    display: flex;
+    justify-content: space-between;
+    max-width: 750px;
+    margin: 24px auto 60px;
+}
+
+#pag2 .acciones__boton--secundario {
+    background: #ffffff;
+    color: #0F2F57;
+    border: 1px solid #dfe3e8;
+}
