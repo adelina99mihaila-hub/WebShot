@@ -99,7 +99,11 @@ inputUrl.addEventListener("keydown", function (evento) {
 
     // 8. Se crea una nueva fila en la tabla
     const fila = document.createElement("tr");
+<<<<<<< HEAD
     fila.dataset.estado = estado.toLowerCase();
+=======
+    
+>>>>>>> 638736b680239a51caaaa664cee752d967ad7220
     fila.innerHTML = `
         <td><input type="checkbox"></td>
         <td>${texto}</td>
