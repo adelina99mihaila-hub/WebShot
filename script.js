@@ -160,3 +160,7 @@ casillasViewport.forEach(function (casilla) {
 
 
 const webshot = "main";
+
+function calcular (valor) {
+    // Aquí puedes agregar la lógica para calcular algo con el valor proporcionado
+}
