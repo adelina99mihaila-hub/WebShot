@@ -24,12 +24,23 @@
         allowedDomains.value = allowedDomains.value.replace(/\s+/g, '');
     });
     
-function mostrarPagina(idPagina){
+function mostrarPagina(idPagina, guardarHistorial = true){
     document.querySelectorAll(".pagina").forEach(function (pagina){
         pagina.hidden = pagina.id !== idPagina;
     });
     window.scrollTo(0,0);
+
+    sessionStorage.setItem("paginaActual", idPagina);
+
+    if (guardarHistorial) {
+        history.pushState({ pagina: idPagina }, "", "#" + idPagina);
+    }
 }
+
+window.addEventListener("popstate", function (e) {
+    const destino = (e.state && e.state.pagina) || "inicio";
+    mostrarPagina(destino, false);
+});
 
 //======  PÁGINA1  ========
 
@@ -136,6 +147,8 @@ function actualizarContadores() {
 
     processButton.disabled = totalMarcados === 0;
     mensajeVacio.hidden = totalFilas > 0;
+
+    sessionStorage.setItem("filasTabla", tabla.innerHTML);
 }
 
 selectAll.addEventListener("change", function () {
@@ -191,6 +204,23 @@ casillasViewport.forEach(function (casilla) {
     }
     });
 });
+
+// ===== RESTAURAR ESTADO AL RECARGAR =====
+const filasGuardadas = sessionStorage.getItem("filasTabla");
+if (filasGuardadas) {
+    tabla.innerHTML = filasGuardadas;
+
+    // Reasignar listeners a checkboxes restaurados
+    tabla.querySelectorAll("input[type='checkbox']").forEach(function (c) {
+        c.addEventListener("change", actualizarContadores);
+    });
+
+    actualizarContadores();
+}
+
+const paginaGuardada = sessionStorage.getItem("paginaActual") || "inicio";
+mostrarPagina(paginaGuardada, false);
+history.replaceState({ pagina: paginaGuardada }, "", "#" + paginaGuardada);
 
 //BLOQUE PAGINA 3 
 
