@@ -63,6 +63,7 @@ body{
     background-repeat: no-repeat;
     background-attachment: fixed;
 }
+
 .search-box {
     display: flex;
     align-items: center;
@@ -116,8 +117,6 @@ body{
     margin-top: 8px;
 }
 
-
-
 .setting label {
     display: block;
     font-size: 0.95rem;
@@ -167,6 +166,7 @@ body{
     display: none;
 }
 
+<<<<<<< HEAD
 /* PAGINA 1 parte CSS*/ 
 
 * {
@@ -404,6 +404,8 @@ input[type="checkbox"] {
     }
 }
 
+=======
+>>>>>>> ed68844aa896c1818f3730ac9547cc5ab93fb823
 /*  ================ PÁGINA 2  ================*/
 
 
