@@ -56,14 +56,9 @@ formulario.addEventListener("submit", function (evento) {
 evento.preventDefault();
 mostrarPagina("pagina-1"); 
 });
-
-
-inputUrl.addEventListener("keydown", function (evento) {
-
-    if (evento.key !== "Enter") return;
     
     const texto = inputUrl.value.trim();
-    if (texto === "") {return;}
+    if (texto === "") return;
 
 
     let dominio = "";
@@ -78,9 +73,9 @@ inputUrl.addEventListener("keydown", function (evento) {
         dominio = url.hostname;
         ruta = url.pathname;
         parametros = url.search === "" ? "-" : url.search;
-        cantidad = url.searchParams.size.length;
+        cantidad = url.searchParams.size;
     } 
-    catch (Error) {
+    catch (e) {
         estado = "Error";
     }
 
