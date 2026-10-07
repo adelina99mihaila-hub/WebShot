@@ -57,6 +57,8 @@ evento.preventDefault();
 mostrarPagina("pagina-1"); 
 });
     
+inputUrl.addEventListener("keydown", function (evento) {
+    if (evento.key !== "Enter") return;
     const texto = inputUrl.value.trim();
     if (texto === "") return;
 
@@ -100,7 +102,7 @@ mostrarPagina("pagina-1");
     inputUrl.value = "";
     actualizarContadores();
     aplicarFiltros();
-
+});
 
 function aplicarFiltros() {
     const textoBuscado = searchInput.value.trim().toLowerCase();
