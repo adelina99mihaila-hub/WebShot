@@ -33,14 +33,10 @@ function mostrarPagina(idPagina){
 
 //======  PÁGINA1  ========
 
-
-let urls = [];
 let activeFilter = "all";
 
 const formulario = document.getElementById("search-box");
 const inputUrl = document.getElementById("url-input");
-const paginaInicio = document.getElementById("inicio");
-const paginaResultados = document.getElementById("pagina-1");
 const tabla = document.getElementById("results-body");
 const mensajeVacio = document.getElementById("empty-message");
 const total = document.getElementById("total-count");
@@ -66,13 +62,19 @@ formulario.addEventListener("submit", function (evento) {
     let cantidad = 0;
     let estado = "OK";
 
+    inputUrl.value = "";
+    actualizarContadores();
+    aplicarFiltros();
+    mostrarPagina("pagina-1");
+});
+
     // 6. Analizamos la URL
     try {
         const url = new URL(texto);
         dominio = url.hostname;
         ruta = url.pathname;
         parametros = url.search === "" ? "-" : url.search;
-        cantidad = url.searchParams.size;
+        cantidad = Array.from(url.searchParams).length;
     } 
     catch (e) {
         estado = "Error";
@@ -95,11 +97,6 @@ formulario.addEventListener("submit", function (evento) {
 
     const checkboxFila = fila.querySelector('input[type="checkbox"]');
     checkboxFila.addEventListener("change", actualizarContadores);
-    
-    inputUrl.value = "";
-    actualizarContadores();
-    aplicarFiltros();
-});
 
 function aplicarFiltros() {
     const textoBuscado = searchInput.value.trim().toLowerCase();
