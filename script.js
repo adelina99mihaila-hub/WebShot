@@ -33,38 +33,26 @@ function mostrarPagina(idPagina){
 
 //======  PÁGINA1  ========
 
-
-let urls = [];
 let activeFilter = "all";
 
-const formulario = document.getElementById("search-form");
+const formulario = document.getElementById("search-box");
 const inputUrl = document.getElementById("url-input");
-const paginaInicio = document.getElementById("inicio");
-const paginaResultados = document.getElementById("pagina-1");
 const tabla = document.getElementById("results-body");
 const mensajeVacio = document.getElementById("empty-message");
 const total = document.getElementById("total-count");
 const totalAbajo = document.getElementById("bottom-total-count");
 const searchInput = document.getElementById("search-input");
 const filterButtons = document.querySelectorAll(".filter-button");
-const selectALL = document.getElementById("select-all");
+const selectAll = document.getElementById("select-all");
 const bottomSelectedCount = document.getElementById("bottom-selected-count");
 const processButton = document.getElementById("process-button");
 
 
 formulario.addEventListener("submit", function (evento) {
-evento.preventDefault();
-mostrarPagina("pagina-1"); 
-});
+    evento.preventDefault();
 
-
-inputUrl.addEventListener("keydown", function (evento) {
-
-    if (evento.key !== "Enter") return;
-    
     const texto = inputUrl.value.trim();
-    if (texto === "") {return;}
-
+    if (texto === "") return;
 
     let dominio = "";
     let ruta = "";
@@ -72,20 +60,18 @@ inputUrl.addEventListener("keydown", function (evento) {
     let cantidad = 0;
     let estado = "OK";
 
-    // 6. Analizamos la URL
+    // Analizamos la URL
     try {
         const url = new URL(texto);
         dominio = url.hostname;
         ruta = url.pathname;
         parametros = url.search === "" ? "-" : url.search;
-        cantidad = url.searchParams.size.length;
-    } 
-    catch (Error) {
+        cantidad = Array.from(url.searchParams).length;
+    } catch (e) {
         estado = "Error";
     }
 
-
-    const fila = document.createElement("tr")
+    const fila = document.createElement("tr");
     fila.dataset.estado = estado.toLowerCase();
     fila.innerHTML = `
         <td><input type="checkbox"></td>
@@ -100,15 +86,16 @@ inputUrl.addEventListener("keydown", function (evento) {
     tabla.appendChild(fila);
 
     const checkboxFila = fila.querySelector('input[type="checkbox"]');
-    checkboxFila.addEventListener("change", actualizarcontadores);
-       
+    checkboxFila.addEventListener("change", actualizarContadores);
+
     inputUrl.value = "";
     actualizarContadores();
     aplicarFiltros();
+    mostrarPagina("pagina-1");
 });
 
 function aplicarFiltros() {
-    const textoBuscado = inputFiltro.value.trim().toLowerCase();
+    const textoBuscado = searchInput.value.trim().toLowerCase();
     const filas = tabla.querySelectorAll("tr");
 
     filas.forEach(function (fila) {
@@ -119,6 +106,49 @@ function aplicarFiltros() {
         fila.hidden = !(coincideBusqueda && coincideFiltro);
     });
 }
+searchInput.addEventListener("input", aplicarFiltros);
+
+filterButtons.forEach(function (boton) {
+    boton.addEventListener("click", function () {
+        filterButtons.forEach(function (b) {
+            b.classList.remove("active");
+        });
+        boton.classList.add("active");
+
+        activeFilter = boton.dataset.filter;
+        aplicarFiltros();
+    });
+});
+
+function actualizarContadores() {
+    const checkboxesFilas = tabla.querySelectorAll("input[type='checkbox']");
+    const totalFilas = checkboxesFilas.length;
+
+    const marcados = Array.from(checkboxesFilas).filter(function (c) {
+        return c.checked;
+    });
+    const totalMarcados = marcados.length;
+
+    total.textContent = totalFilas;
+    totalAbajo.textContent = totalFilas;
+    bottomSelectedCount.textContent = totalMarcados;
+
+    processButton.disabled = totalMarcados === 0;
+    mensajeVacio.hidden = totalFilas > 0;
+}
+
+selectAll.addEventListener("change", function () {
+    const checkboxesFilas = tabla.querySelectorAll("input[type='checkbox']");
+    checkboxesFilas.forEach(function (c) {
+        c.checked = selectAll.checked;
+    });
+    actualizarContadores();
+});
+
+processButton.addEventListener("click", function () {
+    mostrarPagina("pag2");
+});
+
 
 //======  PÁGINA2  ========
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebShot - Pablo prueba</title>
+    <title>WebShot</title>
     <link rel="stylesheet" href="styles.css"> <link rel="icon" href="favicon-32x32.png" type="image/png">
 </head>
 <body>
@@ -133,7 +133,7 @@
 
 </section>
 
-<!--   BLOQUE PÁGINA 2 -->
+<!--     BLOQUES PÁGINA 2 -->
 
 
 <section class="pagina pag2" id="pag2" hidden> 
@@ -195,7 +195,8 @@
 </div>
     </section>
 
-    <section class="pagina  pag3" id="pag3">  
+
+    <section class="pagina  pag3" id="pag3" hidden>  
 
   <h1>Configuración por página</h1>
   <p>Arrastra los marcadores o pulsa en el mapa para añadir un punto.</p>
@@ -214,7 +215,7 @@
     </section>
     <aside>
       <h2>Puntos de captura</h2><p id="estado"></p><p id="resumen"></p>
-      <ol id="puntos"></ol>
+      <ol id="lista-puntos-captura"></ol>
       <form id="anadir"><label>Nuevo punto (%) <input id="nuevo" type="number" min="0" max="100" step="1" value="60" required></label><button>Añadir punto</button></form>
       <button id="restaurar">Restaurar valores iniciales</button>
       <label>Copiar de otra página <select id="copiar"></select></label>
@@ -223,8 +224,9 @@
   </main>
   <footer><strong id="total"></strong><button id="generar" disabled>Generar capturas</button></footer>
   </section>
-</body>
-<footer>
+
+
     <script src="script.js"></script>
-</footer>
+
+</body>
 </html>
