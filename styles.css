@@ -166,14 +166,7 @@ body{
     display: none;
 }
 
-<<<<<<< HEAD
 /* PAGINA 1 parte CSS*/ 
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
 
 body {
     font-family: 'Segoe UI', Roboto, Arial, sans-serif;
@@ -404,10 +397,7 @@ input[type="checkbox"] {
     }
 }
 
-=======
->>>>>>> ed68844aa896c1818f3730ac9547cc5ab93fb823
 /*  ================ PÁGINA 2  ================*/
-
 
 #pag2 header h2 {
     font-size: 48px;
