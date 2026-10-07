@@ -53,10 +53,9 @@ const processButton = document.getElementById("process-button");
 
 
 formulario.addEventListener("submit", function (evento) {
-evento.preventDefault();
-mostrarPagina("pagina-1"); 
-});
-    
+    evento.preventDefault();
+    mostrarPagina("pagina-1"); 
+
     const texto = inputUrl.value.trim();
     if (texto === "") return;
 
