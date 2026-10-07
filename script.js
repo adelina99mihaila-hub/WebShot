@@ -37,7 +37,7 @@ function mostrarPagina(idPagina){
 let urls = [];
 let activeFilter = "all";
 
-const formulario = document.getElementById("search-form");
+const formulario = document.getElementById("search-box");
 const inputUrl = document.getElementById("url-input");
 const paginaInicio = document.getElementById("inicio");
 const paginaResultados = document.getElementById("pagina-1");
@@ -47,7 +47,7 @@ const total = document.getElementById("total-count");
 const totalAbajo = document.getElementById("bottom-total-count");
 const searchInput = document.getElementById("search-input");
 const filterButtons = document.querySelectorAll(".filter-button");
-const selectALL = document.getElementById("select-all");
+const selectAll = document.getElementById("select-all");
 const bottomSelectedCount = document.getElementById("bottom-selected-count");
 const processButton = document.getElementById("process-button");
 
@@ -100,15 +100,15 @@ inputUrl.addEventListener("keydown", function (evento) {
     tabla.appendChild(fila);
 
     const checkboxFila = fila.querySelector('input[type="checkbox"]');
-    checkboxFila.addEventListener("change", actualizarcontadores);
-       
+    checkboxFila.addEventListener("change", actualizarContadores);
+    
     inputUrl.value = "";
     actualizarContadores();
     aplicarFiltros();
 });
 
 function aplicarFiltros() {
-    const textoBuscado = inputFiltro.value.trim().toLowerCase();
+    const textoBuscado = searchInput.value.trim().toLowerCase();
     const filas = tabla.querySelectorAll("tr");
 
     filas.forEach(function (fila) {
@@ -119,6 +119,49 @@ function aplicarFiltros() {
         fila.hidden = !(coincideBusqueda && coincideFiltro);
     });
 }
+searchInput.addEventListener("input", aplicarFiltros);
+
+filterButtons.forEach(function (boton) {
+    boton.addEventListener("click", function () {
+        filterButtons.forEach(function (b) {
+            b.classList.remove("active");
+        });
+        boton.classList.add("active");
+
+        activeFilter = boton.dataset.filter;
+        aplicarFiltros();
+    });
+});
+
+function actualizarContadores() {
+    const checkboxesFilas = tabla.querySelectorAll("input[type='checkbox']");
+    const totalFilas = checkboxesFilas.length;
+
+    const marcados = Array.from(checkboxesFilas).filter(function (c) {
+        return c.checked;
+    });
+    const totalMarcados = marcados.length;
+
+    total.textContent = totalFilas;
+    totalAbajo.textContent = totalFilas;
+    bottomSelectedCount.textContent = totalMarcados;
+
+    processButton.disabled = totalMarcados === 0;
+    mensajeVacio.hidden = totalFilas > 0;
+}
+
+selectAll.addEventListener("change", function () {
+    const checkboxesFilas = tabla.querySelectorAll("input[type='checkbox']");
+    checkboxesFilas.forEach(function (c) {
+        c.checked = selectAll.checked;
+    });
+    actualizarContadores();
+});
+
+processButton.addEventListener("click", function () {
+    mostrarPagina("pag2");
+});
+
 
 //======  PÁGINA2  ========
 
