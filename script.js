@@ -53,15 +53,9 @@ const processButton = document.getElementById("process-button");
 
 
 formulario.addEventListener("submit", function (evento) {
-evento.preventDefault();
-mostrarPagina("pagina-1"); 
-});
-    
-inputUrl.addEventListener("keydown", function (evento) {
-    if (evento.key !== "Enter") return;
+    evento.preventDefault();
     const texto = inputUrl.value.trim();
     if (texto === "") return;
-
 
     let dominio = "";
     let ruta = "";
@@ -69,20 +63,17 @@ inputUrl.addEventListener("keydown", function (evento) {
     let cantidad = 0;
     let estado = "OK";
 
-    // 6. Analizamos la URL
     try {
         const url = new URL(texto);
         dominio = url.hostname;
         ruta = url.pathname;
         parametros = url.search === "" ? "-" : url.search;
         cantidad = url.searchParams.size;
-    } 
-    catch (e) {
+    } catch (e) {
         estado = "Error";
     }
 
-
-    const fila = document.createElement("tr") 
+    const fila = document.createElement("tr");
     fila.dataset.estado = estado.toLowerCase();
     fila.innerHTML = `
         <td><input type="checkbox"></td>
@@ -98,12 +89,12 @@ inputUrl.addEventListener("keydown", function (evento) {
 
     const checkboxFila = fila.querySelector('input[type="checkbox"]');
     checkboxFila.addEventListener("change", actualizarContadores);
-    
+
     inputUrl.value = "";
     actualizarContadores();
     aplicarFiltros();
+    mostrarPagina("pagina-1");
 });
-
 function aplicarFiltros() {
     const textoBuscado = searchInput.value.trim().toLowerCase();
     const filas = tabla.querySelectorAll("tr");
