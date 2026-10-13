@@ -195,39 +195,36 @@
 </div>
     </section>
 
-    <!--   ==== PAG3=====-->
-<!-- 
-    <section class="pagina  pag3" id="pag3" hidden>  
+
+<!-- PÁGINA 3: configuración individual de las URLs seleccionadas -->
+<section class="pagina  pag3" id="pag3" hidden>  
 
   <h1>Configuración por página</h1>
   <p>Arrastra los marcadores o pulsa en el mapa para añadir un punto.</p>
   <main>
-    <aside><h2>Páginas</h2><div id="paginas"></div></aside>
+    <aside><h2>Páginas</h2><div id="pag3-paginas"></div></aside>
     <section>
-      <h2 id="nombre"></h2>
+      <h2 id="pag3-nombre"></h2>
       <fieldset><legend>Tamaños a capturar</legend>
         <label><input type="checkbox" value="desktop" checked> Desktop</label>
         <label><input type="checkbox" value="tablet"> Tablet</label>
         <label><input type="checkbox" value="movil"> Móvil</label>
       </fieldset>
-      <div id="mapa">
-        <div id="marcadores"></div>
+      <div id="pag3-mapa">
+        <div id="pag3-marcadores"></div>
       </div>
     </section>
     <aside>
-      <h2>Puntos de captura</h2><p id="estado"></p><p id="resumen"></p>
-      <ol id="lista-puntos-captura"></ol>
-      <form id="anadir"><label>Nuevo punto (%) <input id="nuevo" type="number" min="0" max="100" step="1" value="60" required></label><button>Añadir punto</button></form>
-      <button id="restaurar">Restaurar valores iniciales</button>
-      <label>Copiar de otra página <select id="copiar"></select></label>
-      <p id="mensaje" role="status"></p>
+      <h2>Puntos de captura</h2><p id="pag3-estado"></p><p id="pag3-resumen"></p>
+      <ol id="pag3-puntos"></ol>
+      <form id="pag3-anadir"><label>Nuevo punto (%) <input id="pag3-nuevo" type="number" min="0" max="100" step="1" value="60" required></label><button>Añadir punto</button></form>
+      <button id="pag3-restaurar">Restaurar valores iniciales</button>
+      <label>Copiar de otra página <select id="pag3-copiar"></select></label>
+      <p id="pag3-mensaje" role="status"></p>
     </aside>
   </main>
-  <footer><strong id="total"></strong><button id="generar" disabled>Generar capturas</button></footer>
-  </section> -->
-
-
-    <script src="script.js"></script>
-
+  <footer><button type="button" id="pag3-volver">← Atrás</button><strong id="pag3-total"></strong><button id="pag3-generar" disabled>Generar capturas</button></footer><p class="nota-capturas">La generación de imágenes todavía no está implementada en este proyecto.</p>
+  </section>
+<script src="script.js"></script>
 </body>
 </html>
