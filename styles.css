@@ -698,40 +698,400 @@ input[type="checkbox"] {
 
 
 
-/* PÁGINA 3: estilos limitados a esta pantalla */
-#pag3 * { box-sizing: border-box; }
-#pag3 { margin: 20px; font-family: Arial, sans-serif; color: black; background: white; }
-#pag3 h1 { font-size: 24px; }
-#pag3 h2 { font-size: 18px; }
-#pag3 main { display: grid; grid-template-columns: 170px minmax(200px, 1fr) 300px; gap: 20px; }
-#pag3 aside { padding: 10px; align-self: start; }
-#pag3 button { padding: 6px 10px; cursor: pointer; }
-#pag3 button:disabled { cursor: default; }
-#pag3 input, #pag3 select { padding: 5px; }
-#pag3 input[type="number"] { width: 65px; }
-#pag3 fieldset { display: flex; flex-wrap: wrap; gap: 10px; }
-#pag3 label { display: block; margin: 10px 0; }
-#pag3 select { width: 100%; }
-#pag3 li { margin: 12px 0; }
-#pag3 ol { padding-left: 20px; }
-#pag3 li button { margin-left: 8px; }
-#pag3 form { margin-bottom: 15px; }
-#pag3 #pag3-paginas button { width: 100%; margin-bottom: 10px; text-align: left; }
-#pag3 button[aria-current="page"] { font-weight: bold; }
-#pag3 #pag3-mapa { position: relative; height: 500px; margin: 25px 0; border: 1px solid #aaa; }
-#pag3 .linea { position: absolute; left: 0; width: 100%; height: 1px; background: #888; pointer-events: none; }
-#pag3 .linea button { position: absolute; right: 0; transform: translateY(-50%); pointer-events: auto; touch-action: none; cursor: ns-resize; }
-#pag3 footer { display: flex; gap: 20px; align-items: center; margin-top: 20px; }
-@media (max-width: 800px) { #pag3 main { grid-template-columns: 1fr; } }
+/* PÁGINA 3 */
 
-#pag3 { max-width: 1200px; margin: 32px auto; padding: 24px; border-radius: 16px; }
-#pag3 * { text-align: left; }
-#pag3 button { height: auto; white-space: normal; font-size: 15px; }
-#pag3 input, #pag3 select { height: auto; flex: none; border: 1px solid #aaa; background: white; font-size: 16px; }
-#pag3 input[type="checkbox"] { padding: 0; }
-#pag3 h2 { overflow-wrap: anywhere; }
-#pag3 fieldset { padding: 12px; }
-#pag3 footer { flex-wrap: wrap; }
-#pag3 .nota-capturas { margin-top: 16px; }
-#pag3 button:disabled { opacity: .55; }
-#pag3 input:focus-visible, #pag3 button:focus-visible, #pag3 select:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+#pag3 {
+  background: transparent;
+  padding: 0;
+}
+
+#pag3 * {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  text-align: left;
+}
+
+#pag3 .contenedor {
+  width: 94%;
+  max-width: 1280px;
+  margin: 30px auto;
+  color: #0f2f57;
+}
+
+#pag3 .cabecera {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin-bottom: 25px;
+  padding: 12px 25px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(15, 47, 87, 0.18);
+}
+
+#pag3 .logo {
+  display: block;
+  width: 210px;
+  max-width: 100%;
+  height: auto;
+  flex: none;
+}
+
+#pag3 h1 {
+  margin: 0 0 10px;
+  font-size: 27px;
+}
+
+#pag3 h2 {
+  margin: 0 0 18px;
+  font-size: 18px;
+}
+
+#pag3 .cabecera p {
+  margin: 0;
+  color: #596778;
+  font-size: 15px;
+}
+
+#pag3 main {
+  display: grid;
+  grid-template-columns: 185px minmax(0, 1fr) 310px;
+  align-items: start;
+  gap: 20px;
+}
+
+#pag3 .panel {
+  min-width: 0;
+  padding: 20px;
+  background: white;
+  border: 1px solid #dce2e9;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(15, 47, 87, 0.18);
+}
+
+#pag3 button,
+#pag3 input,
+#pag3 select {
+  font-size: 14px;
+}
+
+#pag3 button {
+  height: auto;
+  padding: 10px 14px;
+  border: 1px solid #0f2f57;
+  border-radius: 7px;
+  background: #0f2f57;
+  color: white;
+  cursor: pointer;
+  white-space: normal;
+}
+
+#pag3 button:hover {
+  background: #204975;
+}
+
+#pag3 button:disabled {
+  background: #65778b;
+  border-color: #65778b;
+  cursor: default;
+}
+
+#pag3 input[type="number"],
+#pag3 select {
+  height: auto;
+  flex: none;
+  padding: 9px;
+  border: 1px solid #cbd4df;
+  border-radius: 6px;
+  color: #0f2f57;
+  background: white;
+}
+
+#pag3 input[type="number"] {
+  width: 66px;
+}
+
+#pag3 select {
+  width: 100%;
+}
+
+#pag3 input[type="checkbox"] {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  accent-color: #0f2f57;
+}
+
+#pag3 #pag3-paginas {
+  display: grid;
+  gap: 10px;
+}
+
+#pag3 #pag3-paginas button {
+  width: 100%;
+  padding: 12px;
+  border-color: #e0e6ee;
+  background: #f0f3f7;
+  color: #0f2f57;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+#pag3 #pag3-paginas button[aria-current="page"] {
+  background: #0f2f57;
+  color: white;
+  border-color: #0f2f57;
+}
+
+#pag3 .titulo-pagina {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e3e8ee;
+}
+
+#pag3 .titulo-pagina h2 {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+#pag3 .icono-pagina {
+  width: 15px;
+  height: 19px;
+  flex: none;
+  border: 2px solid #0f2f57;
+  border-radius: 2px;
+}
+
+#pag3 fieldset {
+  margin: 20px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+#pag3 legend {
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+#pag3 .tamanos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#pag3 .tamanos label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 9px 11px;
+  border: 1px solid #d6dfe9;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+#pag3 .instruccion {
+  margin: 20px 0 14px;
+  color: #596778;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#pag3 .zona-vista {
+  padding-bottom: 18px;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  background: #f5f7fa;
+}
+
+#pag3 .barra-vista {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 12px;
+  border-bottom: 1px solid #d9e0e8;
+}
+
+#pag3 .punto {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #aab7c6;
+}
+
+#pag3 .texto-vista {
+  margin-left: 8px;
+  color: #68788b;
+  font-size: 12px;
+}
+
+#pag3 #pag3-mapa {
+  position: relative;
+  height: 460px;
+  margin: 22px 12px 0;
+  border: 1px solid #e0e5eb;
+  background: white;
+  cursor: crosshair;
+}
+
+#pag3 .linea {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: #0f2f57;
+  pointer-events: none;
+}
+
+#pag3 .linea button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 5px 10px;
+  transform: translateY(-50%);
+  pointer-events: auto;
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+#pag3 #pag3-estado {
+  display: inline-block;
+  margin: 0;
+  padding: 5px 9px;
+  border-radius: 5px;
+  background: #edf2f8;
+  font-size: 12px;
+}
+
+#pag3 #pag3-resumen {
+  margin: 16px 0;
+  color: #596778;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#pag3 #pag3-puntos {
+  margin: 0 0 20px;
+  padding-left: 23px;
+}
+
+#pag3 #pag3-puntos li {
+  padding: 10px 0;
+  border-bottom: 1px solid #e7ebf0;
+  font-size: 14px;
+}
+
+#pag3 #pag3-puntos li button {
+  margin-left: 7px;
+  padding: 7px 9px;
+  background: white;
+  color: #596778;
+  border-color: #d8e0e8;
+  font-size: 12px;
+}
+
+#pag3 #pag3-anadir label,
+#pag3 .copiar-configuracion label {
+  display: block;
+  margin-bottom: 9px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#pag3 .fila-anadir {
+  display: flex;
+  gap: 8px;
+}
+
+#pag3 .fila-anadir button {
+  flex: 1;
+}
+
+#pag3 .boton-secundario,
+#pag3 .boton-volver {
+  background: white;
+  color: #0f2f57;
+  border-color: #cbd5e0;
+}
+
+#pag3 .boton-secundario {
+  width: 100%;
+  margin-top: 14px;
+}
+
+#pag3 .copiar-configuracion {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #e3e8ee;
+}
+
+#pag3 #pag3-mensaje {
+  margin-top: 14px;
+  font-size: 13px;
+}
+
+#pag3 .pie {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+  padding: 18px 22px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(15, 47, 87, 0.18);
+}
+
+#pag3 .nota-capturas {
+  margin: 16px 0;
+  font-size: 13px;
+}
+
+@media (max-width: 1050px) {
+  #pag3 main {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+
+  #pag3 .panel-paginas {
+    grid-column: 1 / -1;
+  }
+
+  #pag3 #pag3-paginas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  #pag3 .cabecera {
+    flex-direction: column;
+    gap: 8px;
+    padding: 18px;
+  }
+
+  #pag3 .logo {
+    width: 175px;
+  }
+
+  #pag3 main {
+    grid-template-columns: 1fr;
+  }
+
+  #pag3 .pie {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+#pag3 .cabecera,
+#pag3 .panel,
+#pag3 .pie {
+  background: #ffffff;
+  border: 1px solid #dce2e9;
+  border-radius: 20px;
+  box-shadow: 0 4px 16px #302f2f;
+}
