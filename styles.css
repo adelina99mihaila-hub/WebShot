@@ -286,7 +286,7 @@ body{
 
 #total-count {
     font-weight: 700;
-    color: #2563eb;
+    color: #0F2F57;
 }
 
 /* Toolbar */
@@ -311,8 +311,8 @@ body{
 }
 
 #search-input:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    border-color: #0F2F57;
+    box-shadow: 0 0 0 3px rgba(15, 47, 87, 0.15);
 }
 
 .filters {
@@ -336,9 +336,9 @@ body{
 }
 
 .filter-button.active {
-    background-color: #2563eb;
+    background-color: #0F2F57;
     color: #ffffff;
-    border-color: #2563eb;
+    border-color: #0F2F57;
 }
 
 /* Tabla */
@@ -387,7 +387,7 @@ input[type="checkbox"] {
     width: 16px;
     height: 16px;
     cursor: pointer;
-    accent-color: #2563eb;
+    accent-color: #0F2F57;
 }
 
 /* Estados (para filas o badges de estado) */
@@ -434,12 +434,12 @@ input[type="checkbox"] {
 }
 
 #bottom-selected-count {
-    color: #2563eb;
+    color: #0F2F57;
 }
 
 #process-button {
     padding: 10px 20px;
-    background-color: #2563eb;
+    background-color: #0F2F57;
     color: #ffffff;
     border: none;
     border-radius: 8px;
@@ -450,11 +450,11 @@ input[type="checkbox"] {
 }
 
 #process-button:hover:not(:disabled) {
-    background-color: #1d4ed8;
+    background-color: #0b2340;
 }
 
 #process-button:disabled {
-    background-color: #93c5fd;
+    background-color: #a3bffa;
     cursor: not-allowed;
     opacity: 0.7;
 }
