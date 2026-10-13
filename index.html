@@ -199,32 +199,58 @@
 <!-- PÁGINA 3: configuración individual de las URLs seleccionadas -->
 <section class="pagina  pag3" id="pag3" hidden>  
 
-  <h1>Configuración por página</h1>
-  <p>Arrastra los marcadores o pulsa en el mapa para añadir un punto.</p>
-  <main>
-    <aside><h2>Páginas</h2><div id="pag3-paginas"></div></aside>
-    <section>
-      <h2 id="pag3-nombre"></h2>
-      <fieldset><legend>Tamaños a capturar</legend>
-        <label><input type="checkbox" value="desktop" checked> Desktop</label>
-        <label><input type="checkbox" value="tablet"> Tablet</label>
-        <label><input type="checkbox" value="movil"> Móvil</label>
-      </fieldset>
-      <div id="pag3-mapa">
-        <div id="pag3-marcadores"></div>
-      </div>
-    </section>
-    <aside>
-      <h2>Puntos de captura</h2><p id="pag3-estado"></p><p id="pag3-resumen"></p>
-      <ol id="pag3-puntos"></ol>
-      <form id="pag3-anadir"><label>Nuevo punto (%) <input id="pag3-nuevo" type="number" min="0" max="100" step="1" value="60" required></label><button>Añadir punto</button></form>
-      <button id="pag3-restaurar">Restaurar valores iniciales</button>
-      <label>Copiar de otra página <select id="pag3-copiar"></select></label>
-      <p id="pag3-mensaje" role="status"></p>
-    </aside>
-  </main>
-  <footer><button type="button" id="pag3-volver">← Atrás</button><strong id="pag3-total"></strong><button id="pag3-generar" disabled>Generar capturas</button></footer><p class="nota-capturas">La generación de imágenes todavía no está implementada en este proyecto.</p>
-  </section>
+    <h1>Configuración por página</h1>
+    <p>Arrastra los marcadores o pulsa en el mapa para añadir un punto.</p>
+    <main>
+        <aside><h2>Páginas</h2><div id="pag3-paginas"></div></aside>
+        <section>
+            <h2 id="pag3-nombre"></h2>
+            <fieldset><legend>Tamaños a capturar</legend>
+                <label><input type="checkbox" value="desktop" checked> Desktop</label>
+                <label><input type="checkbox" value="tablet"> Tablet</label>
+                <label><input type="checkbox" value="movil"> Móvil</label>
+            </fieldset>
+            <div id="pag3-mapa">
+                <div id="pag3-marcadores"></div>
+            </div>
+        </section>
+        <aside>
+            <h2>Puntos de captura</h2><p id="pag3-estado"></p><p id="pag3-resumen"></p>
+            <ol id="pag3-puntos"></ol>
+        <form id="pag3-anadir"><label>Nuevo punto (%) <input id="pag3-nuevo" type="number" min="0" max="100" step="1" value="60" required></label><button>Añadir punto</button></form>
+        <button id="pag3-restaurar">Restaurar valores iniciales</button>
+        <label>Copiar de otra página <select id="pag3-copiar"></select></label>
+        <p id="pag3-mensaje" role="status"></p>
+        </aside>
+    </main>
+<footer><button type="button" id="pag3-volver">← Atrás</button><strong id="pag3-total"></strong><button id="pag3-generar" disabled>Generar capturas</button></footer><p class="nota-capturas">La generación de imágenes todavía no está implementada en este proyecto.</p>
+</section>
+
+<!-- PÁGINA 4: resultados -->
+<section class="pagina pag4" id="pag4" hidden>
+
+    <header class="pag4__cabecera">
+        <div>
+            <h2>Resultados</h2>
+            <p id="pag4-resumen">0 capturas · 0 páginas</p>
+        </div>
+        <div class="pag4__herramientas">
+            <input type="search" id="pag4-filtro" placeholder="Filtrar por URL...">
+            <button type="button" class="pag4__btn" id="pag4-zip">Descargar todo (ZIP)</button>
+        <button type="button" class="pag4__btn pag4__btn--oscuro" id="pag4-pdf">Exportar PDF</button>
+        </div>
+    </header>
+
+    <div id="pag4-lista">
+    <!-- Las tarjetas se crean con JavaScript -->
+    </div>
+
+    <div class="pag4__acciones">
+        <button type="button" class="pag4__btn" id="pag4-volver">← Atrás</button>
+    </div>
+
+</section>
+
 <script src="script.js"></script>
 </body>
 </html>
