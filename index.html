@@ -196,34 +196,112 @@
     </section>
 
 
-<!-- PÁGINA 3: configuración individual de las URLs seleccionadas -->
-<section class="pagina  pag3" id="pag3" hidden>  
 
-    <h1>Configuración por página</h1>
-    <p>Arrastra los marcadores o pulsa en el mapa para añadir un punto.</p>
+<!-- BLOQUE PAGINA 3  -->
+
+
+<section class="pagina pag3" id="pag3" hidden>
+        <div class="contenedor">
+    <header class="cabecera">
+      <img class="logo" src="logo.webshot.png.png" alt="WebShot">
+      <div>
+        <h1>Configuración por página</h1>
+        <p>Elige los puntos y los tamaños de tus capturas.</p>
+      </div>
+    </header>
+
     <main>
-        <aside><h2>Páginas</h2><div id="pag3-paginas"></div></aside>
-        <section>
-            <h2 id="pag3-nombre"></h2>
-            <fieldset><legend>Tamaños a capturar</legend>
-                <label><input type="checkbox" value="desktop" checked> Desktop</label>
-                <label><input type="checkbox" value="tablet"> Tablet</label>
-                <label><input type="checkbox" value="movil"> Móvil</label>
-            </fieldset>
-            <div id="pag3-mapa">
-                <div id="pag3-marcadores"></div>
-            </div>
-        </section>
-        <aside>
-            <h2>Puntos de captura</h2><p id="pag3-estado"></p><p id="pag3-resumen"></p>
-            <ol id="pag3-puntos"></ol>
-        <form id="pag3-anadir"><label>Nuevo punto (%) <input id="pag3-nuevo" type="number" min="0" max="100" step="1" value="60" required></label><button>Añadir punto</button></form>
-        <button id="pag3-restaurar">Restaurar valores iniciales</button>
-        <label>Copiar de otra página <select id="pag3-copiar"></select></label>
+      <aside class="panel panel-paginas">
+        <h2>Páginas</h2>
+        <div id="pag3-paginas"></div>
+      </aside>
+
+      <section class="panel panel-central">
+        <div class="titulo-pagina">
+          <span class="icono-pagina" aria-hidden="true"></span>
+          <h2 id="pag3-nombre"></h2>
+        </div>
+
+        <fieldset>
+          <legend>Viewports a capturar</legend>
+          <div class="tamanos">
+            <label>
+              <input type="checkbox" value="desktop" checked>
+              Desktop
+            </label>
+            <label>
+              <input type="checkbox" value="tablet">
+              Tablet
+            </label>
+            <label>
+              <input type="checkbox" value="movil">
+              Móvil
+            </label>
+          </div>
+        </fieldset>
+
+        <p class="instruccion">
+          Arrastra los marcadores o haz clic para añadir un punto.
+        </p>
+
+        <div class="zona-vista">
+          <div class="barra-vista">
+            <span class="punto"></span>
+            <span class="punto"></span>
+            <span class="punto"></span>
+            <span class="texto-vista">Vista previa</span>
+          </div>
+          <div id="pag3-mapa">
+            <div id="pag3-marcadores"></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel panel-puntos">
+        <h2>Puntos de captura</h2>
+        <p id="pag3-estado"></p>
+        <p id="pag3-resumen" aria-live="polite"></p>
+        <ol id="pag3-puntos"></ol>
+
+        <form id="pag3-anadir">
+          <label for="pag3-nuevo">Nuevo punto (%)</label>
+          <div class="fila-anadir">
+            <input id="pag3-nuevo" type="number"
+                   min="0" max="100" step="1" value="60" required>
+            <button type="submit">Añadir punto</button>
+          </div>
+        </form>
+
+        <button id="pag3-restaurar"
+                class="boton-secundario" type="button">
+          Restaurar valores iniciales
+        </button>
+
+        <div class="copiar-configuracion">
+          <label for="pag3-copiar">
+            Copiar configuración de otra página
+          </label>
+          <select id="pag3-copiar"></select>
+        </div>
+
         <p id="pag3-mensaje" role="status"></p>
-        </aside>
+      </aside>
     </main>
-<footer><button type="button" id="pag3-volver">← Atrás</button><strong id="pag3-total"></strong><button id="pag3-generar" disabled>Generar capturas</button></footer><p class="nota-capturas">La generación de imágenes todavía no está implementada en este proyecto.</p>
+
+    <footer class="pie">
+      <button id="pag3-volver"
+              class="boton-volver" type="button">← Atrás</button>
+      <strong id="pag3-total"></strong>
+      <button id="pag3-generar" type="button" disabled>
+        Generar capturas
+      </button>
+    </footer>
+
+    <p class="nota-capturas">
+      La generación de imágenes todavía no está implementada
+      en este proyecto.
+    </p>
+  </div>
 </section>
 
 <!-- PÁGINA 4: resultados -->
