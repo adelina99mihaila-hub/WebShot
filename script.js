@@ -425,6 +425,8 @@ const botonAtras = document.getElementById ("pag4-volver");
 
 const botonGenerar = document.getElementById ("pag3-generar");
 
+const nombresTamano = { desktop: "Desktop", tablet: "Tablet", movil: "Móvil" };
+
 function leerConfigPag3() {
     const guardado = sessionStorage.getItem("webshot-configuracion-pag3");
     if (!guardado) {
@@ -438,3 +440,17 @@ botonGenerar.addEventListener("click", function() {
     console.log(config);
     mostrarPagina("pag4");
 });
+
+filtro.addEventListener("input", function (){
+    const texto = filtroPag4.value.trim().toLowerCase();
+
+    listaResultados.querySelectorAll(".pag4__tarjeta").forEach(function(tarjeta){
+        tarjeta.hidden = !tarjeta.dataset.url.includes(texto);
+    });
+});
+
+document.getElementById("pag4-volver").addEventListener("click", function(){
+    mostrarPagina("pag3");
+});
+
+mostrarResultados();
