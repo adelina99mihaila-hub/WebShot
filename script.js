@@ -413,3 +413,13 @@ const paginaGuardada = sessionStorage.getItem("paginaActual") || "inicio";
 mostrarPagina(paginaGuardada, false);
 history.replaceState({ pagina: paginaGuardada }, "", "#" + paginaGuardada);
 
+//======  PAGINA 4   ======//
+
+const listaResultados = document.getElementById ("pag4-lista");
+const archivos = document.getElementById ("pag4");
+const resumen = document.getElementById ("pag4-resumen");
+const filtro = document.getElementById ("pag4-filtro");
+const descargarZip = document.getElementById ("pag4-zip");
+const botonExportar = document.getElementById ("pag4-pdf");
+const botonAtras = document.getElementById ("pag4-volver");
+
