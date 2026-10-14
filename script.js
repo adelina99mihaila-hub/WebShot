@@ -423,3 +423,18 @@ const descargarZip = document.getElementById ("pag4-zip");
 const botonExportar = document.getElementById ("pag4-pdf");
 const botonAtras = document.getElementById ("pag4-volver");
 
+const botonGenerar = document.getElementById ("pag3-generar");
+
+function leerConfigPag3() {
+    const guardado = sessionStorage.getItem("webshot-configuracion-pag3");
+    if (!guardado) {
+        return null;
+    }
+    return JSON.parse(guardado);
+}
+
+botonGenerar.addEventListener("click", function() {
+    const config = leerConfigPag3();
+    console.log(config);
+    mostrarPagina("pag4");
+});
