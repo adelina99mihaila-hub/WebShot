@@ -435,9 +435,65 @@ function leerConfigPag3() {
     return JSON.parse(guardado);
 }
 
-botonGenerar.addEventListener("click", function() {
+function crearTarjetaResultado(url, config,tipo){
+    let etiquetas; 
+    if(tipo === "completa"){
+        etiquetas = ["completa"]
+    }
+    else { config.puntos.map(function (p) { return p + "%"; });}
+    
+let miniaturas = "";
+config.tamanos.forEach(function (tamano){ 
+    etiquetas.forEach(function (etiqueta){
+        miniaturas += `
+                <figure class="pag4__miniatura">
+                    <span class="pag4__etiqueta">${etiqueta}</span>
+                    <button type="button" class="pag4__descarga">⬇</button>
+                    <figcaption>${nombresTamano[tamano]}</figcaption>
+                </figure>`;
+    });
+});
+
+const cantidad = etiquetas.length * config.tamanos.length;
+
+const tarjeta = document.createElement("article");
+tarjeta.className = "pag4__tarjeta";
+    tarjeta.dataset.url = url.toLowerCase();
+    tarjeta.innerHTML = `
+        <div class="pag4__tarjeta-cabecera">
+            <div class="pag4__info">
+                <strong>${url}</strong>
+            </div>
+            <span class="pag4__contador">${cantidad} capturas</span>
+        </div>
+        <div class="pag4__miniaturas">${miniaturas}</div>`;
+
+    return { tarjeta: tarjeta, cantidad: cantidad };
+}
+
+function mostrarResultados() {
+    listaResultados.innerHTML = "";
+
     const config = leerConfigPag3();
-    console.log(config);
+    if (!config) {
+        resumen.textContent = "0 capturas · 0 páginas";
+        return;
+    }
+
+    let totalCapturas = 0;
+    const direcciones = Object.keys(config.datos);
+
+    direcciones.forEach(function (url) {
+        const resultado = crearTarjetaResultado(url, config.datos[url], config.tipo);
+        listaResultados.appendChild(resultado.tarjeta);
+        totalCapturas += resultado.cantidad;
+    });
+    resumen.textContent = totalCapturas + "capturas · " + direcciones.length + "páginas";
+}
+
+
+botonGenerar.addEventListener("click", function() {
+    mostrarResultados();
     mostrarPagina("pag4");
 });
 
@@ -449,7 +505,9 @@ filtro.addEventListener("input", function (){
     });
 });
 
-document.getElementById("pag4-volver").addEventListener("click", function(){
+
+
+botonAtras.addEventListener("click", function () {
     mostrarPagina("pag3");
 });
 
