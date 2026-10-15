@@ -438,9 +438,9 @@ function leerConfigPag3() {
 function crearTarjetaResultado(url, config,tipo){
     let etiquetas; 
     if(tipo === "completa"){
-        etiquetas = ["completa"]
+        etiquetas = ["Completa"];
     }
-    else { config.puntos.map(function (p) { return p + "%"; });}
+    else { etiquetas = config.puntos.map(function (p) { return p + "%"; });}
     
 let miniaturas = "";
 config.tamanos.forEach(function (tamano){ 
@@ -488,7 +488,7 @@ function mostrarResultados() {
         listaResultados.appendChild(resultado.tarjeta);
         totalCapturas += resultado.cantidad;
     });
-    resumen.textContent = totalCapturas + "capturas · " + direcciones.length + "páginas";
+    resumen.textContent = totalCapturas + " capturas · " + direcciones.length + " páginas";
 }
 
 
@@ -498,7 +498,7 @@ botonGenerar.addEventListener("click", function() {
 });
 
 filtro.addEventListener("input", function (){
-    const texto = filtroPag4.value.trim().toLowerCase();
+    const texto = filtro.value.trim().toLowerCase();
 
     listaResultados.querySelectorAll(".pag4__tarjeta").forEach(function(tarjeta){
         tarjeta.hidden = !tarjeta.dataset.url.includes(texto);
