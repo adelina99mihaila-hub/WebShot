@@ -1,5 +1,4 @@
-
-    const crawlDepth = document.getElementById("crawl-depth");
+ const crawlDepth = document.getElementById("crawl-depth");
     const depthValue = document.getElementById("depth-value");
 
     crawlDepth.addEventListener("input", function () {
