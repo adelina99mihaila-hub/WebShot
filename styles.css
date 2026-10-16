@@ -1143,20 +1143,30 @@ font-size: 13px;
     border: 1px solid #d1d5db;
 }
 
+
 #pag4 .pag4__btn {
     height: 40px;
     padding: 0 16px;
     font-size: 15px;
     font-weight: 600;
-    background: #fff;
+    background-color: #ffffff;
     color: #0F2F57;
     border: 1px solid #d1d5db;
+    border-radius: 10px;
+}
+
+#pag4 .pag4__btn:hover {
+    background-color: #f0f4fa;
 }
 
 #pag4 .pag4__btn--oscuro {
-    background: #0F2F57;
-    color: #fff;
+    background-color: #0F2F57;
+    color: #ffffff;
     border-color: #0F2F57;
+}
+
+#pag4 .pag4__btn--oscuro:hover {
+    background-color: #0b2340;
 }
 
 #pag4 .pag4__btn--oscuro:hover {
@@ -1247,3 +1257,7 @@ font-size: 13px;
 #pag4 .pag4__acciones {
     margin-top: 24px;}
 
+/* El traductor del navegador mete etiquetas <font>: que hereden el color del padre, así que esta regla protege los colores de la página */
+font {
+    color: inherit;
+}
