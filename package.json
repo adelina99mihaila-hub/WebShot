@@ -1,16 +1,1 @@
-{
-"name": "webshot",
-"version": "1.0.0",
-"main": "server.js",
-"scripts": {
-    "start": "node server.js",
-    "postinstall": "playwright install chromium"
-},
-"dependencies": {
-    "express": "latest",
-    "playwright": "latest",
-    "archiver": "latest",
-    "pdf-lib": "latest",
-    "robots-parser": "latest"
-}
-}
+{"name":"webshot","version":"1.0.0","main":"server.js","scripts":{"start":"node server.js","postinstall":"playwright install chromium"},"dependencies":{"archiver":"^8.0.0","express":"^5.3.0","pdf-lib":"^1.17.1","playwright":"^1.64.1","robots-parser":"^3.0.1"}}
