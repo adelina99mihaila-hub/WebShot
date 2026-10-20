@@ -80,52 +80,92 @@ const selectAll = document.getElementById("select-all");
 const bottomSelectedCount = document.getElementById("bottom-selected-count");
 const processButton = document.getElementById("process-button");
 
-//Analiza la URL ingresada y agrega una fila a la tabla con los detalles de la URL
-formulario.addEventListener("submit", function (evento) {
+//Analiza la URL enviada por el usuario y la añade a la tabla de resultados
+//La función async nos permite esperarla respuesta del servidor
+formulario.addEventListener("submit", async function (evento) { 
+
     evento.preventDefault();
+
+    //Leemos la url y le quitamos los espacios
     const texto = inputUrl.value.trim();
+
+    //Si el texto está vacío, no hacemos nada
     if (texto === "") return;
 
-    //Variables para la información de la URL
-    let dominio = "";
-    let ruta = "";
-    let parametros = "";
-    let cantidad = 0;
-    let estado = "OK";
+    try{
+        //Enviamos la URL al servidor con una petición POST a la ruta /api/crawl
+        const response = await fetch("/api/crawl", {
+            method: "POST",
+            headers: {
+                //Indicamos que el contenido que enviamos es JSON
+                "Content-Type": "application/json"
+            },
 
-    try {
-        const url = new URL(texto);
-        dominio = url.hostname;
-        ruta = url.pathname;
-        parametros = url.search === "" ? "-" : url.search;
-        cantidad = url.searchParams.size;
-    } catch (e) {
-        estado = "Error";
+            //Convertimos el objeto con la URL en un string JSON para enviarlo al servidor
+            body: JSON.stringify({ url: texto })
+        });
+
+    //Convertimos la respuesta del servidor en un objeto JSON   
+    const resultado = await response.json();
+
+    //Si el servidor devuelve un error, mostramos un mensaje de alerta y salimos de la función
+    if(!response.ok){
+
+        alert(resultado.error || "Error al analizar la URL");
+        return;
     }
-    // Crear una nueva fila en la tabla con los detalles de la URL
-    const fila = document.createElement("tr");
-    fila.dataset.estado = estado.toLowerCase();
 
-    const celdaSeleccion = document.createElement("td");
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    celdaSeleccion.appendChild(checkbox);
+    //Comprueba que la respuesta incluya una lista de páginas
+    if(!Array.isArray(resultado.pages)){
+        throw new Error("Respuesta inesperada del servidor");
+    }
+    //Elimina las filas de resultados anteriores y desmarcamos el checkbox de "Seleccionar todo"
+    tabla.replaceChildren();
+    selectAll.checked = false;
 
-    fila.appendChild(celdaSeleccion);
+    //Recorre cada página devuelta por el servidor y crea una fila en la tabla de resultados
+    resultado.pages.forEach(function (pagina) {
 
-    [texto, dominio, ruta, parametros, cantidad, estado].forEach(function (valor) {
-        const celda = document.createElement("td");
-        celda.textContent = valor;
-        fila.appendChild(celda);
+        const fila = document.createElement("tr");
+
+        //Si la página no tiene un estado, se le asigna "error" por defecto
+        const estado = String(pagina.status || "error");
+
+        fila.dataset.estado = estado.toLowerCase();
+        fila.dataset.url = pagina.url;
+
+        const celdaSeleccion = document.createElement("td");
+        const checkbox = document.createElement("input");
+
+        checkbox.type = "checkbox";
+        celdaSeleccion.appendChild(checkbox);
+        fila.appendChild(celdaSeleccion);
+
+        //Añade las celdas con los datos de la página a la fila
+        [pagina.title, pagina.url, pagina.depth, estado].forEach(function (valor) {
+            const celda = document.createElement("td");
+            celda.textContent = valor ?? " ";
+            fila.appendChild(celda);
+        });
+
+        //Actualiza los contadores al cambiar la selección
+        checkbox.addEventListener("change", actualizarContadores);
+
+        tabla.appendChild(fila);
     });
 
-    tabla.appendChild(fila);
-    checkbox.addEventListener("change", actualizarContadores);
-
     inputUrl.value = "";
+
     actualizarContadores();
     aplicarFiltros();
     mostrarPagina("pagina-1");
+ 
+    } catch (e) {
+        
+        alert("Error al analizar la URL: " + e.message);
+        
+    }
+    
 });
 
 // Función para aplicar filtros de búsqueda y estado a las filas de la tabla
@@ -506,7 +546,7 @@ casillasViewport.forEach(function (casilla) {
 
         const anteriores = datos; datos = Object.create(null);
         filas.forEach(fila => {
-            const url = fila.cells[1].textContent.trim();
+            const url = fila.dataset.url;
             datos[url] = !cambiaron && anteriores[url] ? anteriores[url] : clonarInicial();
         });
 
