@@ -105,21 +105,22 @@ formulario.addEventListener("submit", function (evento) {
     // Crear una nueva fila en la tabla con los detalles de la URL
     const fila = document.createElement("tr");
     fila.dataset.estado = estado.toLowerCase();
-    fila.innerHTML = `
-        <td><input type="checkbox"></td>
-        <td>${texto}</td>
-        <td>${dominio}</td>
-        <td>${ruta}</td>
-        <td>${parametros}</td>
-        <td>${cantidad}</td>
-        <td>${estado}</td>
-    `;
+
+    const celdaSeleccion = document.createElement("td");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    celdaSeleccion.appendChild(checkbox);
+
+    fila.appendChild(celdaSeleccion);
+
+    [texto, dominio, ruta, parametros, cantidad, estado].forEach(function (valor) {
+        const celda = document.createElement("td");
+        celda.textContent = valor;
+        fila.appendChild(celda);
+    });
 
     tabla.appendChild(fila);
-
-    // Agregar un listener al checkbox de la nueva fila para actualizar los contadores cuando se cambie su estado
-    const checkboxFila = fila.querySelector('input[type="checkbox"]');
-    checkboxFila.addEventListener("change", actualizarContadores);
+    checkbox.addEventListener("change", actualizarContadores);
 
     inputUrl.value = "";
     actualizarContadores();
@@ -386,7 +387,7 @@ casillasViewport.forEach(function (casilla) {
 
         //Actualizar el resumen de la página
         document.getElementById('pag3-resumen').textContent = (tipo === 'completa' ? '1 página completa × ' : pagina.puntos.length + ' puntos × ') + pagina.tamanos.length + ' tamaños = ' + cantidad(pagina) + ' capturas';
-        
+
         //Actualizar el menú y la lista de páginas
         let menu = document.getElementById('pag3-paginas'); menu.replaceChildren();
         copiar.replaceChildren(new Option('Selecciona una página…', ''));
@@ -397,11 +398,11 @@ casillasViewport.forEach(function (casilla) {
             total += cantidad(datos[nombre]);
             let boton = document.createElement('button');
             boton.textContent = nombre + (esInicial(datos[nombre]) ? ' · Por defecto' : ' · Personalizada');
-            
+
             if (nombre === paginaActual) boton.setAttribute('aria-current', 'page');
             boton.onclick = function () { paginaActual = nombre; mensaje.textContent = ''; mostrar(); };
             menu.append(boton);
-            
+
             if (nombre !== paginaActual) copiar.add(new Option(nombre, nombre));
         }
 
@@ -436,14 +437,14 @@ casillasViewport.forEach(function (casilla) {
     function anadir(valor) {
 
         if (!Number.isInteger(valor) || valor < 0 || valor > 100) return;
-        
+
         if (datos[paginaActual].puntos.includes(valor)) { mensaje.textContent = 'Ese punto ya existe.'; return; }
         datos[paginaActual].puntos.push(valor); mensaje.textContent = ''; mostrar();
-    
+
     }
     //Añadir un punto de scroll al hacer click en el mapa
     mapa.onclick = function (evento) { if (!evento.target.closest('button')) anadir(porcentaje(evento.clientY)); };
-    
+
     //Formulario para añadir un punto manualmente
     document.getElementById('pag3-anadir').onsubmit = function (evento) {
         evento.preventDefault();
@@ -482,10 +483,10 @@ casillasViewport.forEach(function (casilla) {
     //Navegación entre páginas
     document.getElementById('btn-volver').addEventListener('click', () => mostrarPagina('pagina-1'));
     document.getElementById('pag3-volver').addEventListener('click', () => mostrarPagina('pag2'));
-    
+
     //Botón para continuar a la página 4, validando que las URLs seleccionadas tengan estado OK y que los puntos de scroll sean válidos
     document.getElementById('btn-continuar').addEventListener('click', () => {
-       
+
         const filas = Array.from(tabla.querySelectorAll('tr')).filter(fila => fila.querySelector('input[type="checkbox"]').checked);
         if (!filas.length) { mostrarPagina('pagina-1'); return; }
         if (filas.some(fila => fila.dataset.estado !== 'ok')) {
@@ -610,11 +611,13 @@ function crearTarjetaResultado(url, config, tipo) {
     tarjeta.innerHTML = `
         <div class="pag4__tarjeta-cabecera">
             <div class="pag4__info">
-                <strong>${url}</strong>
+                <strong class="pag4__url"></strong>
             </div>
             <span class="pag4__contador">${cantidad} capturas</span>
         </div>
         <div class="pag4__miniaturas">${miniaturas}</div>`;
+
+    tarjeta.querySelector(".pag4__url").textContent = url;
 
     return { tarjeta: tarjeta, cantidad: cantidad };
 }
