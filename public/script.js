@@ -30,6 +30,9 @@ allowedDomains.addEventListener("input", function () {
     allowedDomains.value = allowedDomains.value.replace(/\s+/g, '');
 });
 
+// Checkbox para respetar robots.txt
+const respetarRobots = document.getElementById("respect-robots");
+
 
 //NAVEGACIÓN ENTRE PÁGINAS
 //Función para mostrar la página correspondiente y ocultar las demás
@@ -82,7 +85,7 @@ const processButton = document.getElementById("process-button");
 
 //Analiza la URL enviada por el usuario y la añade a la tabla de resultados
 //La función async nos permite esperarla respuesta del servidor
-formulario.addEventListener("submit", async function (evento) { 
+formulario.addEventListener("submit", async function (evento) {
 
     evento.preventDefault();
 
@@ -92,7 +95,7 @@ formulario.addEventListener("submit", async function (evento) {
     //Si el texto está vacío, no hacemos nada
     if (texto === "") return;
 
-    try{
+    try {
         //Enviamos la URL al servidor con una petición POST a la ruta /api/crawl
         const response = await fetch("/api/crawl", {
             method: "POST",
@@ -102,70 +105,77 @@ formulario.addEventListener("submit", async function (evento) {
             },
 
             //Convertimos el objeto con la URL en un string JSON para enviarlo al servidor
-            body: JSON.stringify({ url: texto })
+            //enviamos url, profundidad máxima, límite de urls, dominios permitidos y si se respeta robots.txt
+            body: JSON.stringify({
+                url: texto,
+                maxDepth: Number(crawlDepth.value),
+                maxUrls: Number(urlLimit.value),
+                allowedDomains: allowedDomains.value.trim(),
+                respectRobots: respetarRobots.checked
+            })
         });
 
-    //Convertimos la respuesta del servidor en un objeto JSON   
-    const resultado = await response.json();
+        //Convertimos la respuesta del servidor en un objeto JSON   
+        const resultado = await response.json();
 
-    //Si el servidor devuelve un error, mostramos un mensaje de alerta y salimos de la función
-    if(!response.ok){
+        //Si el servidor devuelve un error, mostramos un mensaje de alerta y salimos de la función
+        if (!response.ok) {
 
-        alert(resultado.error || "Error al analizar la URL");
-        return;
-    }
+            alert(resultado.error || "Error al analizar la URL");
+            return;
+        }
 
-    //Comprueba que la respuesta incluya una lista de páginas
-    if(!Array.isArray(resultado.pages)){
-        throw new Error("Respuesta inesperada del servidor");
-    }
-    //Elimina las filas de resultados anteriores y desmarcamos el checkbox de "Seleccionar todo"
-    tabla.replaceChildren();
-    selectAll.checked = false;
+        //Comprueba que la respuesta incluya una lista de páginas
+        if (!Array.isArray(resultado.pages)) {
+            throw new Error("Respuesta inesperada del servidor");
+        }
+        //Elimina las filas de resultados anteriores y desmarcamos el checkbox de "Seleccionar todo"
+        tabla.replaceChildren();
+        selectAll.checked = false;
 
-    //Recorre cada página devuelta por el servidor y crea una fila en la tabla de resultados
-    resultado.pages.forEach(function (pagina) {
+        //Recorre cada página devuelta por el servidor y crea una fila en la tabla de resultados
+        resultado.pages.forEach(function (pagina) {
 
-        const fila = document.createElement("tr");
+            const fila = document.createElement("tr");
 
-        //Si la página no tiene un estado, se le asigna "error" por defecto
-        const estado = String(pagina.status || "error");
+            //Si la página no tiene un estado, se le asigna "error" por defecto
+            const estado = String(pagina.status || "error");
 
-        fila.dataset.estado = estado.toLowerCase();
-        fila.dataset.url = pagina.url;
+            fila.dataset.estado = estado.toLowerCase();
+            fila.dataset.url = pagina.url;
 
-        const celdaSeleccion = document.createElement("td");
-        const checkbox = document.createElement("input");
+            const celdaSeleccion = document.createElement("td");
+            const checkbox = document.createElement("input");
 
-        checkbox.type = "checkbox";
-        celdaSeleccion.appendChild(checkbox);
-        fila.appendChild(celdaSeleccion);
+            checkbox.type = "checkbox";
+            celdaSeleccion.appendChild(checkbox);
+            fila.appendChild(celdaSeleccion);
 
-        //Añade las celdas con los datos de la página a la fila
-        [pagina.title, pagina.url, pagina.depth, estado].forEach(function (valor) {
-            const celda = document.createElement("td");
-            celda.textContent = valor ?? " ";
-            fila.appendChild(celda);
+            //Añade las celdas con los datos de la página a la fila
+            [pagina.title, pagina.url, pagina.depth, estado].forEach(function (valor) {
+                const celda = document.createElement("td");
+                celda.textContent = valor ?? " ";
+                fila.appendChild(celda);
+            });
+
+            //Actualiza los contadores al cambiar la selección
+            checkbox.addEventListener("change", actualizarContadores);
+
+            tabla.appendChild(fila);
         });
 
-        //Actualiza los contadores al cambiar la selección
-        checkbox.addEventListener("change", actualizarContadores);
+        inputUrl.value = "";
 
-        tabla.appendChild(fila);
-    });
+        actualizarContadores();
+        aplicarFiltros();
+        mostrarPagina("pagina-1");
 
-    inputUrl.value = "";
-
-    actualizarContadores();
-    aplicarFiltros();
-    mostrarPagina("pagina-1");
- 
     } catch (e) {
-        
+
         alert("Error al analizar la URL: " + e.message);
-        
+
     }
-    
+
 });
 
 // Función para aplicar filtros de búsqueda y estado a las filas de la tabla
