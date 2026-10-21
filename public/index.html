@@ -1,334 +1,380 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebShot</title>
-    <link rel="stylesheet" href="styles.css"> <link rel="icon" href="favicon-32x32.png" type="image/png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon-32x32.png" type="image/png">
 </head>
+
 <body>
-<section class="pagina inicio" id="inicio">
-    <header>
-        <h1>
-            <img src="logo.webshot.png" alt="logo webshot"> 
-            <span> WebShot</span>
-        </h1>
-        <p>Escoge una web, elige las páginas y crea capturas en diferentes puntos de scroll
+    <!------------------------------------------------->
+    <!-- Bloque de página de inicio -->
+    <!--Permite introducir la URL de la web a analizar-->
+    <!------------------------------------------------->
+    <section class="pagina inicio" id="inicio">
+        <header>
+            <h1>
+                <img src="logo.webshot.png" alt="logo webshot">
+                <span> WebShot</span>
+            </h1>
+            <p>Escoge una web, elige las páginas y crea capturas en diferentes puntos de scroll
 
-        </p>
-        
-    </header>
-    <div class="crawl-card">
+            </p>
+
+        </header>
+
+        <!--Tarjeta para el formulario de búsqueda-->
+        <div class="crawl-card">
 
 
-    <form class="search-box" id="search-box">
-        <input type="text" id="url-input" name="url" placeholder="Ingresa la URL de la web" required>
-        <button type="submit">Analizar</button>
-    </form>
+            <form class="search-box" id="search-box">
+                <input type="text" id="url-input" name="url" placeholder="Ingresa la URL de la web" required>
+                <button type="submit">Analizar</button>
+            </form>
 
 
-<details class="advanced-toggle-wrapper">
-    <summary class="advanced-toggle">
-    <span class="chevron">⌄</span> Ajustes avanzados
-    </summary>
+            <details class="advanced-toggle-wrapper">
+                <summary class="advanced-toggle">
+                    <span class="chevron">⌄</span> Ajustes avanzados
+                </summary>
 
-    
-    <div class="advanced-settings"> <!-- Panel que se abre/cierra -->
 
-    <div class="setting">
-        <label for="crawl-depth">Profundidad de crawl · <span id="depth-value">2</span></label>
-        <input type="range" id="crawl-depth" min="0" max="5" value="2">
-    </div>
+                <div class="advanced-settings"> <!-- Panel que se abre/cierra -->
 
-    <div class="setting">
-        <label for="url-limit">Límite de URLs</label>
-        <input type="number" id="url-limit" value="100">
-    </div>
+                    <div class="setting">
+                        <label for="crawl-depth">Profundidad de crawl · <span id="depth-value">2</span></label>
+                        <input type="range" id="crawl-depth" min="0" max="5" value="2">
+                    </div>
 
-    <div class="setting">
-        <label for="allowed-domains">Dominios permitidos</label>
-        <input type="text" id="allowed-domains" placeholder="ejemplo.com">
-    </div>
+                    <div class="setting">
+                        <label for="url-limit">Límite de URLs</label>
+                        <input type="number" id="url-limit" value="100">
+                    </div>
 
-    <div class="setting setting-toggle">
-        <label class="switch">
-        <input type="checkbox" id="respect-robots" checked>
-        <span class="slider"></span>
-        </label>
-        <span>Respetar robots.txt</span>
-    </div>
+                    <div class="setting">
+                        <label for="allowed-domains">Dominios permitidos</label>
+                        <input type="text" id="allowed-domains" placeholder="ejemplo.com">
+                    </div>
 
-</div>
-</details>
-</div>
-<section class="historico">
-    <h2>HISTÓRICO</h2>
+                    <div class="setting setting-toggle">
+                        <label class="switch">
+                            <input type="checkbox" id="respect-robots" checked>
+                            <span class="slider"></span>
+                        </label>
+                        <span>Respetar robots.txt</span>
+                    </div>
 
-    <div id="lista-historico" class="lista-historico">
-        <!-- Las búsquedas se añaden automáticamente aquí -->
-    </div>
-</section >
-
-</section>
-
-<!--   BLOQUE PÁGINA 1 -->
-
-<section class="pagina pagina-1" id="pagina-1" hidden> 
-
-    <div class="results-header">
-        <div>
-            <h2>URLs analizadas</h2>
-            <p><span id="total-count">0</span> URLs añadidas</p>
+                </div>
+            </details>
         </div>
-    </div>
+        <!-- Historial de las búsquedas aneriores-->
+        <section class="historico">
+            <h2>HISTÓRICO</h2>
 
-    <div class="toolbar">
-        <input type="search" id="search-input" placeholder="Buscar por URL, dominio o parámetro...">
+            <div id="lista-historico" class="lista-historico">
+                <!-- Las búsquedas se añaden automáticamente aquí -->
+            </div>
+        </section>
 
-        <div class="filters">
-            <button type="button" class="filter-button active" data-filter="all">Todas</button>
-            <button type="button" class="filter-button" data-filter="ok">OK</button>
-            <button type="button" class="filter-button" data-filter="error">Error</button>
-        </div>
-    </div>
+    </section>
 
-    <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th class="checkbox-column">
-                        <input type="checkbox" id="select-all">
-                    </th>
-                    <th>URL</th>
-                    <th>DOMINIO</th>
-                    <th>RUTA</th>
-                    <th>PARÁMETROS</th>
-                    <th>CANTIDAD</th>
-                    <th>ESTADO</th>
-                </tr>
-            </thead>
+    <!--   BLOQUE PÁGINA 1 -->
+    <!------------------------------------------------->
+    <!-- SELECCIÓN DE URLs -->
+    <!--Muestra las URLs analizadas-->
+    <!------------------------------------------------->
 
-            <tbody id="results-body">
-                <!-- Las filas se generan con JavaScript -->
-            </tbody>
-        </table>
+    <section class="pagina pagina-1" id="pagina-1" hidden>
 
-        <div id="empty-message" class="empty-message">
-            Todavía no se ha añadido ninguna URL.
-        </div>
-    </div>
-
-    <div class="bottom-bar">
-        <p>
-            <strong id="bottom-selected-count">0</strong>
-            de
-            <span id="bottom-total-count">0</span>
-            URLs seleccionadas
-        </p>
-
-        <button type="button" id="process-button" disabled>
-            Procesar URLs seleccionadas
-        </button>
-    </div>
-
-</section>
-
-<!--     BLOQUES PÁGINA 2 -->
-
-
-<section class="pagina pag2" id="pag2" hidden> 
-<header>
-    <h2> Configuración por defecto</h2>
-    <p> Esta configuración se aplica a las paginas seleccionadas</p>
-</header>
-<div class="config-card">
-        <!-- Bloque 1: puntos de scroll -->
-    <div class="config-card__bloque">
-        <h3>Puntos de scroll (%)</h3>
-        <p> Posiciones verticales donde se hara cada captura.</p>
-        <div class="puntos" id="puntos">
-            <button type="button" class="puntos__anadir" id="btn-anadir-punto">+Añadir punto</button>
-        </div>
-    </div>
-        <!--Bloque 2: viewports-->
-        <div class="config-card__bloque">
-            <h3>Viewports</h3>
-            <p>Selecciona uno o varios. Cada punto de scroll se captura en cada viewport.</p>
-            <div class="viewports">
-                <label class="viewports__opcion">
-                    <input type="checkbox" name="viewport" value="1440" checked>
-                    Desktop
-                    <small>1440px</small>
-                </label>
-                <label class="viewports__opcion">
-                    <input type="checkbox" name="viewport" value="768">
-                    Tablet
-                    <small>768px</small>
-                </label>
-                <label class="viewports__opcion">
-                    <input type="checkbox" name="viewport" value="390">
-                    Móvil
-                    <small>390px</small>
-                </label>
+        <div class="results-header">
+            <div>
+                <h2>URLs analizadas</h2>
+                <p><span id="total-count">0</span> URLs añadidas</p>
             </div>
         </div>
+
+        <div class="toolbar">
+            <input type="search" id="search-input" placeholder="Buscar por URL, dominio o parámetro...">
+
+            <!-- Botones para filtrar las URLs por su estado -->
+
+            <div class="filters">
+                <button type="button" class="filter-button active" data-filter="all">Todas</button>
+                <button type="button" class="filter-button" data-filter="ok">OK</button>
+                <button type="button" class="filter-button" data-filter="error">Error</button>
+            </div>
+        </div>
+
+        <!-- Tabla de resultados -->
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="checkbox-column">
+                            <input type="checkbox" id="select-all">
+                        </th>
+                        <th>Titulo</th>
+                        <th>URL</th>
+                        <th>PROFUNDIDAD</th>
+                        <th>ESTADO</th>
+                    </tr>
+                </thead>
+
+                <tbody id="results-body">
+                    <!-- Las filas se generan con JavaScript -->
+                </tbody>
+            </table>
+
+            <div id="empty-message" class="empty-message">
+                Todavía no se ha añadido ninguna URL.
+            </div>
+        </div>
+
+        <!--Recuento de URLs seleccionadas-->
+
+        <div class="bottom-bar">
+            <p>
+                <strong id="bottom-selected-count">0</strong>
+                de
+                <span id="bottom-total-count">0</span>
+                URLs seleccionadas
+            </p>
+
+            <button type="button" id="process-button" disabled>
+                Procesar URLs seleccionadas
+            </button>
+        </div>
+
+    </section>
+
+    <!--     BLOQUES PÁGINA 2 -->
+    <!------------------------------------------------->
+    <!-- CONFIGURACIÓN   -->
+    <!--Configura los ajustes para las capturas-->
+    <!------------------------------------------------->
+
+
+    <section class="pagina pag2" id="pag2" hidden>
+        <header>
+            <h2> Configuración por defecto</h2>
+            <p> Esta configuración se aplica a las paginas seleccionadas</p>
+        </header>
+
+        <!-- Tarjeta de configuración -->
+        <div class="config-card">
+
+            <!-- Bloque 1: puntos de scroll -->
+
+            <div class="config-card__bloque">
+                <h3>Puntos de scroll (%)</h3>
+                <p> Posiciones verticales donde se hara cada captura.</p>
+                <div class="puntos" id="puntos">
+                    <button type="button" class="puntos__anadir" id="btn-anadir-punto">+ Añadir punto</button>
+                </div>
+            </div>
+
+            <!--Bloque 2: viewports-->
+
+            <div class="config-card__bloque">
+                <h3>Viewports</h3>
+                <p>Selecciona uno o varios. Cada punto de scroll se captura en cada viewport.</p>
+                <div class="viewports">
+                    <label class="viewports__opcion">
+                        <input type="checkbox" name="viewport" value="1440" checked>
+                        Desktop
+                        <small>1440px</small>
+                    </label>
+                    <label class="viewports__opcion">
+                        <input type="checkbox" name="viewport" value="768">
+                        Tablet
+                        <small>768px</small>
+                    </label>
+                    <label class="viewports__opcion">
+                        <input type="checkbox" name="viewport" value="390">
+                        Móvil
+                        <small>390px</small>
+                    </label>
+                </div>
+            </div>
+
             <!--Bloque 3: tipo de captura-->
-        <div class="config-card__bloque">
-            <h3>Tipo de captura</h3>
-            <div class="opciones">
-                <label class="opciones__item">
-                    <input type="radio" name="tipo" value="viewport" checked>
-                    <strong>Solo viewport</strong>
-                    <small>Captura del área visible en cada punto de scroll</small>
-                </label>
-                <label class="opciones__item">
-                    <input type="radio" name="tipo" value="completa">
-                    <strong>Página completa</strong>
-                    <small>Una captura larga de toda la pagina</small>
-                </label>
+
+            <div class="config-card__bloque">
+                <h3>Tipo de captura</h3>
+                <div class="opciones">
+                    <label class="opciones__item">
+                        <input type="radio" name="tipo" value="viewport" checked>
+                        <strong>Solo viewport</strong>
+                        <small>Captura del área visible en cada punto de scroll</small>
+                    </label>
+                    <label class="opciones__item">
+                        <input type="radio" name="tipo" value="completa">
+                        <strong>Página completa</strong>
+                        <small>Una captura larga de toda la pagina</small>
+                    </label>
+                </div>
             </div>
         </div>
-</div>
-<div class="acciones">
-    <button type="button" class="acciones__boton acciones__boton--secundario" id="btn-volver">← Atrás</button>
-    <button type="button" class="acciones__boton" id="btn-continuar">Continuar</button>
-</div>
+
+        <!-- Botones de acción -->
+
+        <div class="acciones">
+            <button type="button" class="acciones__boton acciones__boton--secundario" id="btn-volver">← Atrás</button>
+            <button type="button" class="acciones__boton" id="btn-continuar">Continuar</button>
+        </div>
     </section>
 
 
 
-<!-- BLOQUE PAGINA 3  -->
+    <!-- BLOQUE PAGINA 3  -->
+    <!------------------------------------------------->
+    <!-- CONFIGURACIÓN POR PÁGINA  -->
+    <!--Permite personalizar los ajustes para las capturas-->
+    <!------------------------------------------------>
 
 
-<section class="pagina pag3" id="pag3" hidden>
+    <section class="pagina pag3" id="pag3" hidden>
         <div class="contenedor">
-    <header class="cabecera">
-      <img class="logo" src="logo.webshot.png" alt="WebShot">
-      <div>
-        <h2>Configuración por página</h2>
-        <p>Elige los puntos y los tamaños de tus capturas.</p>
-      </div>
-    </header>
+            <header class="cabecera">
+                <img class="logo" src="logo.webshot.png" alt="WebShot">
+                <div>
+                    <h2>Configuración por página</h2>
+                    <p>Elige los puntos y los tamaños de tus capturas.</p>
+                </div>
+            </header>
 
-    <main>
-      <aside class="panel panel-paginas">
-        <h2>Páginas</h2>
-        <div id="pag3-paginas"></div>
-      </aside>
+            <main>
+                <aside class="panel panel-paginas">
+                    <h2>Páginas</h2>
+                    <div id="pag3-paginas"></div>
+                </aside>
 
-      <section class="panel panel-central">
-        <div class="titulo-pagina">
-          <span class="icono-pagina" aria-hidden="true"></span>
-          <h2 id="pag3-nombre"></h2>
+                <section class="panel panel-central">
+                    <div class="titulo-pagina">
+                        <span class="icono-pagina" aria-hidden="true"></span>
+                        <h2 id="pag3-nombre"></h2>
+                    </div>
+
+                    <fieldset>
+                        <legend>Viewports a capturar</legend>
+                        <div class="tamanos">
+                            <label>
+                                <input type="checkbox" value="desktop" checked>
+                                Desktop
+                            </label>
+                            <label>
+                                <input type="checkbox" value="tablet">
+                                Tablet
+                            </label>
+                            <label>
+                                <input type="checkbox" value="movil">
+                                Móvil
+                            </label>
+                        </div>
+                    </fieldset>
+
+                    <p class="instruccion">
+                        Arrastra los marcadores o haz clic para añadir un punto.
+                    </p>
+
+                    <!-- Zona de vista previa del mapa -->
+
+                    <div class="zona-vista">
+                        <div class="barra-vista">
+                            <span class="punto"></span>
+                            <span class="punto"></span>
+                            <span class="punto"></span>
+                            <span class="texto-vista">Vista previa</span>
+                        </div>
+                        <div id="pag3-mapa">
+                            <div id="pag3-marcadores"></div>
+                        </div>
+                    </div>
+                </section>
+                <!--Gestión de los puntos en panel derecho-->
+
+                <aside class="panel panel-puntos">
+                    <h2>Puntos de captura</h2>
+                    <p id="pag3-estado"></p>
+                    <p id="pag3-resumen" aria-live="polite"></p>
+                    <ol id="pag3-puntos"></ol>
+
+                    <form id="pag3-anadir">
+                        <label for="pag3-nuevo">Nuevo punto (%)</label>
+                        <div class="fila-anadir">
+                            <input id="pag3-nuevo" type="number" min="0" max="100" step="1" value="60" required>
+                            <button type="submit">Añadir punto</button>
+                        </div>
+                    </form>
+
+                    <button id="pag3-restaurar" class="boton-secundario" type="button">
+                        Restaurar valores iniciales
+                    </button>
+
+                    <div class="copiar-configuracion">
+                        <label for="pag3-copiar">
+                            Copiar configuración de otra página
+                        </label>
+                        <select id="pag3-copiar"></select>
+                    </div>
+
+                    <p id="pag3-mensaje" role="status"></p>
+                </aside>
+            </main>
+
+            <!--Pie de página con botones de acción-->
+
+            <footer class="pie">
+                <button id="pag3-volver" class="boton-volver" type="button">← Atrás</button>
+                <strong id="pag3-total"></strong>
+                <button id="pag3-generar" type="button">
+                    Generar capturas
+                </button>
+            </footer>
+
+            <p class="nota-capturas">
+                La generación de imágenes todavía no está implementada
+                en este proyecto.
+            </p>
+        </div>
+    </section>
+
+    <!-- PÁGINA 4: resultados -->
+    <!------------------------------------------------->
+    <!-- RESULTADOS  -->
+    <!--Muestra los resultados de las capturas generadas-->
+    <!------------------------------------------------>
+    <section class="pagina pag4" id="pag4" hidden>
+
+        <header class="pag4__cabecera">
+            <div>
+                <h2>Resultados</h2>
+                <p id="pag4-resumen">0 capturas · 0 páginas</p>
+            </div>
+            <div class="pag4__herramientas">
+                <input type="search" id="pag4-filtro" placeholder="Filtrar por URL...">
+                <button type="button" class="pag4__btn" id="pag4-zip">Descargar todo (ZIP)</button>
+                <button type="button" class="pag4__btn pag4__btn--oscuro" id="pag4-pdf">Exportar PDF</button>
+            </div>
+        </header>
+
+        <!-- JavaScript insertará aquí las tarjetas de resultados -->
+         
+        <div id="pag4-lista">
+            <!-- Las tarjetas se crean con JavaScript -->
         </div>
 
-        <fieldset>
-          <legend>Viewports a capturar</legend>
-          <div class="tamanos">
-            <label>
-              <input type="checkbox" value="desktop" checked>
-              Desktop
-            </label>
-            <label>
-              <input type="checkbox" value="tablet">
-              Tablet
-            </label>
-            <label>
-              <input type="checkbox" value="movil">
-              Móvil
-            </label>
-          </div>
-        </fieldset>
-
-        <p class="instruccion">
-          Arrastra los marcadores o haz clic para añadir un punto.
-        </p>
-
-        <div class="zona-vista">
-          <div class="barra-vista">
-            <span class="punto"></span>
-            <span class="punto"></span>
-            <span class="punto"></span>
-            <span class="texto-vista">Vista previa</span>
-          </div>
-          <div id="pag3-mapa">
-            <div id="pag3-marcadores"></div>
-          </div>
-        </div>
-      </section>
-
-      <aside class="panel panel-puntos">
-        <h2>Puntos de captura</h2>
-        <p id="pag3-estado"></p>
-        <p id="pag3-resumen" aria-live="polite"></p>
-        <ol id="pag3-puntos"></ol>
-
-        <form id="pag3-anadir">
-          <label for="pag3-nuevo">Nuevo punto (%)</label>
-          <div class="fila-anadir">
-            <input id="pag3-nuevo" type="number"
-                   min="0" max="100" step="1" value="60" required>
-            <button type="submit">Añadir punto</button>
-          </div>
-        </form>
-
-        <button id="pag3-restaurar"
-                class="boton-secundario" type="button">
-          Restaurar valores iniciales
-        </button>
-
-        <div class="copiar-configuracion">
-          <label for="pag3-copiar">
-            Copiar configuración de otra página
-          </label>
-          <select id="pag3-copiar"></select>
+        <div class="pag4__acciones">
+            <button type="button" class="pag4__btn" id="pag4-volver">← Atrás</button>
         </div>
 
-        <p id="pag3-mensaje" role="status"></p>
-      </aside>
-    </main>
+    </section>
 
-    <footer class="pie">
-      <button id="pag3-volver"
-              class="boton-volver" type="button">← Atrás</button>
-      <strong id="pag3-total"></strong>
-      <button id="pag3-generar" type="button">
-        Generar capturas
-      </button>
-    </footer>
-
-    <p class="nota-capturas">
-      La generación de imágenes todavía no está implementada
-      en este proyecto.
-    </p>
-  </div>
-</section>
-
-<!-- PÁGINA 4: resultados -->
-<section class="pagina pag4" id="pag4" hidden>
-
-    <header class="pag4__cabecera">
-        <div>
-            <h2>Resultados</h2>
-            <p id="pag4-resumen">0 capturas · 0 páginas</p>
-        </div>
-        <div class="pag4__herramientas">
-            <input type="search" id="pag4-filtro" placeholder="Filtrar por URL...">
-            <button type="button" class="pag4__btn" id="pag4-zip">Descargar todo (ZIP)</button>
-        <button type="button" class="pag4__btn pag4__btn--oscuro" id="pag4-pdf">Exportar PDF</button>
-        </div>
-    </header>
-
-    <div id="pag4-lista">
-    <!-- Las tarjetas se crean con JavaScript -->
-    </div>
-
-    <div class="pag4__acciones">
-        <button type="button" class="pag4__btn" id="pag4-volver">← Atrás</button>
-    </div>
-
-</section>
-
-<script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
+
 </html>
