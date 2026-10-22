@@ -1,3 +1,7 @@
+//Este archivo importa las herramientas que usa el servidor 
+//Express recibe peticiones y Playwright abre paginas web con Chromium  
+//path y fs gestionan rutas y archivos      
+
 const express = require("express"); // require dice: tráeme esta librería. coge la librería Express de node_modules, y la guarda dentro de la constante express
 const path = require("path"); //path, viene incluido en Node, así que no hubo que instalarlo. Sirve para construir rutas de carpetas que funcionen en cualquier sistema.
 
@@ -9,8 +13,8 @@ const { chromium } = require("playwright"); // NUEVO
 const app = express(); // Crea el servidor. A partir de aquí, app es tu servidor
 
 app.use(express.json()); //permite que el servidor entienda los datos que le envía el navegador en formato JSON.
+//---------------------------Buscador url-----------------------------------------------------
 
-//Ruta de prueba
 //Metodo "POST" para recibir datos del navegador. La ruta es /api/crawl. Cuando el navegador haga un POST a esa ruta, se ejecuta la función que recibe req y res.
 
 app.post("/api/crawl", async (req, res) => {
@@ -26,7 +30,9 @@ app.post("/api/crawl", async (req, res) => {
     }
 
     urlTexto = urlTexto.trim(); //Elimina espacios al principio y al final
+
     //Comprobación de que la URL comience con http o https
+    //en caso contrario usa https por defecto
     if (
         /^[a-z][a-z\d+.-]*:\/\//i.test(urlTexto) &&
         !/^https?:\/\//i.test(urlTexto)
@@ -48,7 +54,8 @@ app.post("/api/crawl", async (req, res) => {
             error: "URL inválida"
         });
     }
-    
+
+    //Lee las opciones del rastreo (profundidad, limite de paginas, dominio y robots.txt)
 
     const opciones = req.body ?? {}; //Si req.body es undefined, se le asigna un objeto vacío. Esto evita errores si el navegador no envía ningún dato.
 
@@ -75,6 +82,9 @@ app.post("/api/crawl", async (req, res) => {
         });
     }
 
+    //Falta añadir la logica para el chekbox de robots.txt /PENDIENTE/
+
+    //Valida el dominio adicional y prepara la lista de hosts que el rastreador puede seguir
 
     const hostPermitido = allowedDomains.trim();
 
@@ -101,8 +111,16 @@ app.post("/api/crawl", async (req, res) => {
         }
     }
 
+    //Conjunto para el host inicial
+    const hostPermitidos = new Set([urlPrueba.hostname.toLowerCase()]);
+
+    //si se añadio algún dominio lo añadimos los dominios permitidos si los hubiera
+    if (hostPermitido !== "") {
+        hostPermitidos.add(hostPermitido.toLowerCase());
+    }
+
     //Si todo está bien, devuelve un JSON con la URL y un estado "ok"
-   let navegador;
+    let navegador;
     try {
 
         navegador = await chromium.launch({ headless: true }); //Lanza el navegador Chromium 
@@ -111,37 +129,164 @@ app.post("/api/crawl", async (req, res) => {
         //En modo headless el navegador no se ve
         const page = await navegador.newPage(); //Abre una nueva pestaña
 
-        //Visita la url enviada
-        const respuesta = await page.goto(urlPrueba.href, 
+        //Barrera que inspecciona las solicitudes antes de enviarlas
+        // Revisa las solicitudes de navegación principal y permite solo HTTP o HTTPS.
+        // Las solicitudes de recursos de la página, como imágenes y estilos, continúan.
+        await page.route("**/*", async route => {
 
-            //Espera a que la paguina cargue, despues del tiempo estipulado lanza un error
-            { waitUntil: "domcontentloaded", timeout: 12000 }
-        );
+            //Comprueba que splicitud se va a hacer
+            const solicitud = route.request();
 
-        const titulo = await page.title(); //Obtiene el título de la página
+            //Deja pasar solicitudes que no sean navegación principal
+            if (!solicitud.isNavigationRequest() ||
+                solicitud.frame() !== page.mainFrame()
+            ) {
+                await route.continue();
+                return;
+            }
 
-        return res.json({
-            pages: [
-                {
-                    title: titulo || "Sin título",
-                    url: page.url(),
-                    depth: 0,
+            //Convierte la dirección en una url
+            let destino;
+
+            try {   //Convierte la url a objeto
+                destino = new URL(solicitud.url());
+            } catch {    //Si no es posiblebloquea la solicitud
+                await route.abort();
+                return;
+            }
+
+            //Coprueba protocolo y dominio
+            const protocolo = destino.protocol === "http:" || destino.protocol === "https:";
+
+            //Si el protocolo  no esta permitido bloquea la página
+            if (!protocolo) {
+
+                await route.abort();
+                return;
+            }
+
+            await route.continue();
+        })
+        
+        const paginas = []; //Guarda las páginas que el servidor ya ha visitado
+        const cola = [];    //Guarda las páginas pendientes de visitar
+
+        const urlPrincipal = new URL(urlPrueba.href);
+        urlPrincipal.hash = "";
+
+        const urlPrincipalNormalizada = urlPrincipal.href;
+
+        cola.push({
+            url: urlPrincipalNormalizada,
+            depth: 0
+        });
+
+        const urlVistas = new Set([urlPrincipalNormalizada]);
+
+
+        //Visita las páginas pendientes hasta que se acaban o se llega al limite configurado
+        while (cola.length > 0 && paginas.length < maxUrls) {
+            const paginaActual = cola.shift();
+
+            try {
+                const respuesta = await page.goto(paginaActual.url, {
+                    waitUntil: "domcontentloaded",
+                    timeout: 30000
+                });
+
+                const titulo = await page.title();
+                const urlFinal = page.url();
+
+                paginas.push({
+                    title: titulo || "Sin titulo",
+                    url: urlFinal,
+                    depth: paginaActual.depth,
                     status: respuesta && respuesta.ok() ? "ok" : "error"
-                }]});
+                });
+
+                const urlFinalNormalizada = new URL(urlFinal);
+                urlFinalNormalizada.hash = "";
+                urlVistas.add(urlFinalNormalizada.href);
+
+                //Buscamos paginas hasta llegar a la profundidad elegida
+                if (paginaActual.depth >= maxDepth) {
+                    continue;
+                }
+
+                const enlacesEncontrados = await page.locator("a[href]").evaluateAll(enlaces =>
+                    enlaces.map(enlace => ({
+                        texto: enlace.textContent.trim(),
+                        url: enlace.href
+                    }))
+                );
+
+                //Revisa los enlaces y descarta los no validos como las url duplicadas
+                for (const enlace of enlacesEncontrados) {
+                    if (paginas.length + cola.length >= maxUrls) {
+                        break;
+                    }
+
+                    let urlEnlace;
+
+
+                    try {
+                        urlEnlace = new URL(enlace.url);
+                    } catch {
+                        continue;
+                    }
+
+                    if (
+                        (urlEnlace.protocol !== "http:" && urlEnlace.protocol !== "https:")
+                        || !hostPermitidos.has(urlEnlace.hostname.toLowerCase())
+                    ) {
+                        continue;
+                    }
+
+                    urlEnlace.hash = "";
+                    const urlNormalizada = urlEnlace.href;
+
+                    //Marca las direcciones vistas o en la cola
+                    if (urlVistas.has(urlNormalizada)) { //Si el enlace esta repetido pasa al siguiente
+                        continue;
+                    }
+
+                    urlVistas.add(urlNormalizada); //Guarda la url en urlVistas antes de ver la pagina
+                    cola.push({     //La dirección se añade al final de la cola para visitarla
+                        url: urlNormalizada,
+                        depth: paginaActual.depth + 1 //La profundidad del enlace es la de la página actual +1
+                    });
+                }
             } catch (error) {
+                console.error("Error al visitar la página:", paginaActual.url, error);
+                paginas.push({
+                    title: "Sin titulo",
+                    url: paginaActual.url,
+                    depth: paginaActual.depth,
+                    status: "error"
+                }
+                );
+            }
+        }
+        return res.json({
+            pages: paginas
+        });
+
+    } catch (error) {
         console.error("Error al procesar la URL:", error);
+
         return res.status(500).json({
             error: "Error interno del servidor al procesar la URL."
         });
 
-    } finally {
+    } finally { //Siempre al terminar cerramos Chromium
         if (navegador) {
 
             await navegador.close(); //Cierra el navegador
         }
     }
 
-    });
+});
+//----------------------------------Capturas------------------------------------------------------------------------
 
 app.use(express.static(path.join(__dirname, "public"))); //leído de dentro hacia fuera:
 // 1. __dirname es la carpeta donde está server.js (WebShot).
@@ -168,7 +313,7 @@ app.get("/api/prueba", async (req, res) => {
     res.send('<img src="/capturas/prueba.png" style="max-width:100%">');
 });
 
-// línea 27: Crea una ruta: “cuando alguien visite localhost:3000/api/prueba, ejecuta esto”.
+// línea 307: Crea una ruta: “cuando alguien visite localhost:3000/api/prueba, ejecuta esto”. //CAMBIO EN LA LINEA
 //req (request) es la petición que llega del navegador.
 //res (response) es la respuesta que le devolvemos.
 //async y await
