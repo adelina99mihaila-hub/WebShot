@@ -34,7 +34,11 @@
                 <input type="text" id="url-input" name="url" placeholder="Ingresa la URL de la web" required>
                 <button type="submit">Analizar</button>
             </form>
-
+            <!--Loader para la espera-->
+            <div id="estadoCarga" role="status" aria-live="polite" hidden>
+                <span class="loader" aria-hidden="true"></span>
+                <span>Analizando...</span>
+            </div>
 
             <details class="advanced-toggle-wrapper">
                 <summary class="advanced-toggle">
