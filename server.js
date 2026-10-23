@@ -1,18 +1,82 @@
-//Este archivo importa las herramientas que usa el servidor 
-//Express recibe peticiones y Playwright abre paginas web con Chromium  
-//path y fs gestionan rutas y archivos      
-
 const express = require("express"); // require dice: tráeme esta librería. coge la librería Express de node_modules, y la guarda dentro de la constante express
-const path = require("path"); //path, viene incluido en Node, así que no hubo que instalarlo. Sirve para construir rutas de carpetas que funcionen en cualquier sistema.
-
-const fs = require("fs"); // NUEVO 
-// fs (file system, sistema de archivos) viene incluido en Node. Sirve para crear carpetas y leer o escribir archivos.
-
+const path = require("path"); // path viene incluido en Node. Sirve para construir rutas de carpetas que funcionen en cualquier sistema.
+const fs = require("fs"); // fs (file system) viene incluido en Node. Sirve para crear carpetas y trabajar con archivos.
 const { chromium } = require("playwright"); // NUEVO
 //Playwright trae varios navegadores, y las llaves { } significan “de todo lo que trae, dame solo chromium” (el Chrome que descargamos al principio desde la terminal con el comando npx playwright install chromium).
+const { hacerCaptura, VIEWPORTS } = require("./capturas"); //NUEVO Conecta este archivo con capturas.js (importa la función y los tamaños válidos)
+
 const app = express(); // Crea el servidor. A partir de aquí, app es tu servidor
 
-app.use(express.json()); //permite que el servidor entienda los datos que le envía el navegador en formato JSON.
+app.use(express.json()); // Permite que el servidor entienda datos JSON enviados desde el navegador
+
+app.use(express.static(path.join(__dirname, "public"))); // NUEVO Sirve archivos estáticos de la carpeta public (html, css, js del front)
+
+// Carpeta donde se guardarán las capturas NUEVO
+const CARPETA_CAPTURAS = path.join(__dirname, "capturas");
+fs.mkdirSync(CARPETA_CAPTURAS, { recursive: true }); // Crea la carpeta si no existe
+app.use("/capturas", express.static(CARPETA_CAPTURAS)); // Hace pública la carpeta capturas en la ruta /capturas
+
+// Ruta principal: hace una captura de pantalla con el tamaño indicado
+// Espera body JSON: { url: "...", tamano: "desktop" | "tablet" | "movil" }
+app.post("/api/captura", async (req, res) => {
+    let { url, tamano } = req.body ?? {};
+
+    // Validación básica de URL
+    if (typeof url !== "string" || url.trim() === "") {
+        return res.status(400).json({ error: "URL inválida" });
+    }
+
+    url = url.trim(); // Elimina espacios al principio y final
+
+    // Si trae protocolo distinto de http/https (ej: ftp://), lo bloqueamos
+    if (/^[a-z][a-z\d+.-]*:\/\//i.test(url) && !/^https?:\/\//i.test(url)) {
+        return res.status(400).json({
+            error: "Solo se permiten URLs con http o https"
+        });
+    }
+
+    // Si no trae protocolo, añadimos https://
+    if (!/^https?:\/\//i.test(url)) {
+        url = "https://" + url;
+    }
+
+    // Verifica que la URL final sea válida
+    try {
+        new URL(url);
+    } catch (error) {
+        return res.status(400).json({ error: "URL inválida" });
+    }
+
+    // Valida tamaño contra los tamaños exportados en capturas.js 
+    if (!VIEWPORTS[tamano]) {
+        return res.status(400).json({
+            error: `Tamaño no válido. Usa: ${Object.keys(VIEWPORTS).join(", ")}`
+        });
+    }
+
+    // Nombre único para no sobrescribir imágenes anteriores
+    const nombreArchivo = `captura-${Date.now()}-${tamano}.png`;
+    const rutaArchivo = path.join(CARPETA_CAPTURAS, nombreArchivo);
+
+    try {
+        // Llama a la función del otro archivo (capturas.js)
+        await hacerCaptura(url, tamano, rutaArchivo);
+
+        // Devuelve la ruta pública de la imagen para mostrarla en el front
+        return res.json({
+            ok: true,
+            imagen: `/capturas/${nombreArchivo}`,
+            tamano,
+            url
+        });
+    } catch (error) {
+        console.error("Error al hacer la captura:", error);
+        return res.status(500).json({
+            error: "No se pudo hacer la captura."
+        });
+    }
+});
+
 //---------------------------Buscador url-----------------------------------------------------
 
 //Metodo "POST" para recibir datos del navegador. La ruta es /api/crawl. Cuando el navegador haga un POST a esa ruta, se ejecuta la función que recibe req y res.
@@ -286,53 +350,8 @@ app.post("/api/crawl", async (req, res) => {
     }
 
 });
-//----------------------------------Capturas------------------------------------------------------------------------
-
-app.use(express.static(path.join(__dirname, "public"))); //leído de dentro hacia fuera:
-// 1. __dirname es la carpeta donde está server.js (WebShot).
-// 2. path.join(__dirname, "public") da WebShot\public.
-// 3.express.static(...) significa “entrega los archivos de esa carpeta cuando el navegador los pida”.
-// 4.app.use(...) le dice al servidor que aplique esa regla.
-// Cuando el navegador pida styles.css, el servidor lo busca en public y lo envía. Si alguien pide server.js, no lo encuentra, y por eso queda protegido.
-
-// NUEVO: carpeta donde se guardarán las capturas
-const CARPETA_CAPTURAS = path.join(__dirname, "capturas");
-fs.mkdirSync(CARPETA_CAPTURAS, { recursive: true });
-app.use("/capturas", express.static(CARPETA_CAPTURAS));
-//  la línea 19: Guarda en una variable la ruta WebShot\capturas. Está en mayúsculas por convención, para indicar que es un valor fijo que no va a cambiar.
-// la línea 20: mkdir significa “make directory”, crear carpeta. { recursive: true } evita un error si la carpeta ya existe.
-// la línea 21: Es igual que lo de public, pero para las capturas: cuando el navegador pida /capturas/prueba.png, el servidor la busca en esa carpeta.
-
-// NUEVO: ruta de prueba que hace una captura
-app.get("/api/prueba", async (req, res) => {
-    const navegador = await chromium.launch();
-    const pagina = await navegador.newPage();
-    await pagina.goto("https://example.com");
-    await pagina.screenshot({ path: path.join(CARPETA_CAPTURAS, "prueba.png") });
-    await navegador.close();
-    res.send('<img src="/capturas/prueba.png" style="max-width:100%">');
-});
-
-// línea 307: Crea una ruta: “cuando alguien visite localhost:3000/api/prueba, ejecuta esto”. //CAMBIO EN LA LINEA
-//req (request) es la petición que llega del navegador.
-//res (response) es la respuesta que le devolvemos.
-//async y await
-//Abrir un navegador o cargar una web tarda. await significa “espera a que esto termine antes de pasar a la siguiente línea”. Para poder usar await, la función tiene que llevar async delante.
-
-
-// Lo que hace Playwright, paso a paso:
-
-// chromium.launch() abre el Chrome invisible.
-// navegador.newPage() abre una pestaña nueva.
-// pagina.goto("https://example.com") carga esa web, que existe precisamente para hacer pruebas.
-// pagina.screenshot({ path: ... }) hace la foto y la guarda como prueba.png en la carpeta capturas.
-// navegador.close() cierra Chrome para no dejarlo abierto gastando memoria.
-// res.send(...) responde al navegador con una etiqueta <img> que muestra la captura.
-
-
-
 
 app.listen(3000, () => {
     console.log("WebShot funcionando en http://localhost:3000");
-});//Enciende el servidor y lo pone a escuchar en el puerto 3000. Lo de dentro de { } se ejecuta cuando ya está encendido y escribe un mensaje en la terminal.
-// Importante: app.listen tiene que ser siempre lo último. Primero se configura todo y al final se enciende.
+}); // Enciende el servidor y lo deja escuchando en el puerto 3000
+// Importante: app.listen suele ir al final, cuando ya configuraste todo.

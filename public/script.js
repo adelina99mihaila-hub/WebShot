@@ -731,3 +731,27 @@ botonAtras.addEventListener("click", function () {
 
 //Al cargar la página, se muestran los resultados si ya hay una configuración guardada
 mostrarResultados();
+
+// Pide una captura al servidor y devuelve la ruta de la imagen
+//En concreto, esa función pedirCaptura(url, tamano) hace esto:
+//Envía al backend (/api/captura) la URL y el tamaño.
+//El backend ejecuta hacerCaptura(...) con Playwright.
+//Guarda el .png en la carpeta capturas.
+//Devuelve una ruta como "/capturas/captura-123.png".
+//La función te la devuelve para que tú luego la pongas en un <img> o en tu lista de resultados.
+
+async function pedirCaptura(url, tamano) {
+    const respuesta = await fetch("/api/captura", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: url, tamano: tamano })
+    });
+
+    const datos = await respuesta.json();
+
+    if (!respuesta.ok) {
+        throw new Error(datos.error || "Error al hacer la captura");
+    }
+
+    return datos.imagen; // por ejemplo "/capturas/captura-123-desktop.png"
+}
