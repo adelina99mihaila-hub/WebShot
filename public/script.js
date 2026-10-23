@@ -33,6 +33,8 @@ allowedDomains.addEventListener("input", function () {
 // Checkbox para respetar robots.txt
 const respetarRobots = document.getElementById("respect-robots");
 
+//Activación del loader al analizar la página
+const estadoBusqueda = document.getElementById("estadoCarga");
 
 //NAVEGACIÓN ENTRE PÁGINAS
 //Función para mostrar la página correspondiente y ocultar las demás
@@ -67,6 +69,7 @@ const formulario = document.getElementById("search-box");
 const inputUrl = document.getElementById("url-input");
 const paginaInicio = document.getElementById("inicio");
 
+
 //Elementos de la tabla de resultados
 const paginaResultados = document.getElementById("pagina-1");
 const tabla = document.getElementById("results-body");
@@ -94,6 +97,9 @@ formulario.addEventListener("submit", async function (evento) {
 
     //Si el texto está vacío, no hacemos nada
     if (texto === "") return;
+
+    //Visibiliza el loader
+    estadoBusqueda.hidden = false;
 
     try {
         //Enviamos la URL al servidor con una petición POST a la ruta /api/crawl
@@ -174,6 +180,8 @@ formulario.addEventListener("submit", async function (evento) {
 
         alert("Error al analizar la URL: " + e.message);
 
+    } finally { //Vuelve a ocultar el loader
+        estadoBusqueda.hidden = true;
     }
 
 });
