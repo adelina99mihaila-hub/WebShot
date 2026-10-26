@@ -1,9 +1,8 @@
 const { chromium } = require("playwright");
-
 const path = require("path");
 const fs = require("fs");
 
-// NUEVO Tamaños de ventana para cada viewport
+// Tamaños de ventana para cada viewport
 const VIEWPORTS = {
     desktop: { width: 1440, height: 900 },
     tablet: { width: 768, height: 1024 },
@@ -38,7 +37,7 @@ async function hacerCaptura(url, tamano, rutaArchivo) {
 //try { } finally { } sin catch
 // Igual que antes, pero sin catch. Si algo falla (la web no carga, por ejemplo), el error sube hacia quien llamó a la función, es decir, hacia Pablo. El finally garantiza que Chrome se cierra siempre, aunque haya error.
 
-//NUEVO!! de aquí para abajo
+//NUEVO
 // Hace scroll hasta un porcentaje de la página (0 = arriba, 100 = abajo del todo)
 async function irAPunto(pagina, porcentaje) {
     await pagina.evaluate((p) => {
@@ -49,9 +48,10 @@ async function irAPunto(pagina, porcentaje) {
 }
 // pagina.evaluate(...) ejecuta código dentro de la web, no en Node. Por eso ahí existen document y window, y el porcentaje se le pasa como segundo argumento.
 // maximo es el alto total de la página menos el alto de la ventana: lo máximo que se puede bajar.
-// waitForTimeout(500) espera medio segundo para que carguen las imágenes que aparecen al hacer scroll
+// waitForTimeout(500) espera medio segundo para que carguen las imágenes que aparecen al hacer scroll.
 
-// Lo siguiente hace TODAS las capturas de una URL con un tamaño:
+//NUEVO!! de aquí para abajo
+// Hace TODAS las capturas de una URL con un tamaño:
 // - tipo "viewport": una captura por cada punto de scroll
 // - tipo "completa": una sola captura larga de toda la página
 async function generarCapturas({ url, tamano, tipo = "viewport", puntos = [0], carpeta, nombreBase }) {
@@ -89,6 +89,8 @@ async function generarCapturas({ url, tamano, tipo = "viewport", puntos = [0], c
 
     return resultados;
 }
+
+
 
 module.exports = { hacerCaptura, generarCapturas, VIEWPORTS };
 //Es la línea clave para trabajar en equipo. Significa: “esto es lo que este archivo ofrece a otros archivos”. Sin ella, Pablo no podría usar la función desde server.js. También exporta VIEWPORTS por si Pablo necesita comprobar qué tamaños existen.
