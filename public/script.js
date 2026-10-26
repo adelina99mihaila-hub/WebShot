@@ -147,6 +147,9 @@ formulario.addEventListener("submit", async function (evento) {
             //Si la página no tiene un estado, se le asigna "error" por defecto
             const estado = String(pagina.status || "error");
 
+            //Nombre para la Ruta   /NUEVO
+            const ruta = new URL(pagina.url).pathname;
+
             fila.dataset.estado = estado.toLowerCase();
             fila.dataset.url = pagina.url;
 
@@ -158,7 +161,7 @@ formulario.addEventListener("submit", async function (evento) {
             fila.appendChild(celdaSeleccion);
 
             //Añade las celdas con los datos de la página a la fila
-            [pagina.title, pagina.url, pagina.depth, estado].forEach(function (valor) {
+            [pagina.title, ruta, pagina.depth, estado].forEach(function (valor) {
                 const celda = document.createElement("td");
                 celda.textContent = valor ?? " ";
                 fila.appendChild(celda);
