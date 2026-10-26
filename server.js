@@ -1,15 +1,15 @@
 const express = require("express"); // require dice: tráeme esta librería. coge la librería Express de node_modules, y la guarda dentro de la constante express
 const path = require("path"); // path viene incluido en Node. Sirve para construir rutas de carpetas que funcionen en cualquier sistema.
 const fs = require("fs"); // fs (file system) viene incluido en Node. Sirve para crear carpetas y trabajar con archivos.
-const { chromium } = require("playwright"); // NUEVO
+const { chromium } = require("playwright");
 //Playwright trae varios navegadores, y las llaves { } significan “de todo lo que trae, dame solo chromium” (el Chrome que descargamos al principio desde la terminal con el comando npx playwright install chromium).
-const { hacerCaptura, VIEWPORTS } = require("./capturas"); //NUEVO Conecta este archivo con capturas.js (importa la función y los tamaños válidos)
-
+const { hacerCaptura, VIEWPORTS } = require("./capturas"); //Conecta este archivo con capturas.js (importa la función y los tamaños válidos)
+const robotsParser = require("robots-parser"); //
 const app = express(); // Crea el servidor. A partir de aquí, app es tu servidor
 
 app.use(express.json()); // Permite que el servidor entienda datos JSON enviados desde el navegador
 
-app.use(express.static(path.join(__dirname, "public"))); // NUEVO Sirve archivos estáticos de la carpeta public (html, css, js del front)
+app.use(express.static(path.join(__dirname, "public"))); //Sirve archivos estáticos de la carpeta public (html, css, js del front)
 
 // Carpeta donde se guardarán las capturas NUEVO
 const CARPETA_CAPTURAS = path.join(__dirname, "capturas");
@@ -146,7 +146,59 @@ app.post("/api/crawl", async (req, res) => {
         });
     }
 
-    //Falta añadir la logica para el chekbox de robots.txt /PENDIENTE/
+    //Logica para el chekbox de robots.txt 
+    if (typeof respectRobots !== "boolean") {
+        return res.status(400).json({
+            error: "La opción de respetar robots.txt debe ser true o false."
+        });
+    }
+
+    //Cache de robots.txt se consulta una vez por origen
+    const cacheRobots = new Map();
+
+    async function puedeRastrear(url) {
+
+        //Si la opción se desactiva, no se consultan ni aplican reglas
+        if (!respectRobots) {
+            return true;
+        }
+
+        const direccion = new URL(url);
+        const origen = direccion.origin;
+
+        //Si aun no tenemos las reglas las consultamos
+        if (!cacheRobots.has(origen)) {
+            const urlRobots = `${origen}/robots.txt`;
+            try {
+                //Se establece un limite de tiempo parala busqueda
+                const respuesta = await fetch(urlRobots, {
+                    signal: AbortSignal.timeout(5000)
+                });
+
+                if (respuesta.status === 404) { //Error 404, no hay archivo por lo que se puede rastrear
+                    cacheRobots.set(origen, robotsParser(urlRobots, ""));
+
+                } else if (!respuesta.ok) { //Para otros errores dejamos de rastrear el origen
+                    console.warn(`No se pudo leer ${urlRobots}: HTTP ${respuesta.status}`);
+                    cacheRobots.set(origen, null);
+
+                } else { //Si todo es correcto, analizamos y guardamos las reglas.
+                    const contenido = await respuesta.text();
+                    cacheRobots.set(origen, robotsParser(urlRobots, contenido));
+
+                }
+            } catch (error) { //Si falla laconsulta no rastreamos
+
+                console.error(`Error al consultar ${urlRobots}: `, error);
+                cacheRobots.set(origen, null);
+            }
+        }
+
+        //Continua solo en caso de que el parser confirme que la URL esta permitida.
+        const reglas = cacheRobots.get(origen);
+
+        return reglas !== null && reglas.isAllowed(url, "*") === true;
+    }
 
     //Valida el dominio adicional y prepara la lista de hosts que el rastreador puede seguir
 
@@ -231,7 +283,7 @@ app.post("/api/crawl", async (req, res) => {
 
             await route.continue();
         })
-        
+
         const paginas = []; //Guarda las páginas que el servidor ya ha visitado
         const cola = [];    //Guarda las páginas pendientes de visitar
 
@@ -250,7 +302,13 @@ app.post("/api/crawl", async (req, res) => {
 
         //Visita las páginas pendientes hasta que se acaban o se llega al limite configurado
         while (cola.length > 0 && paginas.length < maxUrls) {
+
             const paginaActual = cola.shift();
+
+            //Si robot.txt prohibe la pagina la omitimos
+            if (!(await puedeRastrear(paginaActual.url))) {
+                continue;
+            }
 
             try {
                 const respuesta = await page.goto(paginaActual.url, {
@@ -311,6 +369,11 @@ app.post("/api/crawl", async (req, res) => {
 
                     //Marca las direcciones vistas o en la cola
                     if (urlVistas.has(urlNormalizada)) { //Si el enlace esta repetido pasa al siguiente
+                        continue;
+                    }
+
+                    //No añade a la cola los enlaces prohibidos por robots.txt.
+                    if (!(await puedeRastrear(urlNormalizada))) {
                         continue;
                     }
 
