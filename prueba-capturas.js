@@ -8,7 +8,7 @@ async function probar() {
         tipo: "viewport",
         puntos: [0, 50, 100],
         carpeta: "capturas",
-        nombreBase: "wikipedia",
+        nombreBase: "cofre.io",
     });
     console.log("Prueba 1 - capturas de scroll:", scroll);
 
@@ -18,7 +18,7 @@ async function probar() {
         tamano: "desktop",
         tipo: "completa",
         carpeta: "capturas",
-        nombreBase: "wikipedia",
+        nombreBase: "cofre.io",
     });
     console.log("Prueba 2 - captura completa:", completa);
 
