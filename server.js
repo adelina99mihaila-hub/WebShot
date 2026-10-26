@@ -168,6 +168,7 @@ app.post("/api/crawl", async (req, res) => {
 
         //Si aun no tenemos las reglas las consultamos
         if (!cacheRobots.has(origen)) {
+
             const urlRobots = `${origen}/robots.txt`;
             try {
                 //Se establece un limite de tiempo parala busqueda
@@ -253,6 +254,11 @@ app.post("/api/crawl", async (req, res) => {
             //Comprueba que splicitud se va a hacer
             const solicitud = route.request();
 
+            //Eliminamos fuentes y archivos multimedia para acelerar el buscador    /NUEVO
+             if (["image", "media", "font"].includes(solicitud.resourceType())) {
+                await route.abort();
+                return;
+            }
             //Deja pasar solicitudes que no sean navegación principal
             if (!solicitud.isNavigationRequest() ||
                 solicitud.frame() !== page.mainFrame()
