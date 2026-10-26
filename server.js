@@ -7,6 +7,9 @@ const fs = require("fs"); // NUEVO
 const { chromium } = require("playwright"); // NUEVO
 //Playwright trae varios navegadores, y las llaves { } significan “de todo lo que trae, dame solo chromium” (el Chrome que descargamos al principio desde la terminal con el comando npx playwright install chromium).
 
+const archiver = require("archiver"); // NUEVO
+// archiver sirve para crear ZIPs en el servidor y enviarlos como descarga.
+
 const { hacerCaptura, VIEWPORTS } = require("./capturas"); // NUEVO
 // Conectamos con el otro archivo (capturas.js) para reutilizar la función de capturar pantalla y la lista de tamaños válidos.
 
@@ -220,6 +223,73 @@ app.post("/api/captura", async (req, res) => {
         return res.status(500).json({
             error: "No se pudo hacer la captura."
         });
+    }
+});
+
+// NUEVO: helper para validar los archivos de captura que llegan desde el front
+function nombresValidos(lista) {
+    if (!Array.isArray(lista) || lista.length === 0 || lista.length > 200) return [];
+    return lista
+        .filter(function (a) { return typeof a === "string"; })
+        .map(function (a) { return path.basename(a); }) // evita rutas peligrosas tipo ../../
+        .filter(function (n) {
+            return /^captura-[\w-]+\.png$/.test(n) && fs.existsSync(path.join(CARPETA_CAPTURAS, n));
+        });
+}
+
+// NUEVO: genera y descarga ZIP con capturas seleccionadas
+app.post("/api/zip", (req, res) => {
+    const nombres = nombresValidos(req.body?.archivos);
+    if (nombres.length === 0) {
+        return res.status(400).json({ error: "No hay capturas válidas para comprimir." });
+    }
+
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader("Content-Disposition", 'attachment; filename="capturas.zip"');
+
+    const zip = archiver("zip");
+
+    zip.on("error", function (error) {
+        console.error("Error al crear el ZIP:", error);
+        res.end();
+    });
+
+    zip.pipe(res);
+
+    nombres.forEach(function (n) {
+        zip.file(path.join(CARPETA_CAPTURAS, n), { name: n });
+    });
+
+    zip.finalize();
+});
+
+// NUEVO: genera y descarga PDF con capturas seleccionadas (una imagen por página)
+app.post("/api/pdf", async (req, res) => {
+    const nombres = nombresValidos(req.body?.archivos);
+    if (nombres.length === 0) {
+        return res.status(400).json({ error: "No hay capturas válidas para exportar." });
+    }
+
+    const imagenes = nombres.map(function (n) {
+        const base64 = fs.readFileSync(path.join(CARPETA_CAPTURAS, n)).toString("base64");
+        return `<img src="data:image/png;base64,${base64}" style="width:100%;display:block;page-break-after:always;">`;
+    }).join("");
+
+    let navegador;
+    try {
+        navegador = await chromium.launch();
+        const pagina = await navegador.newPage();
+        await pagina.setContent(`<html><body style="margin:0">${imagenes}</body></html>`);
+        const pdf = await pagina.pdf({ format: "A4", printBackground: true });
+
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", 'attachment; filename="capturas.pdf"');
+        return res.send(pdf);
+    } catch (error) {
+        console.error("Error al crear el PDF:", error);
+        return res.status(500).json({ error: "No se pudo crear el PDF." });
+    } finally {
+        if (navegador) await navegador.close();
     }
 });
 
