@@ -37,7 +37,7 @@ async function hacerCaptura(url, tamano, rutaArchivo) {
 //try { } finally { } sin catch
 // Igual que antes, pero sin catch. Si algo falla (la web no carga, por ejemplo), el error sube hacia quien llamó a la función, es decir, hacia Pablo. El finally garantiza que Chrome se cierra siempre, aunque haya error.
 
-//NUEVO
+
 // Hace scroll hasta un porcentaje de la página (0 = arriba, 100 = abajo del todo)
 async function irAPunto(pagina, porcentaje) {
     await pagina.evaluate((p) => {
@@ -50,7 +50,32 @@ async function irAPunto(pagina, porcentaje) {
 // maximo es el alto total de la página menos el alto de la ventana: lo máximo que se puede bajar.
 // waitForTimeout(500) espera medio segundo para que carguen las imágenes que aparecen al hacer scroll.
 
-//NUEVO!! de aquí para abajo
+//NUEVO
+// Hace las fotos de una URL en una pestaña que YA está abierta.
+// No abre ni cierra Chrome: eso lo hace quien la llama.
+async function fotografiar(pagina, { url, tamano, tipo, puntos, carpeta, nombreBase}) {
+    
+}
+await pagina.goto(url, { waitUntil: "load", timeout: 30000 });
+const resultados = [];
+//pagina.goto(url, ...): goto significa “ir a”. Le dice a la pestaña que cargue esa dirección, como escribirla en la barra del navegador.
+//{ waitUntil: "load", ... }: “espera hasta que la página haya cargado del todo, imágenes incluidas”, para que la foto no salga a medias.
+//timeout: 30000: tiempo máximo en milisegundos (30 000 ms = 30 segundos). Si tarda más, se rinde y lanza un error.
+//await delante: “no pases a la siguiente línea hasta que la web haya cargado”.
+
+if (tipo === "completa") {
+    const archivo = ` ${nombreBase}_${tamano}_completa.png`; // la const archivo = ;  construye el nombre del archivo. Con comillas invertidas puedes meter variables dentro del texto con ${...}. Si nombreBase es cofre.io y tamano es desktop, el resultado es cofre.io_desktop_completa.png. usamos _ para separar las partes y sea más fácil de leer
+    await pagina.screenshot({ path: path.join(carpeta, archivo),fullPage: true}); //Hace la foto. Le pasamos un objeto con opciones: 1.path: dónde guardar la imagen. path.join(carpeta, archivo) une la carpeta y el nombre en una ruta correcta: capturas\cofre.io_desktop_completa.png. Usamos path.join en vez de juntar texto con + porque pone bien la barra, sea Windows (\) u otro sistema (/). 2.fullPage: true: “página completa”. En vez de fotografiar solo lo que cabe en la ventana, hace una imagen larga de toda la web.
+    resultados.push({ tamano, etiqueta: "Completa", archivo }); //push significa “empujar”: añade un elemento al final de la lista. Añadimos un objeto que describe la foto hecha: 1.tamano es una forma corta de escribir "tamano: tamano" (cuando la propiedad y la variable se llaman igual, basta con escribirlo una vez). 2.etiqueta: "Completa" es el texto que saldrá sobre la miniatura en la página 4. y 3.archivo es el nombre del archivo, otra vez en forma corta.
+} else {
+    for (const punto of puntos) {
+        await irAPunto(pagina, punto);
+        const archivo = `${nombreBase}_${tamano}_${punto}.png`;
+        await pagina.screenshot({path: path.join(carpeta, archivo) });
+        resultados.push({ tamano, etiqueta: punto + "%", archivo });  
+    }// ME QUEDÉ POR  AQUÍ
+}
+
 // Hace TODAS las capturas de una URL con un tamaño:
 // - tipo "viewport": una captura por cada punto de scroll
 // - tipo "completa": una sola captura larga de toda la página
