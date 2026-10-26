@@ -1,17 +1,30 @@
-const { hacerCaptura } = require("./capturas");
-// require("./capturas"): el ./ significa “un archivo mío, de esta carpeta”. Sin ./, Node lo buscaría en node_modules como si fuera una librería instalada. Las llaves { hacerCaptura } cogen solo la función, igual que hacías con { chromium }.
+const { hacerCaptura, generarCapturas } = require("./capturas");
+
 async function probar() {
-    await hacerCaptura("https://www.wikipedia.org", "desktop", "capturas/prueba-desktop.png");
-    console.log("Captura desktop hecha");
-//probar(): una función que hace dos capturas seguidas, una de desktop y otra de móvil.
-    await hacerCaptura("https://www.wikipedia.org", "movil", "capturas/prueba-movil.png");
-    console.log("Captura móvil hecha");
+    // Prueba 1: puntos de scroll en móvil
+    const scroll = await generarCapturas({
+        url: " https://www.cofre.io/",
+        tamano: "movil",
+        tipo: "viewport",
+        puntos: [0, 50, 100],
+        carpeta: "capturas",
+        nombreBase: "wikipedia",
+    });
+    console.log("Prueba 1 - capturas de scroll:", scroll);
+
+    // Prueba 2: página completa en desktop
+    const completa = await generarCapturas({
+        url: " https://www.cofre.io/",
+        tamano: "desktop",
+        tipo: "completa",
+        carpeta: "capturas",
+        nombreBase: "wikipedia",
+    });
+    console.log("Prueba 2 - captura completa:", completa);
+
+    // Prueba 3: la función antigua sigue funcionando (la que usa Pablo)
+    await hacerCaptura(" https://www.cofre.io/", "tablet", "capturas/antigua-tablet.png");
+    console.log("Prueba 3 - hacerCaptura sigue funcionando");
 }
 
-probar().catch(error => console.log("Error:", error.message));
-//.catch(error => ...): si algo falla, muestra el mensaje del error en la terminal en vez de un texto rojo enorme.
-
-//Las imágenes se guardan en la carpeta capturas, que ya está en .gitignore, así que no se subirán a GitHub.
-
-//para comprobar que funciona se ejecuta en la terminal el comando: node prueba-capturas.js. 
-//se debería poder ver : Captura desktop hecha ; Captua móvil hecha. Y en la carpeta capturas deberá aparecer prueba-desktop.png y prueba-móvil.png. 
+probar().catch(error => console.log("Error:", error.message)); 
