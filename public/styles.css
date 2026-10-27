@@ -788,9 +788,7 @@ input[type="checkbox"] {
   white-space: normal;
 }
 
-#pag3 button:hover {
-  background: #204975;
-}
+
 
 #pag3 button:disabled {
   background: #65778b;
