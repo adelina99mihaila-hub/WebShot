@@ -73,7 +73,12 @@ if (tipo === "completa") {
         const archivo = `${nombreBase}_${tamano}_${punto}.png`;
         await pagina.screenshot({path: path.join(carpeta, archivo) });
         resultados.push({ tamano, etiqueta: punto + "%", archivo });  
-    }// ME QUEDÉ POR  AQUÍ
+    }// el "for" es un bucle que se lee: para cada "punto" de la lista "puntos", haz lo de dentro”.
+    // el "await irAPunto(pagina, punto);"": llama a la función de antes para bajar hasta ese porcentaje.
+    //const archivo = ...: igual que antes, pero el final del nombre es el número del punto. Por ejemplo, cofre.io_movil_50.png.
+    // await pagina.screenshot({ path: ... });: hace la foto, esta vez sin fullPage, así que fotografía solo lo que se ve en la ventana en ese momento.
+    //resultados.push({ ..., etiqueta: punto + "%", ... }): punto + "%" une el número y el símbolo, y da "50%".
+    return resultados;
 }
 
 // Hace TODAS las capturas de una URL con un tamaño:
