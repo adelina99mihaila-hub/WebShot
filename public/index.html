@@ -32,7 +32,7 @@
 
             <form class="search-box" id="search-box">
                 <input type="text" id="url-input" name="url" placeholder="Ingresa la URL de la web" required>
-                <button type="submit">Analizar</button>
+                <button type="submit" class="boton-principal">Analizar</button>
             </form>
             <!--Loader para la espera-->
             <div id="estadoCarga" role="status" aria-live="polite" hidden>
@@ -106,9 +106,9 @@
             <!-- Botones para filtrar las URLs por su estado -->
 
             <div class="filters">
-                <button type="button" class="filter-button active" data-filter="all">Todas</button>
-                <button type="button" class="filter-button" data-filter="ok">OK</button>
-                <button type="button" class="filter-button" data-filter="error">Error</button>
+                <button type="button" class="filter-button active boton-principal" data-filter="all">Todas</button>
+                <button type="button" class="filter-button boton-claro" data-filter="ok">OK</button>
+                <button type="button" class="filter-button boton-claro" data-filter="error">Error</button>
             </div>
         </div>
 
@@ -148,7 +148,7 @@
                 URLs seleccionadas
             </p>
 
-            <button type="button" id="process-button" disabled>
+            <button type="button" id="process-button" class="boton-principal" disabled>
                 Procesar URLs seleccionadas
             </button>
         </div>
@@ -177,7 +177,8 @@
                 <h3>Puntos de scroll (%)</h3>
                 <p> Posiciones verticales donde se hara cada captura.</p>
                 <div class="puntos" id="puntos">
-                    <button type="button" class="puntos__anadir" id="btn-anadir-punto">+ Añadir punto</button>
+                    <button type="button" class="puntos__anadir boton-claro" id="btn-anadir-punto">+ Añadir
+                        punto</button>
                 </div>
             </div>
 
@@ -222,14 +223,16 @@
                     </label>
                 </div>
             </div>
+            <!-- Botones de acción -->
+
+            <div class="acciones">
+                <button type="button" class="acciones__boton acciones__boton--secundario boton-claro" id="btn-volver">←
+                    Atrás</button>
+                <button type="button" class="acciones__boton boton-principal" id="btn-continuar">Continuar</button>
+            </div>
         </div>
 
-        <!-- Botones de acción -->
 
-        <div class="acciones">
-            <button type="button" class="acciones__boton acciones__boton--secundario" id="btn-volver">← Atrás</button>
-            <button type="button" class="acciones__boton" id="btn-continuar">Continuar</button>
-        </div>
     </section>
 
 
@@ -243,103 +246,105 @@
 
     <section class="pagina pag3" id="pag3" hidden>
         <div class="contenedor">
-            <header class="cabecera">
-                <img class="logo" src="logo.webshot.png" alt="WebShot">
-                <div>
-                    <h2>Configuración por página</h2>
-                    <p>Elige los puntos y los tamaños de tus capturas.</p>
-                </div>
+            <header>
+                <h2> Configuración por página</h2>
+                <p> Elige los puntos y los tamaños de tus capturas</p>
             </header>
+            <div class="pag3__tarjeta">
+                <main>
+                    <aside class="panel panel-paginas">
+                        <div class="panel-paginas__cabecera">
+                            <h2>Páginas</h2>
+                        </div>
+                        <div id="pag3-paginas"></div>
+                    </aside>
 
-            <main>
-                <aside class="panel panel-paginas">
-                    <h2>Páginas</h2>
-                    <div id="pag3-paginas"></div>
-                </aside>
+                    <section class="panel panel-central">
+                        <div class="titulo-pagina">
+                            <h2 id="pag3-nombre"></h2>
+                        </div>
 
-                <section class="panel panel-central">
-                    <div class="titulo-pagina">
-                        <span class="icono-pagina" aria-hidden="true"></span>
-                        <h2 id="pag3-nombre"></h2>
-                    </div>
+                        <fieldset>
+                            <legend>Viewports a capturar</legend>
+                            <div class="tamanos">
+                                <label>
+                                    <input type="checkbox" value="desktop" checked>
+                                    Desktop
+                                </label>
+                                <label>
+                                    <input type="checkbox" value="tablet">
+                                    Tablet
+                                </label>
+                                <label>
+                                    <input type="checkbox" value="movil">
+                                    Móvil
+                                </label>
+                            </div>
+                        </fieldset>
 
-                    <fieldset>
-                        <legend>Viewports a capturar</legend>
-                        <div class="tamanos">
-                            <label>
-                                <input type="checkbox" value="desktop" checked>
-                                Desktop
+                        <p class="instruccion">
+                            Arrastra los marcadores o haz clic para añadir un punto.
+                        </p>
+
+                        <!-- Zona de vista previa del mapa -->
+
+                        <div class="zona-vista">
+                            <div class="barra-vista">
+                                <span class="punto"></span>
+                                <span class="punto"></span>
+                                <span class="punto"></span>
+                                <span class="texto-vista">Vista previa</span>
+                            </div>
+                            <div id="pag3-mapa">
+                                <div id="pag3-marcadores"></div>
+                            </div>
+                        </div>
+                    </section>
+                    <!--Gestión de los puntos en panel derecho-->
+
+                    <aside class="panel panel-puntos">
+                        <div class="panel-puntos__cabecera">
+                            <h2>Puntos de captura</h2>
+                            <p id="pag3-estado"></p>
+                        </div>
+                        <p id="pag3-resumen" aria-live="polite"></p>
+                        <ol id="pag3-puntos"></ol>
+
+                        <form id="pag3-anadir">
+                            <label for="pag3-nuevo">Nuevo punto (%)</label>
+                            <div class="fila-anadir">
+                                <input id="pag3-nuevo" type="number" min="0" max="100" step="1" value="60" required>
+                                <button type="submit" class="boton-principal">Añadir punto</button>
+                            </div>
+                        </form>
+
+                        <button id="pag3-restaurar" class="boton-secundario boton-claro" type="button">
+                            Restaurar valores iniciales
+                        </button>
+
+                        <div class="copiar-configuracion">
+                            <label for="pag3-copiar">
+                                Copiar configuración de otra página
                             </label>
-                            <label>
-                                <input type="checkbox" value="tablet">
-                                Tablet
-                            </label>
-                            <label>
-                                <input type="checkbox" value="movil">
-                                Móvil
-                            </label>
+                            <select id="pag3-copiar"></select>
                         </div>
-                    </fieldset>
 
-                    <p class="instruccion">
-                        Arrastra los marcadores o haz clic para añadir un punto.
-                    </p>
+                        <p id="pag3-mensaje" role="status"></p>
+                    </aside>
+                </main>
 
-                    <!-- Zona de vista previa del mapa -->
+                <!--Pie de página con botones de acción-->
 
-                    <div class="zona-vista">
-                        <div class="barra-vista">
-                            <span class="punto"></span>
-                            <span class="punto"></span>
-                            <span class="punto"></span>
-                            <span class="texto-vista">Vista previa</span>
-                        </div>
-                        <div id="pag3-mapa">
-                            <div id="pag3-marcadores"></div>
-                        </div>
-                    </div>
-                </section>
-                <!--Gestión de los puntos en panel derecho-->
-
-                <aside class="panel panel-puntos">
-                    <h2>Puntos de captura</h2>
-                    <p id="pag3-estado"></p>
-                    <p id="pag3-resumen" aria-live="polite"></p>
-                    <ol id="pag3-puntos"></ol>
-
-                    <form id="pag3-anadir">
-                        <label for="pag3-nuevo">Nuevo punto (%)</label>
-                        <div class="fila-anadir">
-                            <input id="pag3-nuevo" type="number" min="0" max="100" step="1" value="60" required>
-                            <button type="submit">Añadir punto</button>
-                        </div>
-                    </form>
-
-                    <button id="pag3-restaurar" class="boton-secundario" type="button">
-                        Restaurar valores iniciales
+                <footer class="pie">
+                    <button id="pag3-volver" class="boton-volver boton-claro" type="button">← Atrás</button>
+                    <strong id="pag3-total"></strong>
+                    <button id="pag3-generar" type="button" class="boton-principal">
+                        Generar capturas
                     </button>
+                </footer>
 
-                    <div class="copiar-configuracion">
-                        <label for="pag3-copiar">
-                            Copiar configuración de otra página
-                        </label>
-                        <select id="pag3-copiar"></select>
-                    </div>
 
-                    <p id="pag3-mensaje" role="status"></p>
-                </aside>
-            </main>
-
-            <!--Pie de página con botones de acción-->
-
-            <footer class="pie">
-                <button id="pag3-volver" class="boton-volver" type="button">← Atrás</button>
-                <strong id="pag3-total"></strong>
-                <button id="pag3-generar" type="button">
-                    Generar capturas
-                </button>
-            </footer>
-
+            </div>
             <p class="nota-capturas">
                 La generación de imágenes todavía no está implementada
                 en este proyecto.
@@ -361,19 +366,20 @@
             </div>
             <div class="pag4__herramientas">
                 <input type="search" id="pag4-filtro" placeholder="Filtrar por URL...">
-                <button type="button" class="pag4__btn" id="pag4-zip">Descargar todo (ZIP)</button>
-                <button type="button" class="pag4__btn pag4__btn--oscuro" id="pag4-pdf">Exportar PDF</button>
+                <button type="button" class="pag4__btn boton-claro" id="pag4-zip">Descargar todo (ZIP)</button>
+                <button type="button" class="pag4__btn pag4__btn--oscuro boton-principal" id="pag4-pdf">Exportar
+                    PDF</button>
             </div>
         </header>
 
         <!-- JavaScript insertará aquí las tarjetas de resultados -->
-         
+
         <div id="pag4-lista">
             <!-- Las tarjetas se crean con JavaScript -->
         </div>
 
         <div class="pag4__acciones">
-            <button type="button" class="pag4__btn" id="pag4-volver">← Atrás</button>
+            <button type="button" class="pag4__btn boton-claro" id="pag4-volver">← Atrás</button>
         </div>
 
     </section>

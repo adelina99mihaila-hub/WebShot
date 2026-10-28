@@ -147,6 +147,9 @@ formulario.addEventListener("submit", async function (evento) {
             //Si la página no tiene un estado, se le asigna "error" por defecto
             const estado = String(pagina.status || "error");
 
+            //Nombre para la Ruta   /NUEVO
+            const ruta = new URL(pagina.url).pathname;
+
             fila.dataset.estado = estado.toLowerCase();
             fila.dataset.url = pagina.url;
 
@@ -158,7 +161,7 @@ formulario.addEventListener("submit", async function (evento) {
             fila.appendChild(celdaSeleccion);
 
             //Añade las celdas con los datos de la página a la fila
-            [pagina.title, pagina.url, pagina.depth, estado].forEach(function (valor) {
+            [pagina.title, ruta, pagina.depth, estado].forEach(function (valor) {
                 const celda = document.createElement("td");
                 celda.textContent = valor ?? " ";
                 fila.appendChild(celda);
@@ -206,9 +209,11 @@ searchInput.addEventListener("input", aplicarFiltros);
 filterButtons.forEach(function (boton) {
     boton.addEventListener("click", function () {
         filterButtons.forEach(function (b) {
-            b.classList.remove("active");
+            b.classList.remove("active", "boton-principal");
+            b.classList.add("boton-claro");
         });
-        boton.classList.add("active");
+        boton.classList.add("active", "boton-principal");
+        boton.classList.remove("boton-claro");
 
         activeFilter = boton.dataset.filter;
         aplicarFiltros();
@@ -385,6 +390,7 @@ casillasViewport.forEach(function (casilla) {
             };
             // Botón para eliminar el punto de scroll, solo si hay más de uno
             let quitar = document.createElement('button');
+            quitar.classList.add("boton-claro");
             quitar.textContent = 'Eliminar';
             quitar.onclick = function () {
                 if (pagina.puntos.length === 1) { mensaje.textContent = 'Conserva al menos un punto.'; return; }
@@ -397,6 +403,7 @@ casillasViewport.forEach(function (casilla) {
             linea.className = 'linea'; linea.style.top = punto + '%';
 
             let boton = document.createElement('button');
+            boton.classList.add("boton-principal");
             boton.textContent = punto + '%';
             boton.setAttribute('aria-label', 'Punto ' + punto + ' %. Usa las flechas para moverlo');
             boton.onclick = function (evento) { evento.stopPropagation(); };
@@ -455,9 +462,21 @@ casillasViewport.forEach(function (casilla) {
 
             total += cantidad(datos[nombre]);
             let boton = document.createElement('button');
-            boton.textContent = nombre + (esInicial(datos[nombre]) ? ' · Por defecto' : ' · Personalizada');
+            const ruta = new URL(nombre).pathname;
+            const textoRuta = document.createElement('span');
+            textoRuta.className = 'ruta-pagina';
+            textoRuta.textContent = ruta;
 
-            if (nombre === paginaActual) boton.setAttribute('aria-current', 'page');
+            const estadoPagina = document.createElement('span');
+            estadoPagina.className = 'estado-pagina';
+            estadoPagina.textContent = esInicial(datos[nombre]) ? 'Por defecto' : 'Personalizada';
+
+            boton.append(textoRuta, estadoPagina);
+            boton.classList.add("boton-claro");
+
+            if (nombre === paginaActual) {
+                boton.setAttribute('aria-current', 'page');
+            }
             boton.onclick = function () { paginaActual = nombre; mensaje.textContent = ''; mostrar(); };
             menu.append(boton);
 
@@ -654,7 +673,7 @@ function crearTarjetaResultado(url, config, tipo) {
             miniaturas += `
                 <figure class="pag4__miniatura">
                     <span class="pag4__etiqueta">${etiqueta}</span>
-                    <button type="button" class="pag4__descarga">⬇</button>
+                    <button type="button" class="pag4__descarga boton-claro">⬇</button>
                     <figcaption>${nombresTamano[tamano]}</figcaption>
                 </figure>`;
         });
