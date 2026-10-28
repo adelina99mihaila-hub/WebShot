@@ -53,31 +53,37 @@ async function irAPunto(pagina, porcentaje) {
 //NUEVO
 // Hace las fotos de una URL en una pestaña que YA está abierta.
 // No abre ni cierra Chrome: eso lo hace quien la llama.
-async function fotografiar(pagina, { url, tamano, tipo, puntos, carpeta, nombreBase}) {
-    
-}
-await pagina.goto(url, { waitUntil: "load", timeout: 30000 });
-const resultados = [];
-//pagina.goto(url, ...): goto significa “ir a”. Le dice a la pestaña que cargue esa dirección, como escribirla en la barra del navegador.
-//{ waitUntil: "load", ... }: “espera hasta que la página haya cargado del todo, imágenes incluidas”, para que la foto no salga a medias.
-//timeout: 30000: tiempo máximo en milisegundos (30 000 ms = 30 segundos). Si tarda más, se rinde y lanza un error.
-//await delante: “no pases a la siguiente línea hasta que la web haya cargado”.
+async function fotografiar(
+    pagina,
+    { url, tamano, tipo, puntos, carpeta, nombreBase },
+) {
+    await pagina.goto(url, { waitUntil: "load", timeout: 30000 });
+    const resultados = [];
+  //pagina.goto(url, ...): goto significa “ir a”. Le dice a la pestaña que cargue esa dirección, como escribirla en la barra del navegador.
+  //{ waitUntil: "load", ... }: “espera hasta que la página haya cargado del todo, imágenes incluidas”, para que la foto no salga a medias.
+  //timeout: 30000: tiempo máximo en milisegundos (30 000 ms = 30 segundos). Si tarda más, se rinde y lanza un error.
+  //await delante: “no pases a la siguiente línea hasta que la web haya cargado”.
 
 if (tipo === "completa") {
-    const archivo = ` ${nombreBase}_${tamano}_completa.png`; // la const archivo = ;  construye el nombre del archivo. Con comillas invertidas puedes meter variables dentro del texto con ${...}. Si nombreBase es cofre.io y tamano es desktop, el resultado es cofre.io_desktop_completa.png. usamos _ para separar las partes y sea más fácil de leer
-    await pagina.screenshot({ path: path.join(carpeta, archivo),fullPage: true}); //Hace la foto. Le pasamos un objeto con opciones: 1.path: dónde guardar la imagen. path.join(carpeta, archivo) une la carpeta y el nombre en una ruta correcta: capturas\cofre.io_desktop_completa.png. Usamos path.join en vez de juntar texto con + porque pone bien la barra, sea Windows (\) u otro sistema (/). 2.fullPage: true: “página completa”. En vez de fotografiar solo lo que cabe en la ventana, hace una imagen larga de toda la web.
+    const archivo = `${nombreBase}_${tamano}_completa.png`; // la const archivo = ;  construye el nombre del archivo. Con comillas invertidas puedes meter variables dentro del texto con ${...}. Si nombreBase es cofre.io y tamano es desktop, el resultado es cofre.io_desktop_completa.png. usamos _ para separar las partes y sea más fácil de leer
+    await pagina.screenshot({
+        path: path.join(carpeta, archivo),
+        fullPage: true,
+    }); //Hace la foto. Le pasamos un objeto con opciones: 1.path: dónde guardar la imagen. path.join(carpeta, archivo) une la carpeta y el nombre en una ruta correcta: capturas\cofre.io_desktop_completa.png. Usamos path.join en vez de juntar texto con + porque pone bien la barra, sea Windows (\) u otro sistema (/). 2.fullPage: true: “página completa”. En vez de fotografiar solo lo que cabe en la ventana, hace una imagen larga de toda la web.
     resultados.push({ tamano, etiqueta: "Completa", archivo }); //push significa “empujar”: añade un elemento al final de la lista. Añadimos un objeto que describe la foto hecha: 1.tamano es una forma corta de escribir "tamano: tamano" (cuando la propiedad y la variable se llaman igual, basta con escribirlo una vez). 2.etiqueta: "Completa" es el texto que saldrá sobre la miniatura en la página 4. y 3.archivo es el nombre del archivo, otra vez en forma corta.
 } else {
     for (const punto of puntos) {
         await irAPunto(pagina, punto);
         const archivo = `${nombreBase}_${tamano}_${punto}.png`;
-        await pagina.screenshot({path: path.join(carpeta, archivo) });
-        resultados.push({ tamano, etiqueta: punto + "%", archivo });  
-    }// el "for" es un bucle que se lee: para cada "punto" de la lista "puntos", haz lo de dentro”.
-    // el "await irAPunto(pagina, punto);"": llama a la función de antes para bajar hasta ese porcentaje.
-    //const archivo = ...: igual que antes, pero el final del nombre es el número del punto. Por ejemplo, cofre.io_movil_50.png.
-    // await pagina.screenshot({ path: ... });: hace la foto, esta vez sin fullPage, así que fotografía solo lo que se ve en la ventana en ese momento.
-    //resultados.push({ ..., etiqueta: punto + "%", ... }): punto + "%" une el número y el símbolo, y da "50%".
+        await pagina.screenshot({ path: path.join(carpeta, archivo) });
+        resultados.push({ tamano, etiqueta: punto + "%", archivo });
+    }
+}
+  // el "for" es un bucle que se lee: para cada "punto" de la lista "puntos", haz lo de dentro”.
+  // el "await irAPunto(pagina, punto);"": llama a la función de antes para bajar hasta ese porcentaje.
+  //const archivo = ...: igual que antes, pero el final del nombre es el número del punto. Por ejemplo, cofre.io_movil_50.png.
+  // await pagina.screenshot({ path: ... });: hace la foto, esta vez sin fullPage, así que fotografía solo lo que se ve en la ventana en ese momento.
+  //resultados.push({ ..., etiqueta: punto + "%", ... }): punto + "%" une el número y el símbolo, y da "50%".
     return resultados;
 }
 
@@ -95,29 +101,16 @@ async function generarCapturas({ url, tamano, tipo = "viewport", puntos = [0], c
     fs.mkdirSync(carpeta, { recursive: true });
 
     const navegador = await chromium.launch();
-    const resultados = [];
-
-    try {
-        const pagina = await navegador.newPage({ viewport: VIEWPORTS[tamano] });
-        await pagina.goto(url, { waitUntil: "load", timeout: 30000 });
-
-        if (tipo === "completa") {
-            const archivo = `${nombreBase}_${tamano}_completa.png`;
-            await pagina.screenshot({ path: path.join(carpeta, archivo), fullPage: true });
-            resultados.push({ etiqueta: "Completa", archivo });
-        } else {
-            for (const punto of puntos) {
-                await irAPunto(pagina, punto);
-                const archivo = `${nombreBase}_${tamano}_${punto}.png`;
-                await pagina.screenshot({ path: path.join(carpeta, archivo) });
-                resultados.push({ etiqueta: punto + "%", archivo });
-            }
-        }
+    
+//Los dos "if" comprueban los datos antes de abrir Chrome. Si algo está mal, throw new Error(...) lanza un error y se para. Es mejor fallar pronto que abrir Chrome para nada.
+//"fs.mkdirSync" crea la carpeta si no existe.
+//"chromium.launch()"" abre Chrome. Lo guardamos en navegador para poder cerrarlo después.
+        try {
+        const pagina = await navegador.newPage({ viewport: VIEWPORTS[tamano] });//abre una pestaña nueva con el tamaño elegido.
+        return await fotografiar(pagina, { url, tamano, tipo, puntos, carpeta, nombreBase });//le pasa la pestaña y los datos a fotografiar, espera a que termine y devuelve su lista de resultados.
     } finally {
         await navegador.close();
-    }
-
-    return resultados;
+    } //} finally {: lo de dentro del finally se ejecuta siempre: si todo ha ido bien y también si ha habido un error."await navegador.close();" " cierra Chrome, para que nunca se quede abierto gastando memoria
 }
 
 
