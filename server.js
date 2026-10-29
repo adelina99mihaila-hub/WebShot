@@ -3,9 +3,11 @@ const path = require("path"); // path viene incluido en Node. Sirve para constru
 const fs = require("fs"); // fs (file system) viene incluido en Node. Sirve para crear carpetas y trabajar con archivos.
 const { chromium } = require("playwright");
 //Playwright trae varios navegadores, y las llaves { } significan “de todo lo que trae, dame solo chromium” (el Chrome que descargamos al principio desde la terminal con el comando npx playwright install chromium).
-const { hacerCaptura, VIEWPORTS } = require("./capturas"); //Conecta este archivo con capturas.js (importa la función y los tamaños válidos)
+const { hacerCaptura, generarVistaPrevia, VIEWPORTS } = require("./capturas"); //Conecta este archivo con capturas.js (importa la función y los tamaños válidos)
 const robotsParser = require("robots-parser"); //
 const app = express(); // Crea el servidor. A partir de aquí, app es tu servidor
+const { randomUUID } = require("crypto"); //Sirve para crear id aleatorios, lo usaremos para asociarlos a las urls
+
 
 app.use(express.json()); // Permite que el servidor entienda datos JSON enviados desde el navegador
 
@@ -255,7 +257,7 @@ app.post("/api/crawl", async (req, res) => {
             const solicitud = route.request();
 
             //Eliminamos fuentes y archivos multimedia para acelerar el buscador    /NUEVO
-             if (["image", "media", "font"].includes(solicitud.resourceType())) {
+            if (["image", "media", "font"].includes(solicitud.resourceType())) {
                 await route.abort();
                 return;
             }
@@ -324,12 +326,13 @@ app.post("/api/crawl", async (req, res) => {
 
                 const titulo = await page.title();
                 const urlFinal = page.url();
-
+               
                 paginas.push({
                     title: titulo || "Sin titulo",
                     url: urlFinal,
                     depth: paginaActual.depth,
-                    status: respuesta && respuesta.ok() ? "ok" : "error"
+                    status: respuesta && respuesta.ok() ? "ok" : "error",
+                    
                 });
 
                 const urlFinalNormalizada = new URL(urlFinal);
@@ -400,7 +403,19 @@ app.post("/api/crawl", async (req, res) => {
                 );
             }
         }
+        limpiarSesionesRastreo();
+
+        const crawlId = randomUUID();
+        const urlsEncontradas = paginas
+            .filter(pagina => pagina.status === "ok")
+            .map(pagina => pagina.url);
+
+        sesionesRastreo.set(crawlId, {
+            urlsEncontradas: new Set(urlsEncontradas),
+            expira: Date.now() + DURACION_SESION_RASTREO
+        });
         return res.json({
+            crawlId,
             pages: paginas
         });
 
@@ -418,6 +433,117 @@ app.post("/api/crawl", async (req, res) => {
         }
     }
 
+});
+
+//Map para guardar las sesiones de rastreo identificadas con un id(crawlId)
+const sesionesRastreo = new Map();
+//Establece la duración de la sesión en 20 min
+const DURACION_SESION_RASTREO = 20 * 60 * 1000;
+//Maximo de 50 sesiones de rastreo
+const MAX_SESIONES_RASTREO = 50;
+
+
+//Función para eliminar las sesiones caducadas
+function limpiarSesionesRastreo() {
+
+    const ahora = Date.now();
+
+    //Recorremos todas las sesiones guardadas en map y borramos las caducadas
+    for (const [id, sesion] of sesionesRastreo) {
+
+        if (sesion.expira <= ahora) {
+            sesionesRastreo.delete(id);
+        }
+    }
+    //Si llevamos mas de 50 sesiones borramos la mas antigua para dejar espacio
+    while (sesionesRastreo.size >= MAX_SESIONES_RASTREO) {
+
+        const idMasAntiguo = sesionesRastreo.keys().next().value;
+        sesionesRastreo.delete(idMasAntiguo);
+
+    }
+}
+
+//Registramos en el servidor las url seleccionadas en la tabla
+//Se valida que llegue un id y una lista de urls, que la urls este entre las encontradas y no se repita
+//la sesión debe existir y no haber caducado
+app.post("/api/seleccion", (req, res) => {
+
+    const { crawlId, urls } = req.body ?? {}; //si rer.body no existe creamos un objeto vacio
+
+    //Comprobamos que crawldId sea texto y que urls sea un array de entre 1-100 elementos
+    if (typeof crawlId !== "string" || !Array.isArray(urls)
+        || urls.length === 0 || urls.length > 100) {
+
+        return res.status(400).json({ error: "Selección inválida" });
+    }
+
+    //Buscamos la sesión perteneciente al id recibido
+    const sesion = sesionesRastreo.get(crawlId);
+
+    //comprobamos si ha caducado
+    if (!sesion || sesion.expira <= Date.now()) {
+
+        sesionesRastreo.delete(crawlId);
+        return res.status(410).json({ error: "El rastreo ha caducado" }); //Error 410 recurso eliminado
+    
+    }
+    //comprobamos que sea texto y este entre las encontradas y que no haya duplicidad
+    if (urls.some(url => typeof url !== "string" || !sesion.urlsEncontradas.has(url))
+        || new Set(urls).size !== urls.length) {
+
+        return res.status(400).json({ error: "La selección contiene páginas invalidas" });
+    }
+    
+    //Convertimos el array en un set, que guarda valores unicos y permite comprobar la duplicidad
+    sesion.urlsSeleccionadas = new Set(urls);
+    //Renovamos la sesión
+    sesion.expira = Date.now() + DURACION_SESION_RASTREO;
+
+    return res.json({ ok: true });
+
+});
+
+//Ruta para generar la captura para la vista previa
+app.post("/api/vista-previa", async (req, res) => {
+
+    const { crawlId, url } = req.body ?? {};
+
+    if (typeof crawlId !== "string" || typeof url !== "string") {
+
+        return res.status(400).json({ error: "Solicitud de vista previa inválida." });
+    }
+
+    const sesion = sesionesRastreo.get(crawlId);
+
+    if (!sesion || sesion.expira <= Date.now()) {
+        sesionesRastreo.delete(crawlId);
+        return res.status(410).json({ error: "El rastreo ha caducado. Vuelve a analizar la web." });
+    }
+
+    if (!sesion.urlsSeleccionadas || !sesion.urlsSeleccionadas.has(url)) {
+        return res.status(403).json({ error: "Esa página no forma parte de la selección." });
+    }
+    //Bloque para la captura
+    try {
+        //Llamamos a la función para la vista previa
+        const vista = await generarVistaPrevia(url);
+
+        sesion.expira = Date.now() + DURACION_SESION_RASTREO;
+
+        //Debe devolver una imagen jpeg 
+        return res
+            .type("image/jpeg")
+            .set("X-Preview-Document-Height", String(vista.alturaDocumento))
+            .set("X-Preview-Viewport-Height", String(vista.alturaViewport))
+            .send(vista.imagen); //Se envian los datos al navegador
+
+        //Los dos encabezados acompañan a la imagen con las medidas necesarias;
+        // el navegador podrá leerlos al pedirla y usarlos para mantener el significado actual de los porcentajes.
+    } catch (error) {
+        console.error("Error al generar la vista previa:", url, error);
+        return res.status(500).json({ error: "No se pudo generar la vista previa." });
+    }
 });
 
 app.listen(3000, () => {
