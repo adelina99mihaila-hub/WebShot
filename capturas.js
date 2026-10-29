@@ -87,6 +87,34 @@ if (tipo === "completa") {
     return resultados;
 }
 
+// Intenta hacer las fotos. Si falla, lo vuelve a intentar UNA vez más con una pestaña nueva.
+async function fotografiarConReintento(navegador, opciones) {
+    for (let intento = 1; intento <= 2; intento++) {
+        const pagina = await navegador.newPage({ viewport: VIEWPORTS[opciones.tamano] });
+        try {
+            return await fotografiar(pagina, opciones);
+        } catch (error) {
+            if (intento === 2) {
+                throw error;
+            }
+            console.warn("Fallo en el intento 1, reintentando:", opciones.url, opciones.tamano);
+        } finally {
+            await pagina.close();
+        }
+    }
+}//Recibe dos cosas:
+// navegador :// el Chrome ya abierto por //generarTodo. Esta función no abre Chrome; solo abre y cierra pestañas.
+// opciones: //el objeto con url, tamano, tipo, //puntos, carpeta y nombreBase. Esta vez no lo desestructuramos con llaves, porque casi no usamos sus datos aquí: solo se lo pasamos tal cual a fotografiar. Cuando necesitamos un dato concreto, lo leemos con un punto: opciones.tamano, opciones.url.
+
+// NUEVOO Convierte una URL en un texto válido para usarlo como nombre de archivo
+function nombreSeguro(url) {
+    return url
+        .replace(/^https?:\/\//, "")//http:// o https:// al principio (^ = “al principio”, s? = “con o sin s”) se borra. ("" = nada), porque no aporta.
+        .replace(/[^a-z0-9]+/gi, "_")//Cualquier grupo de caracteres que no sea letra ni número se cambia por _. Las letras g e i del final significan “todas las veces” y “da igual mayúscula o minúscula”.
+        .replace(/^_+|_+$/g, "")//Guiones bajos al principio o al final se borran.
+        .slice(0, 60);//Se queda con los primeros 60 caracteres. Hay URLs larguísimas y Windows tiene un límite de longitud de ruta.
+}//Coge el texto de la URL y le aplica una cadena de transformaciones, una debajo de otra. Cada línea recibe el resultado de la anterior. Lo escribimos en varias líneas solo para que se lea mejor. “reemplaza”. Busca algo en el texto y lo cambia por otra cosa. Lo que se busca va entre barras /.../
+
 // Hace TODAS las capturas de una URL con un tamaño:
 // - tipo "viewport": una captura por cada punto de scroll
 // - tipo "completa": una sola captura larga de toda la página
@@ -113,7 +141,49 @@ async function generarCapturas({ url, tamano, tipo = "viewport", puntos = [0], c
     } //} finally {: lo de dentro del finally se ejecuta siempre: si todo ha ido bien y también si ha habido un error."await navegador.close();" " cierra Chrome, para que nunca se quede abierto gastando memoria
 }
 
+// NUEVO Hace TODAS las capturas de la configuración de la página 3, abriendo Chrome UNA sola vez.
+// datos = { "https://...": { puntos: [0, 40], tamanos: ["desktop", "movil"] }, ... }
+async function generarTodo({ tipo, datos, carpeta }) {
+        if (tipo !== "viewport" && tipo !== "completa") {
+        throw new Error("Tipo de captura no válido: " + tipo);
+    }
 
+    fs.mkdirSync(carpeta, { recursive: true });
 
-module.exports = { hacerCaptura, generarCapturas, VIEWPORTS };
+    const navegador = await chromium.launch();
+    const resultados = [];
+        try {
+        for (const [url, ajustes] of Object.entries(datos)) {
+            const capturas = [];
+            const nombreBase = nombreSeguro(url);
+                        for (const tamano of ajustes.tamanos) {
+                if (!VIEWPORTS[tamano]) {
+                    capturas.push({ tamano, error: "Tamaño no válido" });
+                    continue;
+                }//Un bucle dentro de otro bucle. Por cada URL, recorre sus tamaños. Si la URL tiene ["desktop", "movil"], esto se repite dos veces. "if (!VIEWPORTS[tamano])"" si el tamaño no existe en tu tabla… Esta vez no lanzamos un error, porque pararía todo. Lo apuntamos en la lista y seguimos. "continue" : “salta a la siguiente vuelta del bucle”. Deja este tamaño y pasa al siguiente sin ejecutar lo de abajo.
+                                        try {
+                    const fotos = await fotografiarConReintento(navegador, {
+                        url,
+                        tamano,
+                        tipo,
+                        puntos: ajustes.puntos,
+                        carpeta,
+                        nombreBase,
+                    });
+                    capturas.push(...fotos);
+                } catch (error) {
+                    console.error("No se pudo capturar", url, tamano, error.message);
+                    capturas.push({ tamano, error: "No se pudo capturar la página" });
+                } 
+            }   
+                        resultados.push({ url, capturas });
+        }
+    } finally {
+        await navegador.close();
+    }
+
+    return resultados;
+}
+
+module.exports = { hacerCaptura, generarCapturas, generarTodo, VIEWPORTS };
 //Es la línea clave para trabajar en equipo. Significa: “esto es lo que este archivo ofrece a otros archivos”. Sin ella, Pablo no podría usar la función desde server.js. También exporta VIEWPORTS por si Pablo necesita comprobar qué tamaños existen.
