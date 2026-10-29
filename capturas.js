@@ -22,8 +22,8 @@ async function hacerCaptura(url, tamano, rutaArchivo) {
     if (!VIEWPORTS[tamano]) {
         throw new Error("Tamaño no válido: " + tamano);
     }
-            //throw new Error(...) dice que: 
-// Si el tamaño no existe, la función lanza un error y se para. No decide qué responder al usuario: eso se hace con express,Pablo recibirá el error en su catch de server.js. esta función solo avisa de que algo ha fallado.
+    //throw new Error(...) dice que: 
+    // Si el tamaño no existe, la función lanza un error y se para. No decide qué responder al usuario: eso se hace con express,Pablo recibirá el error en su catch de server.js. esta función solo avisa de que algo ha fallado.
     const navegador = await chromium.launch();
     try {
         const pagina = await navegador.newPage({ viewport: VIEWPORTS[tamano] });
@@ -185,5 +185,40 @@ async function generarTodo({ tipo, datos, carpeta }) {
     return resultados;
 }
 
-module.exports = { hacerCaptura, generarCapturas, generarTodo, VIEWPORTS };
+//Función para generar una captura para la vista previa
+async function generarVistaPrevia(url) {
+
+    const navegador = await chromium.launch();
+
+    try {
+        const pagina = await navegador.newPage({
+            viewport: VIEWPORTS.desktop,
+            deviceScaleFactor: 0.5
+        });
+
+        await pagina.goto(url, { waitUntil: "load", timeout: 30000 });
+
+        const dimensiones = await pagina.evaluate(() => ({
+            alturaDocumento: document.documentElement.scrollHeight,
+            alturaViewport: window.innerHeight
+        }));
+
+        const imagen = await pagina.screenshot({
+
+            type: "jpeg",
+            quality: 60,
+            fullPage: true
+
+        });
+        return {
+            imagen,
+            ...dimensiones
+        };
+    } finally {
+        await navegador.close();
+    }
+}
+
+module.exports = { hacerCaptura, generarCapturas, generarTodo, generarVistaPrevia, VIEWPORTS };
 //Es la línea clave para trabajar en equipo. Significa: “esto es lo que este archivo ofrece a otros archivos”. Sin ella, Pablo no podría usar la función desde server.js. También exporta VIEWPORTS por si Pablo necesita comprobar qué tamaños existen.
+

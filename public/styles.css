@@ -227,9 +227,70 @@ body {
 }
 
 .historico {
-    width: min(900px, 95%);
+    width: min(750px, 95%);
     margin: 70px auto 0;
     text-align: left;
+}
+
+.lista-historico {
+    display: grid;
+    gap: 12px;
+}
+
+.historico__elemento {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 60px;
+    padding: 16px 18px;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    background: var(--color-superficie);
+    color: var(--color-texto);
+    text-align: left;
+    cursor: pointer;
+}
+
+
+.historico__elemento:hover {
+    border-color: var(--color-principal);
+}
+
+.historico__datos {
+    display: grid;
+    min-width: 0;
+}
+
+.historico__url {
+    overflow-wrap: anywhere;
+    color: var(--color-texto-secundario);
+    font-size: 0.9rem;
+}
+
+.historico__fecha {
+    flex: none;
+    color: var(--color-texto-secundario);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 600px) {
+    .historico__elemento {
+        align-items: center;
+        flex-direction: row;
+        gap: 10px;
+        padding: 14px 12px;
+    }
+
+    .historico__contenido {
+        gap: 10px;
+    }
+
+
+    .historico__fecha {
+        font-size: 0.8rem;
+    }
 }
 
 .pagina[hidden] {
@@ -954,12 +1015,34 @@ input[type="checkbox"] {
 }
 
 #pag3 #pag3-mapa {
+    overflow-y: auto;
     position: relative;
     height: 460px;
     margin: 22px 12px 0;
     border: 1px solid #e0e5eb;
     background: white;
     cursor: crosshair;
+}
+#pag3 #pag3-pagina-completa {
+    position: relative;
+    width: 100%;
+    
+}
+
+#pag3 #pag3-imagen {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+#pag3 #pag3-marcadores {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+#pag3 .linea button {
+    pointer-events: auto;
 }
 
 #pag3 .linea {

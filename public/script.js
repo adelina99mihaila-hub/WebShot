@@ -4,6 +4,8 @@
 const crawlDepth = document.getElementById("crawl-depth");
 // Valor actual de la profundidad de rastreo
 const depthValue = document.getElementById("depth-value");
+//Variable para el id
+let crawlIdActual = sessionStorage.getItem("crawlIdActual");
 
 // Actualizar el valor mostrado cuando se cambie el rango
 crawlDepth.addEventListener("input", function () {
@@ -69,6 +71,174 @@ const formulario = document.getElementById("search-box");
 const inputUrl = document.getElementById("url-input");
 const paginaInicio = document.getElementById("inicio");
 
+//Elementos para el historico
+const listaHistorico = document.getElementById("lista-historico");
+const CLAVE_HISTORIAL = "webshot-historial"; //Clave para el historial
+const MAX_HISTORIAL = 10; //Maximo de busquedas para el historial
+let historialActivoKey = sessionStorage.getItem("historialActivoKey"); //Clave en la sesion
+let seleccionHistoriaPendiente = null;
+
+//Función para normalizar una url como clave de búsqueda
+function claveBusqueda(urlTexto) {
+
+    const textoConProtocolo = /^https?:\/\//i.test(urlTexto)
+        ? urlTexto
+        : "https://" + urlTexto;
+
+    //Covertimos el texto a objeto
+    const url = new URL(textoConProtocolo);
+
+    //Eliminamos el fragmento que aparece después de #.
+    //Por ejemplo, https://ejemplo.com/pagina#contacto
+    //se convierte en https://ejemplo.com/pagina.
+    url.hash = "";
+
+    //Devolvemos la url normalizada
+    return url.href;
+}
+
+//Función para leer el historial guardado
+function leerHistorial() {
+
+    try {
+
+        //Recuperamos el historial
+        const historial = JSON.parse(localStorage.getItem(CLAVE_HISTORIAL) || "[]");
+
+        //Comprobamos que sea un array
+        if (!Array.isArray(historial)) {
+
+            return [];
+        }
+
+        //Filtramos y conservamos las entradas con la estructura esperada
+        return historial.filter(function (entrada) {
+
+            // Comprobamos que:
+            // 1. La entrada exista.
+            // 2. Su propiedad clave sea un texto.
+            // 3. Su propiedad url sea un texto.
+            // 4. Exista la propiedad opciones.
+            // 5. La propiedad seleccionadas sea un array.
+            return entrada &&
+                typeof entrada.clave === "string" &&
+                typeof entrada.url === "string" &&
+                entrada.opciones &&
+                Array.isArray(entrada.seleccionadas);
+        });
+    } catch (error) {
+        console.error("No se pudo leer el historial:", error);
+        return [];
+    }
+}
+
+//Función para guardar el hstorial
+function guardarHistorial(historial) {
+
+    try {
+        //Convertimos el array en Json y lo gradamos con la clave
+        localStorage.setItem(CLAVE_HISTORIAL, JSON.stringify(historial));
+        return true;
+
+    } catch (error) {
+        console.error("No se pudo guardar el historial:", error);
+        return false;
+    }
+}
+
+//Función para el tiempodel historial
+function tiempoRelativo(fecha) {
+
+    //Se calcula los minutos desde la fecha de la búsqueda
+    const minutos = Math.max(0, Math.floor((Date.now() - fecha) / 60000));
+
+    if (minutos < 1) return "ahora"; //Si ha pasado menos de un minuto aparece "ahora"
+    if (minutos < 60) return `hace ${minutos} min`; //Menos de una hora salen los minutos
+
+    //Si ha pasado mas de una hora se muestran las horas sin minutos (se redondea hacia abajo)
+    const horas = Math.floor(minutos / 60);
+    if (horas < 24) return `hace ${horas} h`;
+
+    //Lo mismo para los días, redondeamos hacia abajo
+    const dias = Math.floor(horas / 24);
+
+
+    if (dias < 30) return `hace ${dias} días`;
+
+    //Para mas de 30 dias se muestra la fecha
+    return new Date(fecha).toLocaleDateString("es");
+}
+
+//Función para mostrar el historial
+function mostrarHistorial() {
+
+    //Primero borramos los elementos anteriores para actualizar
+    listaHistorico.replaceChildren();
+
+    //leemos el historial guardado
+    const historial = leerHistorial();
+
+    //Comprobamos si hay alguna búsqueda guuardada
+    if (historial.length === 0) {
+
+        const vacio = document.createElement("p");
+        vacio.textContent = "Tus búsquedas anteriores aparecerán aquí.";
+        listaHistorico.appendChild(vacio);
+        return;
+
+    }
+
+    //Para cada entrada creamos un botón con los datos
+    historial.forEach(function (entrada) {
+
+        const boton = document.createElement("button");
+        boton.type = "button";
+        boton.className = "historico__elemento";
+
+        const datos = document.createElement("span");
+        datos.className = "historico__datos";
+
+        //dominio de la url 
+        const dominio = new URL(entrada.url).hostname.replace(/^www\./i, "");
+
+        const nombre = document.createElement("strong");
+        nombre.textContent = dominio;
+
+        //mostramos tambien la url completa
+        const url = document.createElement("span");
+        url.className = "historico__url";
+        url.textContent = entrada.url;
+
+        //mostramos la fecha
+        const fecha = document.createElement("span");
+        fecha.className = "historico__fecha";
+        fecha.textContent = tiempoRelativo(entrada.fecha);
+
+        //Añadimos los datos al contenedor
+        datos.append(nombre, url);
+        //Se puede recuperar la búsqueda al pulsar el botón
+        boton.append(datos, fecha);
+
+        //Al pulsar el boton se ejecuta la función que ejecuta una nueva búsqueda
+        boton.addEventListener("click", function () {
+            inputUrl.value = entrada.url;
+            crawlDepth.value = entrada.opciones.maxDepth;
+            depthValue.textContent = entrada.opciones.maxDepth;
+            urlLimit.value = entrada.opciones.maxUrls;
+            allowedDomains.value = entrada.opciones.allowedDomains;
+            respetarRobots.checked = entrada.opciones.respectRobots;
+            seleccionHistoriaPendiente = entrada.seleccionadas;
+            formulario.requestSubmit();
+        });
+
+        //Añadimos el botón al contenedor
+        listaHistorico.appendChild(boton);
+    });
+
+
+}
+mostrarHistorial();
+
 
 //Elementos de la tabla de resultados
 const paginaResultados = document.getElementById("pagina-1");
@@ -98,6 +268,8 @@ formulario.addEventListener("submit", async function (evento) {
     //Si el texto está vacío, no hacemos nada
     if (texto === "") return;
 
+    const seleccionSolicitada = seleccionHistoriaPendiente;
+    seleccionHistoriaPendiente = null;
     //Visibiliza el loader
     estadoBusqueda.hidden = false;
 
@@ -135,6 +307,57 @@ formulario.addEventListener("submit", async function (evento) {
         if (!Array.isArray(resultado.pages)) {
             throw new Error("Respuesta inesperada del servidor");
         }
+        //Comprobación del id del rastreo
+        if (typeof resultado.crawlId !== "string" || resultado.crawlId === "") {
+            throw new Error("La respuesta no incluye un identificador de rastreo válido");
+        }
+        //Guardamos el identificador en una variable
+        crawlIdActual = resultado.crawlId;
+        //Guardamos el identificador 
+        sessionStorage.setItem("crawlIdActual", crawlIdActual);
+
+        //normalizamos la url
+        const urlGuardada = claveBusqueda(texto);
+        //recuperamos el historial
+        const historial = leerHistorial();
+
+        //Objeto con la información de la búsqueda actual
+        const entradaActual = {
+            clave: urlGuardada,
+            url: urlGuardada,
+            nombre: new URL(urlGuardada).hostname,
+            fecha: Date.now(),
+            opciones: {
+                maxDepth: Number(crawlDepth.value),
+                maxUrls: Number(urlLimit.value),
+                allowedDomains: allowedDomains.value.trim(),
+                respectRobots: respetarRobots.checked
+            },
+            //guardamos las paginas seleccionadas, usamos un array vacio por defecto
+            seleccionadas: seleccionSolicitada || []
+        };
+        //Array con el historial actualizado
+        const historialActualizado = [
+            //La búsqueda actual va en primera posición
+            entradaActual,
+            //filtramos que no tengan la misma clave que la actual
+            ...historial.filter(function (entrada) {
+                return entrada.clave !== urlGuardada;
+            })
+        ].slice(0, MAX_HISTORIAL); //respetamos el limite de 10 búsquedas
+
+        //guardamos la clave de la búsqueda actual
+        historialActivoKey = urlGuardada;
+        //la guardamos en sessionstorage
+        sessionStorage.setItem("historialActivoKey", historialActivoKey);
+
+        //Comprobamos que se guarde correctamente o lanzamos error
+        if (!guardarHistorial(historialActualizado)) {
+            alert("El rastreo terminó, pero no se pudo guardar en el historial.");
+        }
+
+        //mostramos el historial
+        mostrarHistorial();
         //Elimina las filas de resultados anteriores y desmarcamos el checkbox de "Seleccionar todo"
         tabla.replaceChildren();
         selectAll.checked = false;
@@ -157,6 +380,8 @@ formulario.addEventListener("submit", async function (evento) {
             const checkbox = document.createElement("input");
 
             checkbox.type = "checkbox";
+            //Si la búsqueda es del historial se marcan las paginas que estuvieran seleccionadas
+            checkbox.checked = entradaActual.seleccionadas.includes(pagina.url);
             celdaSeleccion.appendChild(checkbox);
             fila.appendChild(celdaSeleccion);
 
@@ -244,6 +469,33 @@ function actualizarContadores() {
     // Guarda el estado de los checkboxes en sessionStorage para restaurarlo después de recargar la página
     checkboxesFilas.forEach(c => c.toggleAttribute('checked', c.checked));
     sessionStorage.setItem("filasTabla", tabla.innerHTML);
+
+    //En caso de que haya una clave de historial
+    if (historialActivoKey) {
+        //leemos el historial
+        const historial = leerHistorial();
+        //buscamos la entrada que corresponda
+        const entrada = historial.find(function (item) {
+            return item.clave === historialActivoKey;
+        });
+        //Si encontramos la entrada actualizamos las páginas deleccionadas
+        if (entrada) {
+
+            entrada.seleccionadas = Array.from(
+                tabla.querySelectorAll("tr")
+            )
+                //Filtramos las casillas que estan marcadas
+                .filter(function (fila) {
+                    const checkbox = fila.querySelector("input[type='checkbox']");
+                    return checkbox && checkbox.checked;
+                })
+                .map(function (fila) {
+                    return fila.dataset.url;
+                });
+
+            guardarHistorial(historial);
+        }
+    }
 }
 
 //Listener para el checkbox "Seleccionar todo"
@@ -352,6 +604,11 @@ casillasViewport.forEach(function (casilla) {
     //Elementos de la página 3
     let mapa = document.getElementById('pag3-mapa');
     let marcadores = document.getElementById('pag3-marcadores');
+    let imagenVistaPrevia = document.getElementById('pag3-imagen');
+    let textoVistaPrevia = document.querySelector('#pag3 .texto-vista');
+    const vistasPrevias = new Map();
+    let solicitudVistaPrevia = 0;
+    let vistaPreviaActual = null;
     let lista = document.getElementById('pag3-puntos');
     let copiar = document.getElementById('pag3-copiar');
     let mensaje = document.getElementById('pag3-mensaje');
@@ -360,6 +617,123 @@ casillasViewport.forEach(function (casilla) {
     //Función para comprobar si la configuración de la página es igual a la configuración inicial
     function esInicial(pagina) {
         return pagina.puntos.join(',') === inicial.puntos.join(',') && pagina.tamanos.join(',') === inicial.tamanos.join(',');
+    }
+
+    async function cargarVistaPrevia(url) {
+
+        //incrementamos el numero de solicitud al llamar a la función para distinguir solicitudes nuevas
+        const solicitud = ++solicitudVistaPrevia;
+        //Comprobamos si la vista previa esta guardada
+        const guardada = vistasPrevias.get(url);
+
+        //si ya existia la reutilizamos
+        if (guardada) {
+            vistaPreviaActual = guardada;
+            imagenVistaPrevia.src = guardada.imagen;
+            imagenVistaPrevia.hidden = false;
+            textoVistaPrevia.textContent = 'Vista previa';
+            return;
+        }
+        //Si no habia cista guardada mostramos mensaje mientras carga
+        imagenVistaPrevia.hidden = true;
+        vistaPreviaActual = null;
+        textoVistaPrevia.textContent = 'Cargando vista previa...';
+
+        try {
+            //Petición para la captura de la vista previa
+            const respuesta = await fetch('/api/vista-previa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ crawlId: crawlIdActual, url })
+            });
+
+            if (!respuesta.ok) {
+                const error = await respuesta.json();
+                throw new Error(error.error || 'No se pudo cargar la vista previa.');
+            }
+            //leemos la altura y lo pasamos a numero
+            const alturaDocumento = Number(respuesta.headers.get('X-Preview-Document-Height'));
+            //lo mismo con la altura del navegador
+            const alturaViewport = Number(respuesta.headers.get('X-Preview-Viewport-Height'));
+
+            //Comprobamos que ambos sean numeros validos
+            if (
+                !Number.isFinite(alturaDocumento) || alturaDocumento <= 0 ||
+                !Number.isFinite(alturaViewport) || alturaViewport <= 0
+            ) {
+                throw new Error('El servidor no devolvió dimensiones válidas para la vista previa.');
+            }
+
+            //Blob permite trabajar con los datos binarios de la imagen
+            const blob = await respuesta.blob();
+
+            //si se ha hecho otra petición abandonamos
+            if (solicitud !== solicitudVistaPrevia) {
+                return;
+            }
+
+            //Url temporal para mostrar el blob como una imagen
+            const imagen = URL.createObjectURL(blob);
+
+            //Si la cache tiene mas de 20 vistas se borra la mas antigua
+            if (vistasPrevias.size >= 20) {
+                const [urlAntigua, vistaAntigua] = vistasPrevias.entries().next().value;
+                URL.revokeObjectURL(vistaAntigua.imagen);
+                vistasPrevias.delete(urlAntigua);
+            }
+            //Objeto con los datos para la vista
+            const vista = {
+                imagen,
+                alturaDocumento, //altura de la captura
+                alturaViewport  //altura del area visible del navegador
+            };
+
+            //guardamos la vista en la cache con su url 
+            vistasPrevias.set(url, vista);
+            vistaPreviaActual = vista; //vista activa
+            imagenVistaPrevia.src = imagen;
+            imagenVistaPrevia.hidden = false;
+            textoVistaPrevia.textContent = 'Vista previa';
+            actualizarPosicionesMarcadores();//recalculamos la posicion de las vistas
+
+        } catch (error) {
+            console.error('Error al cargar la vista previa:', error);
+            //Solo se muestra el mensaje si sigue siendo la solicitud mas reciente
+            if (solicitud === solicitudVistaPrevia) {
+                textoVistaPrevia.textContent = error.message;
+            }
+        }
+    }
+
+    //Esta función recibe el porcentaje de desplazamiento del marcador
+    function posicionMarcador(punto) {
+
+        //si no hay vista previa no calculamos
+        if (!vistaPreviaActual) return 0;
+
+        const alturaDocumento = vistaPreviaActual.alturaDocumento;
+        const alturaViewport = vistaPreviaActual.alturaViewport;
+        //Maximo desplazamiento posible, si el documento es es mas alto que la pantalla es la diferencia entre ambos
+        const maximoScroll = Math.max(0, alturaDocumento - alturaViewport);
+        //Calculamos la posición con respecto al desplazamiento
+        //Si el punto es 50 obtenemos el 50% del desplazamiento maximo
+        const posicionScroll = maximoScroll * punto / 100;
+        //Convertimos la posición de desplazamiento en un porcentaje respecto a la altura
+        //devolvemos ese porcentaje para los marcadores
+        return posicionScroll / alturaDocumento * 100;
+    }
+
+    //Función que actualiza la posición de los marcadores
+    function actualizarPosicionesMarcadores() {
+
+        //Obtenemos los elementos de los marcadores
+        Array.from(marcadores.children).forEach(linea => {
+            //Convertimos a número el atributo del porcentaje de desplazamiento
+            const punto = Number(linea.dataset.punto);
+            //Calculamos la posición vertical del marcador
+            //la propiedad top establece su posición vertical
+            linea.style.top = posicionMarcador(punto) + '%';
+        });
     }
 
     // Refresca la pantalla después de cambiar los datos.
@@ -372,6 +746,7 @@ casillasViewport.forEach(function (casilla) {
         pagina.puntos.sort(function (a, b) { return a - b; });
 
         document.getElementById('pag3-nombre').textContent = paginaActual;
+        cargarVistaPrevia(paginaActual);
         document.getElementById('pag3-estado').textContent = esInicial(pagina) ? 'Por defecto' : 'Personalizada';
         lista.replaceChildren();
         marcadores.replaceChildren();
@@ -400,7 +775,9 @@ casillasViewport.forEach(function (casilla) {
 
             //Crear el marcador en el mapa
             let linea = document.createElement('div');
-            linea.className = 'linea'; linea.style.top = punto + '%';
+            linea.className = 'linea';
+            linea.dataset.punto = punto;
+            linea.style.top = posicionMarcador(punto) + '%';
 
             let boton = document.createElement('button');
             boton.classList.add("boton-principal");
@@ -412,16 +789,20 @@ casillasViewport.forEach(function (casilla) {
             let nuevo = punto;
             boton.onpointerdown = function (evento) {
 
-                if (evento.button !== 0) return;
+                if (!vistaPreviaActual || imagenVistaPrevia.hidden || evento.button !== 0) return;
                 arrastrando = true;
                 boton.setPointerCapture(evento.pointerId);
             };
             //Actualia el marcador mientras se arrastra
             boton.onpointermove = function (evento) {
-
                 if (!arrastrando) return;
-                nuevo = porcentaje(evento.clientY);
-                linea.style.top = nuevo + '%'; boton.textContent = nuevo + '%';
+                const valorNuevo = porcentaje(evento.clientY);
+                if (valorNuevo === null) return;
+
+                nuevo = valorNuevo;
+                linea.dataset.punto = nuevo;
+                linea.style.top = posicionMarcador(nuevo) + '%';
+                boton.textContent = nuevo + '%';
             };
 
             //Al soltar el marcador, se guarda la nueva posición
@@ -446,6 +827,7 @@ casillasViewport.forEach(function (casilla) {
             };
             linea.append(boton); marcadores.append(linea);
         });
+        actualizarPosicionesMarcadores();
 
         //Actualizar las casillas de tamaños de viewport según la configuración de la página
         casillas.forEach(function (casilla) { casilla.checked = pagina.tamanos.includes(casilla.value); });
@@ -487,12 +869,30 @@ casillasViewport.forEach(function (casilla) {
         sessionStorage.setItem('webshot-configuracion-pag3', JSON.stringify({ datos, paginaActual, inicial, tipo }));
     }
 
-    //Función para calcular el porcentaje de la posición Y en relación al mapa
     function porcentaje(posicionY) {
+        if (!vistaPreviaActual || imagenVistaPrevia.hidden) return null;
 
-        let rectangulo = mapa.getBoundingClientRect();
-        let numero = Math.round((posicionY - rectangulo.top) / rectangulo.height * 100);
-        return Math.max(0, Math.min(100, numero));
+        const rectangulo = imagenVistaPrevia.getBoundingClientRect();
+        if (rectangulo.height <= 0) return null;
+
+        const posicionEnImagen = Math.max(
+            0,
+            Math.min(rectangulo.height, posicionY - rectangulo.top)
+        );
+        const alturaDocumento = vistaPreviaActual.alturaDocumento;
+        const maximoScroll = Math.max(
+            0,
+            alturaDocumento - vistaPreviaActual.alturaViewport
+        );
+
+        if (maximoScroll === 0) return 0;
+
+        const posicionDocumento = posicionEnImagen / rectangulo.height * alturaDocumento;
+
+        return Math.max(
+            0,
+            Math.min(100, Math.round(posicionDocumento / maximoScroll * 100))
+        );
     }
 
     //Función para cambiar el valor de un punto de scroll
@@ -519,8 +919,12 @@ casillasViewport.forEach(function (casilla) {
         datos[paginaActual].puntos.push(valor); mensaje.textContent = ''; mostrar();
 
     }
-    //Añadir un punto de scroll al hacer click en el mapa
-    mapa.onclick = function (evento) { if (!evento.target.closest('button')) anadir(porcentaje(evento.clientY)); };
+    mapa.onclick = function (evento) {
+        if (evento.target.closest('button')) return;
+
+        const valor = porcentaje(evento.clientY);
+        if (valor !== null) anadir(valor);
+    };
 
     //Formulario para añadir un punto manualmente
     document.getElementById('pag3-anadir').onsubmit = function (evento) {
@@ -561,8 +965,8 @@ casillasViewport.forEach(function (casilla) {
     document.getElementById('btn-volver').addEventListener('click', () => mostrarPagina('pagina-1'));
     document.getElementById('pag3-volver').addEventListener('click', () => mostrarPagina('pag2'));
 
-    //Botón para continuar a la página 4, validando que las URLs seleccionadas tengan estado OK y que los puntos de scroll sean válidos
-    document.getElementById('btn-continuar').addEventListener('click', () => {
+    //Botón para continuar a la página 3, validando que las URLs seleccionadas tengan estado OK y que los puntos de scroll sean válidos
+    document.getElementById('btn-continuar').addEventListener('click', async () => {
 
         const filas = Array.from(tabla.querySelectorAll('tr')).filter(fila => fila.querySelector('input[type="checkbox"]').checked);
         if (!filas.length) { mostrarPagina('pagina-1'); return; }
@@ -573,6 +977,33 @@ casillasViewport.forEach(function (casilla) {
         const puntos = campos.map(campo => Number(campo.value));
         if (campos.some(campo => campo.value === '') || puntos.some(punto => !Number.isInteger(punto) || punto < 0 || punto > 100) || new Set(puntos).size !== puntos.length) {
             alert('Los puntos deben ser enteros distintos entre 0 y 100.'); return;
+        }
+        if (!crawlIdActual) {
+            alert('No hay un rastreo válido. Vuelve a analizar la web.');
+            return;
+        }
+
+        try {
+            //Enviamos la petición al servidor
+            const respuesta = await fetch('/api/seleccion', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    crawlId: crawlIdActual, //id de rastreo
+                    urls: filas.map(fila => fila.dataset.url)
+                })
+            });
+            //Convertimos la respuesta de json a js
+            const resultado = await respuesta.json();
+
+            if (!respuesta.ok) {
+                alert(resultado.error || 'No se pudo registrar la selección.');
+                return;
+            }
+        } catch (error) {
+            console.error('Error al registrar la selección:', error);
+            alert('No se pudo conectar con el servidor para registrar la selección.');
+            return;
         }
 
         const tamanos = Object.keys(anchos).filter(nombre => Array.from(casillasViewport).some(casilla => casilla.value === anchos[nombre] && casilla.checked));
