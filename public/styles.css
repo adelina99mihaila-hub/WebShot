@@ -34,7 +34,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-top: 100px;
+    margin-top: 20px;
     margin-right: 250px;
 
 }
@@ -51,7 +51,9 @@
     margin-top: -80px;
     margin-bottom: 100px;
 }
-
+#inicio {
+    padding-bottom: 48px;
+}
 input {
     flex: 1;
     /* ocupa todo el hueco libre de la caja, empuja el botón al borde */
@@ -228,13 +230,26 @@ body {
 
 .historico {
     width: min(750px, 95%);
-    margin: 70px auto 0;
+    margin: 48px auto 0;
+    padding: 24px;
     text-align: left;
+
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: 20px;
+    box-shadow: 0 4px 16px #1f293794;
+
+
+
 }
 
 .lista-historico {
     display: grid;
     gap: 12px;
+}
+.historico__datos,
+.historico__datos > * {
+    text-align: left;
 }
 
 .historico__elemento {
@@ -251,11 +266,13 @@ body {
     color: var(--color-texto);
     text-align: left;
     cursor: pointer;
+    margin-bottom: 2px;
 }
 
 
 .historico__elemento:hover {
     border-color: var(--color-principal);
+    background-color: var(--color-fondo-suave);
 }
 
 .historico__datos {
