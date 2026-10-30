@@ -652,12 +652,15 @@ input[type="checkbox"] {
 
 /* Bottom bar */
 .bottom-bar {
+    position: sticky;
+    bottom: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-top: 24px;
-    padding-top: 16px;
-    border-top: 1px solid #e5e7eb;
+    padding: 18px 22px;
+    background: #ffffff;
+    border-top: 1px solid var(--color-borde);
 }
 
 .bottom-bar p {
