@@ -34,7 +34,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-top: 100px;
+    margin-top: 20px;
     margin-right: 250px;
 
 }
@@ -50,6 +50,10 @@
     font-size: 20px;
     margin-top: -80px;
     margin-bottom: 100px;
+}
+
+#inicio {
+    padding-bottom: 48px;
 }
 
 input {
@@ -103,6 +107,84 @@ button {
 .boton-claro {
     font-size: 15px;
     font-weight: 600;
+}
+
+.navegacion-app {
+    width: min(1100px, 95%);
+    margin: 16px auto 24px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: 16px;
+    box-shadow: 0 4px 16px #1f293740;
+}
+
+.navegacion-app #nav-inicio {
+    flex: none;
+}
+
+.indicador-pasos {
+    display: flex;
+    flex: 1;
+    gap: 8px;
+    list-style: none;
+}
+
+.indicador-pasos[hidden] {
+    display: none;
+}
+
+.indicador-pasos li {
+    flex: 1;
+    min-width: 0;
+}
+
+.indicador-pasos button {
+    width: 100%;
+    height: auto;
+    min-height: 40px;
+    padding: 8px;
+    border: 1px solid var(--color-borde);
+    background: var(--color-fondo-suave);
+    color: var(--color-texto-secundario);
+    font-size: 14px;
+}
+
+.indicador-pasos button.activo {
+    background: var(--color-principal);
+    border-color: var(--color-principal);
+    color: #fff;
+}
+
+.indicador-pasos button.completado {
+    background: var(--color-claro-hover);
+    border-color: var(--color-principal);
+    color: var(--color-principal);
+}
+
+.indicador-pasos button:disabled {
+    cursor: default;
+    opacity: 1;
+}
+
+@media (max-width: 600px) {
+    .navegacion-app {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .navegacion-app #nav-inicio {
+        align-self: flex-start;
+    }
+
+    .indicador-pasos {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 body {
@@ -228,13 +310,27 @@ body {
 
 .historico {
     width: min(750px, 95%);
-    margin: 70px auto 0;
+    margin: 48px auto 0;
+    padding: 24px;
     text-align: left;
+
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: 20px;
+    box-shadow: 0 4px 16px #1f293794;
+
+
+
 }
 
 .lista-historico {
     display: grid;
     gap: 12px;
+}
+
+.historico__datos,
+.historico__datos>* {
+    text-align: left;
 }
 
 .historico__elemento {
@@ -251,11 +347,13 @@ body {
     color: var(--color-texto);
     text-align: left;
     cursor: pointer;
+    margin-bottom: 2px;
 }
 
 
 .historico__elemento:hover {
     border-color: var(--color-principal);
+    background-color: var(--color-fondo-suave);
 }
 
 .historico__datos {
@@ -1023,10 +1121,11 @@ input[type="checkbox"] {
     background: white;
     cursor: crosshair;
 }
+
 #pag3 #pag3-pagina-completa {
     position: relative;
     width: 100%;
-    
+
 }
 
 #pag3 #pag3-imagen {
@@ -1076,6 +1175,7 @@ input[type="checkbox"] {
     margin: 0;
     white-space: nowrap;
 }
+
 #pag3 .panel-paginas__cabecera {
     margin-bottom: 16px;
     padding-bottom: 16px;
@@ -1087,11 +1187,13 @@ input[type="checkbox"] {
     margin: 0;
 
 }
+
 #pag3 #pag3-paginas button[aria-current="page"] {
-   border-color: var(--color-principal);
+    border-color: var(--color-principal);
     background: #edf2f8;
     color: var(--color-principal);
 }
+
 #pag3 #pag3-paginas button {
     display: flex;
     align-items: center;
@@ -1105,6 +1207,7 @@ input[type="checkbox"] {
     font-size: 15px;
     font-weight: 600;
 }
+
 #pag3 #pag3-paginas .ruta-pagina {
     min-width: 0;
     text-align: left;
@@ -1115,6 +1218,7 @@ input[type="checkbox"] {
     flex: 0 0 auto;
     margin-left: auto;
 }
+
 #pag3 #pag3-estado,
 #pag3 #pag3-paginas .estado-pagina {
 
