@@ -10,6 +10,20 @@
 </head>
 
 <body>
+    
+    <!--Navbar de navegación para las distintas páginas-->
+    <nav id= "navbar-menu" class="navegacion-app" aria-label="Navegación del flujo">
+        <button type="button" id="nav-inicio" class="boton-claro">
+            Inicio
+        </button>
+
+        <ol class="indicador-pasos" hidden>
+            <li><button type="button" data-pagina="pagina-1">1. Descubrir</button></li>
+            <li><button type="button" data-pagina="pag2">2. Config global</button></li>
+            <li><button type="button" data-pagina="pag3">3. Config por página</button></li>
+            <li><button type="button" data-pagina="pag4">4. Resultados</button></li>
+        </ol>
+    </nav>
     <!------------------------------------------------->
     <!-- Bloque de página de inicio -->
     <!--Permite introducir la URL de la web a analizar-->
@@ -300,7 +314,7 @@
                                     <img id="pag3-imagen" alt="Vista previa de la página" hidden>
                                     <div id="pag3-marcadores"></div>
                                 </div>
-                                
+
                             </div>
                         </div>
                     </section>

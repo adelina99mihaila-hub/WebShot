@@ -39,20 +39,103 @@ const respetarRobots = document.getElementById("respect-robots");
 const estadoBusqueda = document.getElementById("estadoCarga");
 
 //NAVEGACIÓN ENTRE PÁGINAS
+
+const paginasFlujo = ["pagina-1", "pag2", "pag3", "pag4"];
+
+//Función encargada de actualizar el indicador de pasos (navbar)
+function actualizarIndicador(pagina) {
+
+    //Busca la posición de la página en el array
+    const pasoActual = paginasFlujo.indexOf(pagina);
+
+    //Constante para el Navbar
+    const indicador = document.querySelector(".indicador-pasos");
+
+    //Oculto en la página de inicio
+    indicador.hidden = pagina === "inicio";
+    
+    //Recorre los botones y obtiene el paso actual para modificar los estilos
+    indicador.querySelectorAll("[data-pagina]").forEach(function (boton) {
+      
+        const paso = paginasFlujo.indexOf(boton.dataset.pagina);
+
+        boton.classList.toggle("activo", paso === pasoActual);
+        boton.classList.toggle("completado", paso < pasoActual);
+
+        if (paso === pasoActual) {
+            boton.setAttribute("aria-current", "step");
+        } else {
+            boton.removeAttribute("aria-current");
+        }
+    });
+}
+
+//Recorre los botones y añade el evento de click
+document.querySelectorAll(".indicador-pasos [data-pagina]").forEach(function (boton) {
+    boton.addEventListener("click", async function () {
+        
+        const paginaVisible = document.querySelector(".pagina:not([hidden])");
+        const destino = boton.dataset.pagina;
+
+        if (!paginaVisible || paginaVisible.id === destino) return;
+
+        if (destino === "pag3" && !await window.prepararConfiguracionPorPagina()) {
+            return;
+        }
+
+        if (destino === "pag4") {
+            if (paginaVisible.id !== "pag3" || !leerConfigPag3()) {
+                if (!await window.prepararConfiguracionPorPagina()) return;
+            }
+
+            mostrarResultados();
+        }
+
+        mostrarPagina(destino);
+    });
+});
 //Función para mostrar la página correspondiente y ocultar las demás
 function mostrarPagina(idPagina, guardarHistorial = true) {
+
+    //Recorre todas las secciones y muestra solo la del id seleccionado
     document.querySelectorAll(".pagina").forEach(function (pagina) {
         pagina.hidden = pagina.id !== idPagina;
     });
+    
+    //Si estamos en inicio ocultamos el navbar
+    const navbar = document.getElementById("navbar-menu");
+
+    if (navbar){
+        navbar.hidden = idPagina === "inicio";
+    }
+    //Scroll al principio de la página
     window.scrollTo(0, 0);
 
     sessionStorage.setItem("paginaActual", idPagina);
+
+    actualizarIndicador(idPagina);
 
     if (guardarHistorial) {
         history.pushState({ pagina: idPagina }, "", "#" + idPagina);
     }
 }
+document.getElementById("nav-inicio").addEventListener("click", function () {
+    mostrarPagina("inicio");
+});
 
+document.querySelectorAll(".indicador-pasos [data-pagina]").forEach(function (boton) {
+    boton.addEventListener("click", function () {
+        const paginaVisible = document.querySelector(".pagina:not([hidden])");
+        if (!paginaVisible) return;
+
+        const pasoActual = paginasFlujo.indexOf(paginaVisible.id);
+        const pasoDestino = paginasFlujo.indexOf(boton.dataset.pagina);
+
+        if (pasoDestino < pasoActual) {
+            mostrarPagina(boton.dataset.pagina);
+        }
+    });
+});
 // Escuchar el evento popstate para manejar la navegación hacia atrás y hacia adelante
 window.addEventListener("popstate", function (e) {
     const destino = (e.state && e.state.pagina) || "inicio";
@@ -965,65 +1048,131 @@ casillasViewport.forEach(function (casilla) {
     document.getElementById('btn-volver').addEventListener('click', () => mostrarPagina('pagina-1'));
     document.getElementById('pag3-volver').addEventListener('click', () => mostrarPagina('pag2'));
 
-    //Botón para continuar a la página 3, validando que las URLs seleccionadas tengan estado OK y que los puntos de scroll sean válidos
-    document.getElementById('btn-continuar').addEventListener('click', async () => {
+//Función que prepara y valida la configuración antes de pasar de página
+    async function prepararConfiguracionPorPagina() {
 
-        const filas = Array.from(tabla.querySelectorAll('tr')).filter(fila => fila.querySelector('input[type="checkbox"]').checked);
-        if (!filas.length) { mostrarPagina('pagina-1'); return; }
-        if (filas.some(fila => fila.dataset.estado !== 'ok')) {
-            alert('Selecciona únicamente URLs con estado OK para continuar.'); return;
+        //Obtiene las checkbox de las urls
+        const filas = Array.from(tabla.querySelectorAll("tr")).filter(function (fila) {
+            return fila.querySelector('input[type="checkbox"]').checked;
+        });
+
+        //Debe haber al menos una url seleccionada
+        if (!filas.length) {
+            alert("Selecciona al menos una URL antes de entrar en la configuración por página.");
+            return false;
         }
-        const campos = Array.from(contenedorPuntosScroll.querySelectorAll('input'));
-        const puntos = campos.map(campo => Number(campo.value));
-        if (campos.some(campo => campo.value === '') || puntos.some(punto => !Number.isInteger(punto) || punto < 0 || punto > 100) || new Set(puntos).size !== puntos.length) {
-            alert('Los puntos deben ser enteros distintos entre 0 y 100.'); return;
+
+        //Comprueba que todas las paginas esten ok
+        if (filas.some(function (fila) {
+            return fila.dataset.estado !== "ok";
+        })) {
+            alert("Selecciona únicamente URLs con estado OK para continuar.");
+            return false;
         }
+
+        //Obtiene los puntos de scroll
+        const campos = Array.from(contenedorPuntosScroll.querySelectorAll("input"));
+        const puntos = campos.map(function (campo) {
+            return Number(campo.value);
+        });
+
+        //Valida los puntos de scroll
+        if (
+            campos.some(function (campo) { return campo.value === ""; }) ||
+            puntos.some(function (punto) {
+                return !Number.isInteger(punto) || punto < 0 || punto > 100;
+            }) ||
+            new Set(puntos).size !== puntos.length
+        ) {
+            alert("Los puntos deben ser enteros distintos entre 0 y 100.");
+            return false;
+        }
+
+        //El id del rastreo debe ser valido
         if (!crawlIdActual) {
-            alert('No hay un rastreo válido. Vuelve a analizar la web.');
-            return;
+            alert("No hay un rastreo válido. Vuelve a analizar la web.");
+            return false;
         }
 
         try {
-            //Enviamos la petición al servidor
-            const respuesta = await fetch('/api/seleccion', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+            const respuesta = await fetch("/api/seleccion", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    crawlId: crawlIdActual, //id de rastreo
-                    urls: filas.map(fila => fila.dataset.url)
+                    crawlId: crawlIdActual,
+                    urls: filas.map(function (fila) {
+                        return fila.dataset.url;
+                    })
                 })
             });
-            //Convertimos la respuesta de json a js
+
             const resultado = await respuesta.json();
 
             if (!respuesta.ok) {
-                alert(resultado.error || 'No se pudo registrar la selección.');
-                return;
+                alert(resultado.error || "No se pudo registrar la selección.");
+                return false;
             }
         } catch (error) {
-            console.error('Error al registrar la selección:', error);
-            alert('No se pudo conectar con el servidor para registrar la selección.');
-            return;
+            console.error("Error al registrar la selección:", error);
+            alert("No se pudo conectar con el servidor para registrar la selección.");
+            return false;
         }
 
-        const tamanos = Object.keys(anchos).filter(nombre => Array.from(casillasViewport).some(casilla => casilla.value === anchos[nombre] && casilla.checked));
-        const nuevosIniciales = { puntos: puntos.sort((a, b) => a - b), tamanos };
-        const nuevoTipo = document.querySelector('#pag2 input[name="tipo"]:checked').value;
-        const cambiaron = JSON.stringify(nuevosIniciales) !== JSON.stringify(inicial) || tipo !== nuevoTipo;
-        inicial = nuevosIniciales; tipo = nuevoTipo;
-
-        const anteriores = datos; datos = Object.create(null);
-        filas.forEach(fila => {
-            const url = fila.dataset.url;
-            datos[url] = !cambiaron && anteriores[url] ? anteriores[url] : clonarInicial();
+       // Los tamaños de viewport marcados
+        const tamanos = Object.keys(anchos).filter(function (nombre) {
+            return Array.from(casillasViewport).some(function (casilla) {
+                return casilla.value === anchos[nombre] && casilla.checked;
+            });
         });
 
-        if (!datos[paginaActual]) paginaActual = Object.keys(datos)[0];
-        mensaje.textContent = tipo === 'completa' ? 'Página completa: se cuenta una captura por tamaño; los puntos de scroll solo se aplican al modo viewport.' : '';
-        mostrar(); mostrarPagina('pag3');
+        //Objeto con la configuración con puntos de scroll y viewports
+        const nuevosIniciales = {
+            puntos: puntos.sort(function (a, b) { return a - b; }),
+            tamanos: tamanos
+        };
+        //Confifuración seleccionada en la página 2
+        const nuevoTipo = document.querySelector('#pag2 input[name="tipo"]:checked').value;
+       //Compara si se ha personalizado la configuración
+        const cambiaron =
+            JSON.stringify(nuevosIniciales) !== JSON.stringify(inicial) ||
+            tipo !== nuevoTipo;
 
+        //Actualiza con los nuevos valores
+        inicial = nuevosIniciales;
+        tipo = nuevoTipo;
+
+        //Guarda los los datos para poder reutilizarlos
+        const anteriores = datos;
+        datos = Object.create(null);
+
+        //Recorre las filas, si no ha cambiado la configuración conservalos datos
+        //si ha cambiado se crea una configuración inicial nueva
+        filas.forEach(function (fila) {
+            const url = fila.dataset.url;
+            datos[url] = !cambiaron && anteriores[url]
+                ? anteriores[url]
+                : clonarInicial();
+        });
+
+        if (!datos[paginaActual]) {
+            paginaActual = Object.keys(datos)[0];
+        }
+
+        mensaje.textContent = tipo === "completa"
+            ? "Página completa: se cuenta una captura por tamaño; los puntos de scroll solo se aplican al modo viewport."
+            : "";
+
+        mostrar();
+        return true;
+    }
+    //Permite que la configuración este disponible globalmente
+    window.prepararConfiguracionPorPagina = prepararConfiguracionPorPagina;
+    //Añade el evento al botón de continuar
+    document.getElementById("btn-continuar").addEventListener("click", async function () {
+        if (await prepararConfiguracionPorPagina()) {
+            mostrarPagina("pag3");
+        }
     });
-
     //Al cargar la página, se restauran los datos guardados en sessionStorage
     contenedorPuntosScroll.querySelectorAll('.puntos__item').forEach(punto => punto.remove());
     inicial.puntos.forEach(valor => contenedorPuntosScroll.insertBefore(crearPunto(valor), btnAnadirPunto));
