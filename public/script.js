@@ -655,81 +655,145 @@ function leerConfigPag3() {
     return JSON.parse(guardado);
 }
 
-//Función para crear una tarjeta de resultado para una URL dada, con la configuración de puntos y tamaños de viewport
-function crearTarjetaResultado(url, config, tipo) {
-
-    let etiquetas;
-
-    if (tipo === "completa") {
-        etiquetas = ["Completa"];
+//NUEVO Función para leer el resultado de la última generación de capturas guardado en sessionStorage
+function leerResultado() {
+    const guardado = sessionStorage.getItem("webshot-resultado");
+    if (!guardado) {
+        return null;
     }
-    else { etiquetas = config.puntos.map(function (p) { return p + "%"; }); }
+    return JSON.parse(guardado);
+}
 
-    let miniaturas = "";
+//Crea la miniatura de UNA captura: imagen, etiqueta, tamaño y botón de descarga
+function crearMiniatura(captura) {
+    const figura = document.createElement("figure");
+    figura.className = "pag4__miniatura";
 
-    //Generar las miniaturas para cada combinación de tamaño y etiqueta
-    config.tamanos.forEach(function (tamano) {
-        etiquetas.forEach(function (etiqueta) {
-            miniaturas += `
-                <figure class="pag4__miniatura">
-                    <span class="pag4__etiqueta">${etiqueta}</span>
-                    <button type="button" class="pag4__descarga boton-claro">⬇</button>
-                    <figcaption>${nombresTamano[tamano]}</figcaption>
-                </figure>`;
-        });
-    });
+    const pie = document.createElement("figcaption");
+    pie.textContent = nombresTamano[captura.tamano] || captura.tamano;
 
-    const cantidad = etiquetas.length * config.tamanos.length;
+    //Si la captura falló, mostramos el mensaje de error en lugar de la imagen
+    if (captura.error) {
+        const aviso = document.createElement("p");
+        aviso.className = "pag4__error";
+        aviso.textContent = captura.error;
+        figura.append(aviso, pie);
+        return figura;
+    }
 
-    //Crear el elemento de tarjeta con la información de la URL, cantidad de capturas y miniaturas
+    const imagen = document.createElement("img");
+    imagen.src = captura.src;
+    imagen.alt = "Captura " + captura.etiqueta + " en " + pie.textContent;
+    imagen.loading = "lazy";
+
+    const etiqueta = document.createElement("span");
+    etiqueta.className = "pag4__etiqueta";
+    etiqueta.textContent = captura.etiqueta;
+
+    const descarga = document.createElement("a");
+    descarga.className = "pag4__descarga boton-claro";
+    descarga.href = captura.src;
+    descarga.download = captura.archivo;
+    descarga.textContent = "⬇";
+    descarga.title = "Descargar captura";
+
+    figura.append(imagen, etiqueta, descarga, pie);
+    return figura;
+}
+
+//Crea la tarjeta de una URL con todas sus capturas
+function crearTarjetaResultado(pagina) {
+
     const tarjeta = document.createElement("article");
     tarjeta.className = "pag4__tarjeta";
-    tarjeta.dataset.url = url.toLowerCase();
+    tarjeta.dataset.url = pagina.url.toLowerCase();
+
+    //Contamos solo las capturas que salieron bien
+    const correctas = pagina.capturas.filter(function (captura) {
+        return !captura.error;
+    }).length;
+
     tarjeta.innerHTML = `
         <div class="pag4__tarjeta-cabecera">
             <div class="pag4__info">
                 <strong class="pag4__url"></strong>
             </div>
-            <span class="pag4__contador">${cantidad} capturas</span>
+            <span class="pag4__contador"></span>
         </div>
-        <div class="pag4__miniaturas">${miniaturas}</div>`;
+        <div class="pag4__miniaturas"></div>`;
 
-    tarjeta.querySelector(".pag4__url").textContent = url;
+    tarjeta.querySelector(".pag4__url").textContent = pagina.url;
+    tarjeta.querySelector(".pag4__contador").textContent = correctas + " capturas";
 
-    return { tarjeta: tarjeta, cantidad: cantidad };
+    const contenedor = tarjeta.querySelector(".pag4__miniaturas");
+    pagina.capturas.forEach(function (captura) {
+        contenedor.appendChild(crearMiniatura(captura));
+    });
+
+    return { tarjeta: tarjeta, cantidad: correctas };
 }
 
 
-//Función para mostrar los resultados en la página 4, generando tarjetas
+//Función para mostrar los resultados en la página 4, a partir de la última generación de capturas
 function mostrarResultados() {
 
     listaResultados.innerHTML = "";
 
-    const config = leerConfigPag3();
-    if (!config) {
+    const resultado = leerResultado();
+    if (!resultado) {
         resumen.textContent = "0 capturas · 0 páginas";
         return;
     }
 
     let totalCapturas = 0;
-    const direcciones = Object.keys(config.datos);
 
-    direcciones.forEach(function (url) {
-
-        const resultado = crearTarjetaResultado(url, config.datos[url], config.tipo);
-        listaResultados.appendChild(resultado.tarjeta);
-        totalCapturas += resultado.cantidad;
-
+    resultado.paginas.forEach(function (pagina) {
+        const creada = crearTarjetaResultado(pagina);
+        listaResultados.appendChild(creada.tarjeta);
+        totalCapturas += creada.cantidad;
     });
 
-    resumen.textContent = totalCapturas + " capturas · " + direcciones.length + " páginas";
+    resumen.textContent = totalCapturas + " capturas · " + resultado.paginas.length + " páginas";
 }
 
-//Botón para generar los resultados y pasar a la página 4
-botonGenerar.addEventListener("click", function () {
+//Botón para generar las capturas: envía la configuración al servidor y muestra el resultado en la página 4
+botonGenerar.addEventListener("click", async function () {
 
-    mostrarResultados();
-    mostrarPagina("pag4");
+    const config = leerConfigPag3();
+    if (!config || Object.keys(config.datos).length === 0) {
+        alert("No hay páginas configuradas para capturar.");
+        return;
+    }
+
+    //Desactivamos el botón mientras se generan, para que no se pulse dos veces
+    const textoOriginal = botonGenerar.textContent;
+    botonGenerar.disabled = true;
+    botonGenerar.textContent = "Generando capturas…";
+
+    try {
+        const respuesta = await fetch("/api/generar", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ tipo: config.tipo, datos: config.datos })
+        });
+
+        const resultado = await respuesta.json();
+
+        if (!respuesta.ok) {
+            throw new Error(resultado.error || "Error al generar las capturas");
+        }
+
+        sessionStorage.setItem("webshot-resultado", JSON.stringify(resultado));
+        mostrarResultados();
+        mostrarPagina("pag4");
+
+    } catch (error) {
+        alert("No se pudieron generar las capturas: " + error.message);
+
+    } finally {
+        botonGenerar.disabled = false;
+        botonGenerar.textContent = textoOriginal;
+    }
 });
 
 //Filtro paralas tarjetas de resultados según la URL
