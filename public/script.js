@@ -375,6 +375,11 @@ formulario.addEventListener("submit", async function (evento) {
                 respectRobots: respetarRobots.checked
             })
         });
+        
+        //Si la ruta todavía no existe en el servidor (404), avisamos con un mensaje claro
+        if (respuesta.status === 404) {
+            throw new Error("la generación de capturas todavía no está disponible en el servidor.");
+        }
 
         //Convertimos la respuesta del servidor en un objeto JSON   
         const resultado = await response.json();
