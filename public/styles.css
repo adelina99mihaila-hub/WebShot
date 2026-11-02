@@ -729,7 +729,7 @@ input[type="checkbox"] {
     background: #ffffff;
     border-radius: 20px;
     box-shadow: 0 4px 16px #1f293794;
-    overflow: hidden;
+  /*  overflow: hidden;*/
     border: 1px solid #dce2e9;
 }
 
@@ -908,11 +908,17 @@ input[type="checkbox"] {
 
 /* Bloque: acciones */
 #pag2 .acciones {
+    position: sticky;
+    bottom: 0;
     display: flex;
     justify-content: space-between;
     margin: 0;
     padding: 20px 28px;
     border-top: 1px solid #eee;
+    background: #ffffff;
+    z-index: 10;
+    border-radius:  0 0 20px 20px;
+
 }
 
 #pag2 .acciones__boton--secundario {
@@ -1313,10 +1319,6 @@ input[type="checkbox"] {
     border-top: 1px solid var(--color-borde);
 }
 
-/* #pag3 .nota-capturas {
-    margin: 16px 0;
-    font-size: 13px;
-} */
 
 @media (max-width: 1050px) {
     #pag3 main {
@@ -1361,8 +1363,70 @@ input[type="checkbox"] {
     border-radius: 12px;
 }
 
+.pantalla-generando {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgb(15 23 42 / 65%);
+}
 
+.pantalla-generando__capturas {
+    width: min(420px, 100%);
+    padding: 36px 24px;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 12px 40px rgb(0 0 0 / 20%);
+    text-align: center;
+}
 
+.pantalla-generando__capturas h2 {
+    margin: 20px 0 8px;
+    color: var(--color-texto);
+}
+
+.pantalla-generando__capturas p {
+    color: var(--color-texto-secundario);
+}
+/*
+.pantalla-generando__loader {
+    display: block;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto;
+    border-width: 5px;
+} Opcion loader o barra de carga
+*/
+.pantalla-generando__progreso {
+    position: relative;
+    height: 10px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e5e7eb;
+}
+
+.pantalla-generando__progreso::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 40%;
+    border-radius: inherit;
+    background: var(--color-principal);
+    animation: progreso-indeterminado 1.4s ease-in-out infinite;
+}
+
+@keyframes progreso-indeterminado {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(250%);
+    }
+}
 
 /* ================ PÁGINA 4 ================ */
 

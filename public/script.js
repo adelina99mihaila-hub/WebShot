@@ -79,6 +79,15 @@ document.querySelectorAll(".indicador-pasos [data-pagina]").forEach(function (bo
 
         if (!paginaVisible || paginaVisible.id === destino) return;
 
+        const pasoActual = paginasFlujo.indexOf(paginaVisible.id);
+        const pasoDestino = paginasFlujo.indexOf(destino);
+
+        // Al retroceder, navega sin volver a preparar la configuración.
+        if (pasoDestino < pasoActual) {
+            mostrarPagina(destino);
+            return;
+        }
+
         if (destino === "pag3" && !await window.prepararConfiguracionPorPagina()) {
             return;
         }
@@ -123,19 +132,6 @@ document.getElementById("nav-inicio").addEventListener("click", function () {
     mostrarPagina("inicio");
 });
 
-document.querySelectorAll(".indicador-pasos [data-pagina]").forEach(function (boton) {
-    boton.addEventListener("click", function () {
-        const paginaVisible = document.querySelector(".pagina:not([hidden])");
-        if (!paginaVisible) return;
-
-        const pasoActual = paginasFlujo.indexOf(paginaVisible.id);
-        const pasoDestino = paginasFlujo.indexOf(boton.dataset.pagina);
-
-        if (pasoDestino < pasoActual) {
-            mostrarPagina(boton.dataset.pagina);
-        }
-    });
-});
 // Escuchar el evento popstate para manejar la navegación hacia atrás y hacia adelante
 window.addEventListener("popstate", function (e) {
     const destino = (e.state && e.state.pagina) || "inicio";
@@ -1361,7 +1357,7 @@ function crearMiniatura(captura) {
 
     const figura = document.createElement("figure");
     figura.className = "pag4__miniatura";
-    
+
     const pie = document.createElement("figcaption");
     pie.textContent = nombresTamano[captura.tamano] || captura.tamano;
 
@@ -1486,10 +1482,13 @@ botonGenerar.addEventListener("click", async function () {
         return;
     }
 
+    const pantallaGenerando = document.getElementById("pantalla-generando");
+
     //Desactivamos el botón mientras se generan, para que no se pulse dos veces
     const textoOriginal = botonGenerar.textContent;
     botonGenerar.disabled = true;
     botonGenerar.textContent = "Generando capturas…";
+    pantallaGenerando.hidden = false;
 
     try {
         const respuesta = await fetch("/api/generar", {
@@ -1517,6 +1516,7 @@ botonGenerar.addEventListener("click", async function () {
         alert("No se pudieron generar las capturas: " + error.message);
 
     } finally {
+        pantallaGenerando.hidden = true;
         botonGenerar.disabled = false;
         botonGenerar.textContent = textoOriginal;
     }

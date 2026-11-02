@@ -361,8 +361,19 @@
                     </button>
                 </footer>
 
-
     </section>
+    <!-- PANTALLA DE CARGA -->
+    <!------------------------------------------------->
+    <!--Muestra la carga de las capturas-->
+    <!------------------------------------------------>
+    <div id="pantalla-generando" class="pantalla-generando" role="status" aria-live="polite" hidden>
+        <div class="pantalla-generando__capturas">
+            <!-- <span class="loader pantalla-generando__loader" aria-hidden="true"></span>-->
+            <div class="pantalla-generando__progreso" role="progressbar" aria-label="Generando capturas"></div><!--Opción loader o barra de carga-->
+            <h2>Generando capturas...</h2>
+            <p>Esto puede tardar unos minutos.</p>
+        </div>
+    </div>
 
     <!-- PÁGINA 4: resultados -->
     <!------------------------------------------------->
