@@ -10,9 +10,9 @@
 </head>
 
 <body>
-    
+
     <!--Navbar de navegación para las distintas páginas-->
-    <nav id= "navbar-menu" class="navegacion-app" aria-label="Navegación del flujo">
+    <nav id="navbar-menu" class="navegacion-app" aria-label="Navegación del flujo">
         <button type="button" id="nav-inicio" class="boton-claro">
             Inicio
         </button>
@@ -389,7 +389,14 @@
                     PDF</button>
             </div>
         </header>
-
+        <div class="pag4__comparacion-controles">
+            <p id="pag4-comparacion-estado" role="status" aria-live="polite">
+                Selecciona dos capturas para compararlas.
+            </p>
+            <button type="button" id="pag4-comparar" class="boton-principal" disabled>
+                Comparar
+            </button>
+        </div>
         <!-- JavaScript insertará aquí las tarjetas de resultados -->
 
         <div id="pag4-lista">
@@ -401,6 +408,22 @@
         </div>
 
     </section>
+    <dialog id="pag4-comparador" aria-labelledby="pag4-comparador-titulo">
+        <div class="pag4__comparador-cabecera">
+            <h2 id="pag4-comparador-titulo">Comparar capturas</h2>
+            <button type="button" id="pag4-cierre-comparador" aria-label="cerrar">X</button>
+        </div>
+        <div class="pag4__comparador-capturas">
+            <figure>
+                <figcaption id="pag4-comparador-1"></figcaption>
+                <div id="pag4-comparador-captura-1"></div>
+            </figure>
+            <figure>
+                <figcaption id="pag4-comparador-2"></figcaption>
+                <div id="pag4-comparador-captura-2"></div>
+            </figure>
+        </div>
+    </dialog>
 
     <script src="script.js"></script>
 </body>

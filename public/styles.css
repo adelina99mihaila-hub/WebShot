@@ -1510,6 +1510,105 @@ input[type="checkbox"] {
 #pag4 .pag4__acciones {
     margin-top: 24px;
 }
+#pag4 .pag4__comparacion-controles {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    margin: 16px 0;
+}
+
+#pag4 .pag4__comparacion-controles p {
+    color: var(--color-texto-secundario);
+}
+
+#pag4 .pag4__comparacion-controles button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+#pag4 .pag4__seleccion {
+    position: absolute;
+    top: 44px;
+    left: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 0.8rem;
+}
+
+#pag4 .pag4__seleccion input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--color-principal);
+}
+
+#pag4-comparador {
+    width: min(1000px, 92vw);
+    max-width: none;
+    max-height: 85vh;
+    margin: auto;
+    padding: 24px;
+    border: 1px solid var(--color-borde);
+    border-radius: 16px;
+    color: var(--color-texto);
+}
+
+#pag4-comparador::backdrop {
+    background: rgb(15 23 42 / 65%);
+}
+
+.pag4__comparador-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.pag4__comparador-capturas {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.pag4__comparador-capturas figure {
+    min-width: 0;
+}
+
+.pag4__comparador-capturas figcaption {
+    position: static;
+    margin-bottom: 8px;
+    color: var(--color-texto);
+    text-align: left;
+}
+
+#pag4-comparador-captura-1,
+#pag4-comparador-captura-2 {
+    display: grid;
+    min-height: 240px;
+    place-items: center;
+    padding: 20px;
+    border: 1px dashed var(--color-borde);
+    border-radius: 12px;
+    background: var(--color-fondo-suave);
+    color: var(--color-texto-secundario);
+}
+
+@media (max-width: 600px) {
+    #pag4 .pag4__comparacion-controles {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .pag4__comparador-capturas {
+        grid-template-columns: 1fr;
+    }
+}
 
 /* El traductor del navegador mete etiquetas <font>: que hereden el color del padre, así que esta regla protege los colores de la página */
 font {
