@@ -1226,45 +1226,62 @@ const botonGenerar = document.getElementById("pag3-generar");
 
 const nombresTamano = { desktop: "Desktop", tablet: "Tablet", movil: "Móvil" };
 
-const opcionesComparacion = [];
+//Constantes para la función de comparar dos capturas
+const opcionesComparacion = []; //Almacena todas las capturas disponibles
 const botonComparar = document.getElementById("pag4-comparar");
 const estadoComparacion = document.getElementById("pag4-comparacion-estado");
 const dialogoComparador = document.getElementById("pag4-comparador");
 const botonCerrarComparador = document.getElementById("pag4-cierre-comparador");
-const seleccionesComparacion = [];
+const seleccionesComparacion = []; //Almacena solo las dos capturas elegidas para comparar
 
+//Evento para el contenedor de resultado, se escuchan los cambios desde el contenedor
 listaResultados.addEventListener("change", function (evento) {
+
+    //Elemento que provoca el evento
     const casilla = evento.target;
 
+    //Comprobamos que sea una casilla de comparar
     if (!casilla.matches(".pag4__comparar-checkbox")) return;
 
+    //Pasamos a número el identificador de su casilla
     const id = Number(casilla.dataset.miniaturaId);
 
+    //Comprobamos que sea numero y que sea valido
     if (!Number.isInteger(id) || !opcionesComparacion[id]) {
+
         casilla.checked = false;
         console.error("La miniatura seleccionada no tiene un identificador válido.");
         return;
     }
 
+    //Si la casilla ha sido marcada dejamos comparar como mucho 2 capturas
     if (casilla.checked) {
+
         if (seleccionesComparacion.length === 2) {
+
             casilla.checked = false;
             estadoComparacion.textContent = "Puedes seleccionar como máximo dos capturas.";
             return;
         }
 
         seleccionesComparacion.push(id);
+
     } else {
+
         const indice = seleccionesComparacion.indexOf(id);
         if (indice !== -1) seleccionesComparacion.splice(indice, 1);
     }
-
+    //Se actualiza el estado después de cada selección o deselección
     actualizarComparacion();
 });
 
+
+//Función para actualizar la comparación en función del número de capturas seleccionadas
 function actualizarComparacion() {
+
     const cantidad = seleccionesComparacion.length;
 
+    //Solo se activa el botón cuando se seleccionan dos capturas
     botonComparar.disabled = cantidad !== 2;
     estadoComparacion.textContent = cantidad === 0
         ? "Selecciona dos capturas para compararlas."
@@ -1272,17 +1289,20 @@ function actualizarComparacion() {
 
 }
 
+//Función para el boton de comparar
 botonComparar.addEventListener("click", function () {
-    if(seleccionesComparacion.length !== 2) return;
+
+    if (seleccionesComparacion.length !== 2) return;
 
     const primera = opcionesComparacion[seleccionesComparacion[0]];
     const segunda = opcionesComparacion[seleccionesComparacion[1]];
 
-    if(!primera || !segunda){
+    if (!primera || !segunda) {
         console.error("No se encontraron las dos opciones seleccionadas.");
         return;
     }
 
+    //Mostramos los datos de las capturas
 
     document.getElementById("pag4-comparador-1").textContent =
         `${primera.url} · ${nombresTamano[primera.tamano]} · ${primera.etiqueta}`;
@@ -1296,9 +1316,13 @@ botonComparar.addEventListener("click", function () {
     document.getElementById("pag4-comparador-captura-2").textContent =
         "La captura real aparecerá aquí cuando se conecte la generación.";
 
+    //Abrimos la ventana de diálogo en formato modal
+    //showModal() muestra el diálogo y bloquea la interacción
+    //con el resto de la página hasta que se cierre
     dialogoComparador.showModal();
 });
 
+//Botón para cerrar el comparador
 botonCerrarComparador.addEventListener("click", function () {
     dialogoComparador.close();
 });
@@ -1315,22 +1339,29 @@ function leerConfigPag3() {
 
 //NUEVO Función para leer el resultado de la última generación de capturas guardado en sessionStorage
 function leerResultado() {
-    
+
+    //Limpiamos todo lo referente a la comparación de capturas
     opcionesComparacion.length = 0;
     seleccionesComparacion.length = 0;
     actualizarComparacion();
+
+
     const guardado = sessionStorage.getItem("webshot-resultado");
     if (!guardado) {
         return null;
     }
     return JSON.parse(guardado);
 }
-function crearMiniatura(captura, url){
+
+//Función para crear las miniaturas de las capturas
+function crearMiniatura(captura) {
+
     const opcion = document.createElement("div");
     opcion.className = "pag4__opcion";
 
-     const figura = document.createElement("figure");
+    const figura = document.createElement("figure");
     figura.className = "pag4__miniatura";
+    
     const pie = document.createElement("figcaption");
     pie.textContent = nombresTamano[captura.tamano] || captura.tamano;
 
@@ -1343,7 +1374,7 @@ function crearMiniatura(captura, url){
         opcion.appendChild(figura);
         return opcion;
     }
-    
+
     const indice = opcionesComparacion.length;
 
     opcionesComparacion.push({
@@ -1353,7 +1384,7 @@ function crearMiniatura(captura, url){
         src: captura.src
     });
 
-        const imagen = document.createElement("img");
+    const imagen = document.createElement("img");
     imagen.src = captura.src;
     imagen.alt = "Captura " + captura.etiqueta + " en " + pie.textContent;
     imagen.loading = "lazy";
@@ -1370,7 +1401,7 @@ function crearMiniatura(captura, url){
     descarga.title = "Descargar captura";
     descarga.setAttribute("aria-label", `Descargar captura ${captura.etiqueta}`);
 
-        figura.append(imagen, etiqueta, descarga, pie);
+    figura.append(imagen, etiqueta, descarga, pie);
 
     const labelComparar = document.createElement("label");
     labelComparar.className = "pag4__seleccion";
@@ -1390,7 +1421,7 @@ function crearMiniatura(captura, url){
 //Crea la tarjeta de una URL con todas sus capturas
 function crearTarjetaResultado(pagina) {
 
-    
+
 
     //Crear el elemento de tarjeta con la información de la URL, cantidad de capturas y miniaturas
     const tarjeta = document.createElement("article");
@@ -1467,7 +1498,7 @@ botonGenerar.addEventListener("click", async function () {
             body: JSON.stringify({ tipo: config.tipo, datos: config.datos })
         });
 
-//Si la ruta todavía no existe en el servidor (404), avisamos con un mensaje claro
+        //Si la ruta todavía no existe en el servidor (404), avisamos con un mensaje claro
         if (respuesta.status === 404) {
             throw new Error("la generación de capturas todavía no está disponible en el servidor.");
         }
