@@ -145,8 +145,6 @@ window.addEventListener("popstate", function (e) {
 //======  PÁGINA 1  ========
 //Gestion de URLs y filtros
 
-
-let urls = [];
 let activeFilter = "all";
 
 //Elementos de la página de inicio
@@ -610,11 +608,9 @@ function crearPunto(valor) {
     const botonQuitar = punto.querySelector(".puntos__quitar");
     botonQuitar.addEventListener("click", function () {
         const cuantasHayAhora = contenedorPuntosScroll.querySelectorAll(".puntos__item").length;
-        if (cuantasHayAhora > 1) {
-            punto.remove();
-        }
+        if (cuantasHayAhora > 1) punto.remove();
+    });
 
-    })
     return punto;
 }
 
@@ -1192,12 +1188,9 @@ const filasGuardadas = sessionStorage.getItem("filasTabla");
 if (filasGuardadas) {
 
     tabla.innerHTML = filasGuardadas;
-
-    // Reasignar listeners a checkboxes restaurados
     tabla.querySelectorAll("input[type='checkbox']").forEach(function (c) {
         c.addEventListener("change", actualizarContadores);
     });
-
     actualizarContadores();
 }
 
@@ -1205,6 +1198,8 @@ if (filasGuardadas) {
 const paginaGuardada = sessionStorage.getItem("paginaActual") || "inicio";
 mostrarPagina(paginaGuardada, false);
 history.replaceState({ pagina: paginaGuardada }, "", "#" + paginaGuardada);
+
+
 
 //======  PAGINA 4   ======//
 //Tarjetas de resultados, filtros y exportación
@@ -1223,6 +1218,7 @@ const botonAtras = document.getElementById("pag4-volver");
 
 const botonGenerar = document.getElementById("pag3-generar");
 
+let capturasGeneradas = [];
 
 const nombresTamano = { desktop: "Desktop", tablet: "Tablet", movil: "Móvil" };
 
@@ -1230,9 +1226,7 @@ const nombresTamano = { desktop: "Desktop", tablet: "Tablet", movil: "Móvil" };
 function leerConfigPag3() {
 
     const guardado = sessionStorage.getItem("webshot-configuracion-pag3");
-    if (!guardado) {
-        return null;
-    }
+    if (!guardado) return null;
     return JSON.parse(guardado);
 }
 
@@ -1401,14 +1395,6 @@ botonAtras.addEventListener("click", function () {
 //Al cargar la página, se muestran los resultados si ya hay una configuración guardada
 mostrarResultados();
 
-// Pide una captura al servidor y devuelve la ruta de la imagen
-//En concreto, esa función pedirCaptura(url, tamano) hace esto:
-//Envía al backend (/api/captura) la URL y el tamaño.
-//El backend ejecuta hacerCaptura(...) con Playwright.
-//Guarda el .png en la carpeta capturas.
-//Devuelve una ruta como "/capturas/captura-123.png".
-//La función te la devuelve para que tú luego la pongas en un <img> o en tu lista de resultados.
-
 async function pedirCaptura(url, tamano) {
     const respuesta = await fetch("/api/captura", {
         method: "POST",
@@ -1422,5 +1408,46 @@ async function pedirCaptura(url, tamano) {
         throw new Error(datos.error || "Error al hacer la captura");
     }
 
-    return datos.imagen; // por ejemplo "/capturas/captura-123-desktop.png"
+    return datos.imagen;
 }
+
+async function descargarArchivo(ruta, nombre) {
+    if (capturasGeneradas.length === 0) {
+        alert("Primero genera las capturas.");
+        return;
+    }
+
+    const respuesta = await fetch(ruta, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ archivos: capturasGeneradas })
+    });
+
+    if (!respuesta.ok) {
+        const datos = await respuesta.json();
+        throw new Error(datos.error || "Error en la descarga");
+    }
+
+    const blob = await respuesta.blob();
+    const enlace = document.createElement("a");
+    enlace.href = URL.createObjectURL(blob);
+    enlace.download = nombre;
+    enlace.click();
+    URL.revokeObjectURL(enlace.href);
+}
+
+descargarZip.addEventListener("click", async function () {
+    try {
+        await descargarArchivo("/api/zip", "capturas.zip");
+    } catch (error) {
+        alert("No se pudo descargar el ZIP: " + error.message);
+    }
+});
+
+botonExportar.addEventListener("click", async function () {
+    try {
+        await descargarArchivo("/api/pdf", "capturas.pdf");
+    } catch (error) {
+        alert("No se pudo exportar el PDF: " + error.message);
+    }
+});
