@@ -458,6 +458,7 @@ formulario.addEventListener("submit", async function (evento) {
             const checkbox = document.createElement("input");
 
             checkbox.type = "checkbox";
+            checkbox.setAttribute("aria-label", `Seleccionar ${pagina.url}`);
             //Si la búsqueda es del historial se marcan las paginas que estuvieran seleccionadas
             checkbox.checked = entradaActual.seleccionadas.includes(pagina.url);
             celdaSeleccion.appendChild(checkbox);
@@ -594,19 +595,61 @@ processButton.addEventListener("click", function () {
 //======  PÁGINA 2  ========
 //Gestión de puntos de scroll y tamaños de viewport
 
+//Función para repartir los puntos de scroll
+function repartirPuntosScroll() {
+
+    //Convertimos todos los puntos(pastillas) en un array
+    const puntos = Array.from(
+        contenedorPuntosScroll.querySelectorAll(".puntos__item")
+    );
+
+    //Repartimos proporcionalmente los puntos entre 0% y 100%
+    puntos.forEach(function (punto, indice) {
+        const porcentaje = puntos.length === 1
+            ? 0
+            : Math.round(indice * 100 / (puntos.length - 1));
+
+        //Añadimos el porcentaje a cada punto
+        const valor = punto.querySelector(".puntos__valor");
+        valor.textContent = String(porcentaje);
+        valor.setAttribute("aria-label", `${porcentaje} por ciento`);
+
+        punto.querySelector(".puntos__quitar").setAttribute(
+            "aria-label",
+            `Eliminar punto de scroll del ${porcentaje} %`
+        );
+    });
+}
 // Función para crear un nuevo punto de scroll
 function crearPunto(valor) {
+
     const punto = document.createElement("span");
     punto.className = "puntos__item";
-    punto.innerHTML = "<input type='number' value='" + valor + "'><span>%</span><button class='puntos__quitar'>×</button>";
 
-    //Botón para quitar el punto de scroll, solo si hay más de uno
-    const botonQuitar = punto.querySelector(".puntos__quitar");
+    const porcentaje = document.createElement("span");
+    porcentaje.className = "puntos__valor";
+    porcentaje.textContent = valor;
+    porcentaje.setAttribute("aria-label", `${valor} por ciento`);
+
+    //Botón y evento para quitar el punto
+    const botonQuitar = document.createElement("button");
+    botonQuitar.type = "button";
+    botonQuitar.className = "puntos__quitar";
+    botonQuitar.textContent = "×";
+    botonQuitar.setAttribute("aria-label", `Eliminar punto de scroll del ${valor} %`);
+
     botonQuitar.addEventListener("click", function () {
-        const cuantasHayAhora = contenedorPuntosScroll.querySelectorAll(".puntos__item").length;
-        if (cuantasHayAhora > 1) punto.remove();
+        const puntos = Array.from(
+            contenedorPuntosScroll.querySelectorAll(".puntos__item")
+        );
+
+        if (puntos.length > 1) {
+            punto.remove();
+            repartirPuntosScroll();
+        }
     });
 
+    punto.append(porcentaje, document.createTextNode("%"), botonQuitar);
     return punto;
 }
 
@@ -623,8 +666,10 @@ puntosPorDefecto.forEach(function (valor) {
 });
 //Añade el punto de scroll al hacer click en el botón "Añadir punto"
 btnAnadirPunto.addEventListener("click", function () {
-    const nuevaPastilla = crearPunto(100);
+
+    const nuevaPastilla = crearPunto(0);
     contenedorPuntosScroll.insertBefore(nuevaPastilla, btnAnadirPunto);
+    repartirPuntosScroll();
 });
 
 //Valida que al menos un tamaño de viewport esté seleccionado
@@ -1064,14 +1109,17 @@ casillasViewport.forEach(function (casilla) {
         }
 
         //Obtiene los puntos de scroll
-        const campos = Array.from(contenedorPuntosScroll.querySelectorAll("input"));
+        const campos = Array.from(contenedorPuntosScroll.querySelectorAll(".puntos__valor"));
         const puntos = campos.map(function (campo) {
-            return Number(campo.value);
+            return Number(campo.textContent.trim());
         });
 
         //Valida los puntos de scroll
         if (
-            campos.some(function (campo) { return campo.value === ""; }) ||
+            campos.length === 0 ||
+            campos.some(function (campo) {
+                return campo.textContent.trim() === "";
+            }) ||
             puntos.some(function (punto) {
                 return !Number.isInteger(punto) || punto < 0 || punto > 100;
             }) ||
@@ -1318,6 +1366,7 @@ botonComparar.addEventListener("click", function () {
     imagenSegunda.src = segunda.src;
     imagenSegunda.alt = `Captura ${segunda.etiqueta} de ${segunda.url}`;
     contenedorSegunda.replaceChildren(imagenSegunda);
+
     //Abrimos la ventana de diálogo en formato modal
     //showModal() muestra el diálogo y bloquea la interacción
     //con el resto de la página hasta que se cierre
