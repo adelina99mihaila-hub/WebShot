@@ -1266,6 +1266,9 @@ let capturasGeneradas = [];
 
 const nombresTamano = { desktop: "Desktop", tablet: "Tablet", movil: "Móvil" };
 
+//Ancho en píxeles de cada tamaño, para mostrarlo en la información de las miniaturas
+const anchosTamanoPx = { desktop: 1440, tablet: 768, movil: 390 };
+
 //Constantes para la función de comparar dos capturas
 const opcionesComparacion = []; //Almacena todas las capturas disponibles
 const botonComparar = document.getElementById("pag4-comparar");
@@ -1451,6 +1454,17 @@ function crearMiniatura(captura, url) {
     imagen.alt = "Captura " + captura.etiqueta + " en " + pie.textContent;
     imagen.loading = "lazy";
 
+        // NUEVOO Al hacer clic (o pulsar Enter) en la imagen, se abre en el visor ampliado
+    imagen.tabIndex = 0;
+    imagen.addEventListener("click", function () {
+        abrirVisor(captura.src);
+    });
+    imagen.addEventListener("keydown", function (evento) {
+        if (evento.key === "Enter") {
+            abrirVisor(captura.src);
+        }
+    });
+
     const etiqueta = document.createElement("span");
     etiqueta.className = "pag4__etiqueta";
     etiqueta.textContent = captura.etiqueta;
@@ -1463,7 +1477,26 @@ function crearMiniatura(captura, url) {
     descarga.title = "Descargar captura";
     descarga.setAttribute("aria-label", `Descargar captura ${captura.etiqueta}`);
 
-    figura.append(imagen, etiqueta, descarga, pie);
+        //Franja con más información que aparece al pasar el ratón por la miniatura
+    const anchoPx = anchosTamanoPx[captura.tamano];
+
+    const infoHover = document.createElement("div");
+    infoHover.className = "pag4__info-hover";
+
+    const lineaTamano = document.createElement("strong");
+    lineaTamano.textContent = pie.textContent + (anchoPx ? " · " + anchoPx + " px" : "");
+
+    const lineaPunto = document.createElement("span");
+    lineaPunto.textContent = captura.etiqueta === "Completa"
+        ? "Página completa"
+        : "Scroll al " + captura.etiqueta;
+
+    const lineaAccion = document.createElement("span");
+    lineaAccion.textContent = "🔍 Clic para ampliar";
+
+    infoHover.append(lineaTamano, lineaPunto, lineaAccion);
+
+    figura.append(imagen, etiqueta, descarga, infoHover, pie);
 
     const labelComparar = document.createElement("label");
     labelComparar.className = "pag4__seleccion";
@@ -1602,6 +1635,107 @@ filtro.addEventListener("input", function () {
 //Botón para volver a la página 3
 botonAtras.addEventListener("click", function () {
     mostrarPagina("pag3");
+});
+
+//====== NUEVO  VISOR AMPLIADO  ======//
+//Muestra una captura en grande, con flechas para pasar a la anterior o a la siguiente
+
+const visor = document.getElementById("visor");
+const visorImagen = document.getElementById("visor-imagen");
+const visorTitulo = document.getElementById("visor-titulo");
+const visorContador = document.getElementById("visor-contador");
+const visorDescargar = document.getElementById("visor-descargar");
+const visorAnterior = document.getElementById("visor-anterior");
+const visorSiguiente = document.getElementById("visor-siguiente");
+const visorCerrar = document.getElementById("visor-cerrar");
+
+//Lista de capturas que se pueden recorrer en el visor, y cuál se está viendo
+let capturasVisor = [];
+let posicionVisor = 0;
+
+//Abre el visor en la captura pulsada
+function abrirVisor(src) {
+    const resultado = leerResultado();
+    if (!resultado) {
+        return;
+    }
+
+    //Juntamos en una sola lista las capturas correctas de las tarjetas que se ven (respetando el filtro)
+    const texto = filtro.value.trim().toLowerCase();
+    capturasVisor = [];
+
+    resultado.paginas.forEach(function (pagina) {
+        if (!pagina.url.toLowerCase().includes(texto)) {
+            return;
+        }
+        pagina.capturas.forEach(function (captura) {
+            if (!captura.error) {
+                capturasVisor.push({ ...captura, url: pagina.url });
+            }
+        });
+    });
+
+    const posicion = capturasVisor.findIndex(function (captura) {
+        return captura.src === src;
+    });
+    if (posicion === -1) {
+        return;
+    }
+
+    mostrarEnVisor(posicion);
+    visor.showModal();
+}
+
+//Pone en el visor la captura de esa posición
+function mostrarEnVisor(posicion) {
+    posicionVisor = posicion;
+    const captura = capturasVisor[posicion];
+    const nombreTamano = nombresTamano[captura.tamano] || captura.tamano;
+
+    visorImagen.src = captura.src;
+    visorImagen.alt = "Captura " + captura.etiqueta + " en " + nombreTamano + " de " + captura.url;
+    visorTitulo.textContent = captura.url + " · " + nombreTamano + " · " + captura.etiqueta;
+    visorContador.textContent = (posicion + 1) + " / " + capturasVisor.length;
+    visorDescargar.href = captura.src;
+    visorDescargar.download = captura.archivo;
+
+    //Desactiva las flechas cuando no hay anterior o siguiente
+    visorAnterior.disabled = posicion === 0;
+    visorSiguiente.disabled = posicion === capturasVisor.length - 1;
+}
+//Flechas para pasar de una captura a otra
+visorAnterior.addEventListener("click", function () {
+    if (posicionVisor > 0) {
+        mostrarEnVisor(posicionVisor - 1);
+    }
+});
+
+visorSiguiente.addEventListener("click", function () {
+    if (posicionVisor < capturasVisor.length - 1) {
+        mostrarEnVisor(posicionVisor + 1);
+    }
+});
+
+//Flechas del teclado (la tecla Esc ya cierra el visor por sí sola)
+visor.addEventListener("keydown", function (evento) {
+    if (evento.key === "ArrowLeft") {
+        visorAnterior.click();
+    }
+    if (evento.key === "ArrowRight") {
+        visorSiguiente.click();
+    }
+});
+
+//Botón de cerrar
+visorCerrar.addEventListener("click", function () {
+    visor.close();
+});
+
+//Cerrar al hacer clic en el fondo oscuro, fuera del contenido
+visor.addEventListener("click", function (evento) {
+    if (evento.target === visor) {
+        visor.close();
+    }
 });
 
 //Al cargar la página, se muestran los resultados si ya hay una configuración guardada

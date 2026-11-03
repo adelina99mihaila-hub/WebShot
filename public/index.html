@@ -414,7 +414,23 @@
         <div class="pag4__acciones">
             <button type="button" class="pag4__btn boton-claro" id="pag4-volver">← Atrás</button>
         </div>
-
+        <!-- NUEVOOO - Visor ampliado de capturas -->
+        <dialog id="visor" class="visor" aria-label="Captura ampliada">
+            <div class="visor__barra">
+                <p id="visor-titulo" class="visor__titulo"></p>
+                <span id="visor-contador" class="visor__contador"></span>
+                <a id="visor-descargar" class="visor__boton boton-claro" download>⬇ Descargar</a>
+                <button type="button" id="visor-cerrar" class="visor__boton boton-claro" aria-label="Cerrar">✕</button>
+            </div>
+            <div class="visor__cuerpo">
+                <button type="button" id="visor-anterior" class="visor__flecha" aria-label="Captura anterior">‹</button>
+                <div class="visor__imagen">
+                    <img id="visor-imagen" alt="">
+                </div>
+                <button type="button" id="visor-siguiente" class="visor__flecha" aria-label="Captura siguiente">›</button>
+            </div>
+        </dialog>
+        <!-- aria-label es un nombre para los lectores de pantalla, que usan las personas ciegas. Como el ✕ o las flechas no tienen texto que se entienda leído en voz alta, les ponemos uno: “Cerrar”, “Captura anterior”… -->
     </section>
     <!-- Comparador para dos capturas -->
     <dialog id="pag4-comparador" aria-labelledby="pag4-comparador-titulo">
