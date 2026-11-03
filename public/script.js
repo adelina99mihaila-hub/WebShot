@@ -1302,12 +1302,19 @@ botonComparar.addEventListener("click", function () {
     document.getElementById("pag4-comparador-2").textContent =
         `${segunda.url} · ${nombresTamano[segunda.tamano]} · ${segunda.etiqueta}`;
 
-    document.getElementById("pag4-comparador-captura-1").textContent =
-        "La captura real aparecerá aquí cuando se conecte la generación.";
+    const contenedorPrimera =
+        document.getElementById("pag4-comparador-captura-1");
+    const imagenPrimera = document.createElement("img");
+    imagenPrimera.src = primera.src;
+    imagenPrimera.alt = `Captura ${primera.etiqueta} de ${primera.url}`;
+    contenedorPrimera.replaceChildren(imagenPrimera);
 
-    document.getElementById("pag4-comparador-captura-2").textContent =
-        "La captura real aparecerá aquí cuando se conecte la generación.";
-
+    const contenedorSegunda =
+        document.getElementById("pag4-comparador-captura-2");
+    const imagenSegunda = document.createElement("img");
+    imagenSegunda.src = segunda.src;
+    imagenSegunda.alt = `Captura ${segunda.etiqueta} de ${segunda.url}`;
+    contenedorSegunda.replaceChildren(imagenSegunda);
     //Abrimos la ventana de diálogo en formato modal
     //showModal() muestra el diálogo y bloquea la interacción
     //con el resto de la página hasta que se cierre
@@ -1344,7 +1351,7 @@ function leerResultado() {
 }
 
 //Función para crear las miniaturas de las capturas
-function crearMiniatura(captura) {
+function crearMiniatura(captura, url) {
 
     const opcion = document.createElement("div");
     opcion.className = "pag4__opcion";
@@ -1365,17 +1372,33 @@ function crearMiniatura(captura) {
         return opcion;
     }
 
+    //NUEVO
+    const src = captura.src || (
+        captura.archivo
+            ? `/capturas/${encodeURIComponent(captura.archivo)}`
+            : null
+    );
+
+    if (!src) {
+        const aviso = document.createElement("p");
+        aviso.className = "pag4__error";
+        aviso.textContent = "La captura no tiene una ruta de imagen disponible.";
+        figura.append(aviso, pie);
+        opcion.appendChild(figura);
+        return opcion;
+    }
+
     const indice = opcionesComparacion.length;
 
     opcionesComparacion.push({
         url: url,
         tamano: captura.tamano,
         etiqueta: captura.etiqueta,
-        src: captura.src
+        src: src
     });
 
     const imagen = document.createElement("img");
-    imagen.src = captura.src;
+    imagen.src = src;
     imagen.alt = "Captura " + captura.etiqueta + " en " + pie.textContent;
     imagen.loading = "lazy";
 
@@ -1385,7 +1408,7 @@ function crearMiniatura(captura) {
 
     const descarga = document.createElement("a");
     descarga.className = "pag4__descarga boton-claro";
-    descarga.href = captura.src;
+    descarga.href = src;
     descarga.download = captura.archivo;
     descarga.textContent = "⬇";
     descarga.title = "Descargar captura";
@@ -1437,7 +1460,7 @@ function crearTarjetaResultado(pagina) {
 
     const contenedor = tarjeta.querySelector(".pag4__miniaturas");
     pagina.capturas.forEach(function (captura) {
-        contenedor.appendChild(crearMiniatura(captura));
+        contenedor.appendChild(crearMiniatura(captura, pagina.url));
     });
 
     return { tarjeta: tarjeta, cantidad: correctas };
@@ -1488,7 +1511,7 @@ botonGenerar.addEventListener("click", async function () {
         const respuesta = await fetch("/api/generar", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ tipo: config.tipo, datos: config.datos })
+            body: JSON.stringify({ crawlId: crawlIdActual, tipo: config.tipo, datos: config.datos })
         });
 
         //Si la ruta todavía no existe en el servidor (404), avisamos con un mensaje claro

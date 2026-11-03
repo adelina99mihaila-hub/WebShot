@@ -1663,6 +1663,16 @@ input[type="checkbox"] {
     color: var(--color-texto-secundario);
 }
 
+#pag4-comparador-captura-1 img,
+#pag4-comparador-captura-2 img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 65vh;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
 @media (max-width: 600px) {
     #pag4 .pag4__comparacion-controles {
         align-items: stretch;

@@ -1,9 +1,16 @@
 const express = require("express"); // require dice: tráeme esta librería. coge la librería Express de node_modules, y la guarda dentro de la constante express
 const path = require("path"); // path viene incluido en Node. Sirve para construir rutas de carpetas que funcionen en cualquier sistema.
 const fs = require("fs"); // fs (file system) viene incluido en Node. Sirve para crear carpetas y trabajar con archivos.
+const archiver = require("archiver");
 const { chromium } = require("playwright");
 //Playwright trae varios navegadores, y las llaves { } significan “de todo lo que trae, dame solo chromium” (el Chrome que descargamos al principio desde la terminal con el comando npx playwright install chromium).
-const { hacerCaptura, generarVistaPrevia, VIEWPORTS } = require("./capturas"); //Conecta este archivo con capturas.js (importa la función y los tamaños válidos)
+const {
+    hacerCaptura,
+    generarCapturas,
+    generarTodo,
+    generarVistaPrevia,
+    VIEWPORTS
+} = require("./capturas"); //Conecta este archivo con capturas.js (importa la función y los tamaños válidos)
 const robotsParser = require("robots-parser"); //
 const app = express(); // Crea el servidor. A partir de aquí, app es tu servidor
 const { randomUUID } = require("crypto"); //Sirve para crear id aleatorios, lo usaremos para asociarlos a las urls
@@ -133,221 +140,6 @@ app.post("/api/pdf", async (req, res) => {
     } catch (error) {
         console.error("Error al crear el PDF:", error);
         return res.status(500).json({ error: "No se pudo crear el PDF." });
-    } finally {
-        if (navegador) await navegador.close();
-    }
-});
-
-// ---------- Crawl ----------
-app.post("/api/crawl", async (req, res) => {
-    let urlTexto = req.body?.url;
-
-    if (typeof urlTexto !== "string" || urlTexto.trim() === "") {
-        return res.status(400).json({ error: "URL inválida" });
-    }
-
-    urlTexto = urlTexto.trim();
-
-    if (/^[a-z][a-z\d+.-]*:\/\//i.test(urlTexto) && !/^https?:\/\//i.test(urlTexto)) {
-        return res.status(400).json({ error: "Solo se permiten URLs con http o https" });
-    }
-
-    if (!/^https?:\/\//i.test(urlTexto)) {
-        urlTexto = "https://" + urlTexto;
-    }
-
-    let urlPrueba;
-    try {
-        urlPrueba = new URL(urlTexto);
-    } catch {
-        return res.status(400).json({ error: "URL inválida" });
-    }
-
-    const opciones = req.body ?? {};
-    const { maxDepth, maxUrls, allowedDomains, respectRobots } = opciones;
-
-    if (!Number.isInteger(maxDepth) || maxDepth < 0 || maxDepth > 5) {
-        return res.status(400).json({ error: "Profundidad máxima inválida. Debe ser un número entero entre 0 y 5." });
-    }
-
-    if (!Number.isInteger(maxUrls) || maxUrls < 1 || maxUrls > 100) {
-        return res.status(400).json({ error: "Límite de URLs inválido. Debe ser un número entero entre 1 y 100." });
-    }
-
-    if (typeof allowedDomains !== "string") {
-        return res.status(400).json({ error: "El dominio debe ser una cadena de texto." });
-    }
-
-    if (typeof respectRobots !== "boolean") {
-        return res.status(400).json({ error: "La opción de respetar robots.txt debe ser true o false." });
-    }
-
-    const cacheRobots = new Map();
-
-    async function puedeRastrear(url) {
-        if (!respectRobots) return true;
-
-        const direccion = new URL(url);
-        const origen = direccion.origin;
-
-        if (!cacheRobots.has(origen)) {
-            const urlRobots = `${origen}/robots.txt`;
-            try {
-                const respuesta = await fetch(urlRobots, { signal: AbortSignal.timeout(5000) });
-
-                if (respuesta.status === 404) {
-                    cacheRobots.set(origen, robotsParser(urlRobots, ""));
-                } else if (!respuesta.ok) {
-                    console.warn(`No se pudo leer ${urlRobots}: HTTP ${respuesta.status}`);
-                    cacheRobots.set(origen, null);
-                } else {
-                    const contenido = await respuesta.text();
-                    cacheRobots.set(origen, robotsParser(urlRobots, contenido));
-                }
-            } catch (error) {
-                console.error(`Error al consultar ${urlRobots}: `, error);
-                cacheRobots.set(origen, null);
-            }
-        }
-
-        const reglas = cacheRobots.get(origen);
-        return reglas !== null && reglas.isAllowed(url, "*") === true;
-    }
-
-    const hostPermitido = allowedDomains.trim();
-
-    if (hostPermitido !== "") {
-        if (/[\/:?#@\s]/.test(hostPermitido)) {
-            return res.status(400).json({ error: "El dominio contiene caracteres inválidos." });
-        }
-
-        try {
-            const urlPermitido = new URL("https://" + hostPermitido);
-            if (urlPermitido.hostname !== hostPermitido.toLowerCase()) {
-                return res.status(400).json({ error: "El dominio permitido no es válido." });
-            }
-        } catch {
-            return res.status(400).json({ error: "El dominio permitido no es una URL válida." });
-        }
-    }
-
-    const hostPermitidos = new Set([urlPrueba.hostname.toLowerCase()]);
-    if (hostPermitido !== "") hostPermitidos.add(hostPermitido.toLowerCase());
-
-    let navegador;
-    try {
-        navegador = await chromium.launch({ headless: true });
-        const page = await navegador.newPage();
-
-        await page.route("**/*", async route => {
-            const solicitud = route.request();
-
-            if (!solicitud.isNavigationRequest() || solicitud.frame() !== page.mainFrame()) {
-                await route.continue();
-                return;
-            }
-
-            let destino;
-            try {
-                destino = new URL(solicitud.url());
-            } catch {
-                await route.abort();
-                return;
-            }
-
-            const protocolo = destino.protocol === "http:" || destino.protocol === "https:";
-            if (!protocolo) {
-                await route.abort();
-                return;
-            }
-
-            await route.continue();
-        });
-
-        const paginas = [];
-        const cola = [];
-
-        const urlPrincipal = new URL(urlPrueba.href);
-        urlPrincipal.hash = "";
-        const urlPrincipalNormalizada = urlPrincipal.href;
-
-        cola.push({ url: urlPrincipalNormalizada, depth: 0 });
-        const urlVistas = new Set([urlPrincipalNormalizada]);
-
-        while (cola.length > 0 && paginas.length < maxUrls) {
-            const paginaActual = cola.shift();
-
-            if (!(await puedeRastrear(paginaActual.url))) continue;
-
-            try {
-                const respuesta = await page.goto(paginaActual.url, {
-                    waitUntil: "domcontentloaded",
-                    timeout: 30000
-                });
-
-                const titulo = await page.title();
-                const urlFinal = page.url();
-
-                paginas.push({
-                    title: titulo || "Sin titulo",
-                    url: urlFinal,
-                    depth: paginaActual.depth,
-                    status: respuesta && respuesta.ok() ? "ok" : "error"
-                });
-
-                const urlFinalNormalizada = new URL(urlFinal);
-                urlFinalNormalizada.hash = "";
-                urlVistas.add(urlFinalNormalizada.href);
-
-                if (paginaActual.depth >= maxDepth) continue;
-
-                const enlacesEncontrados = await page.locator("a[href]").evaluateAll(enlaces =>
-                    enlaces.map(enlace => ({
-                        texto: (enlace.textContent || "").trim(),
-                        url: enlace.href
-                    }))
-                );
-
-                for (const enlace of enlacesEncontrados) {
-                    if (paginas.length + cola.length >= maxUrls) break;
-
-                    let urlEnlace;
-                    try {
-                        urlEnlace = new URL(enlace.url);
-                    } catch {
-                        continue;
-                    }
-
-                    if (
-                        (urlEnlace.protocol !== "http:" && urlEnlace.protocol !== "https:") ||
-                        !hostPermitidos.has(urlEnlace.hostname.toLowerCase())
-                    ) continue;
-
-                    urlEnlace.hash = "";
-                    const urlNormalizada = urlEnlace.href;
-
-                    if (urlVistas.has(urlNormalizada)) continue;
-                    if (!(await puedeRastrear(urlNormalizada))) continue;
-
-                    urlVistas.add(urlNormalizada);
-                    cola.push({ url: urlNormalizada, depth: paginaActual.depth + 1 });
-                }
-            } catch (error) {
-                console.error("Error al visitar la página:", paginaActual.url, error);
-                paginas.push({
-                    title: "Sin titulo",
-                    url: paginaActual.url,
-                    depth: paginaActual.depth,
-                    status: "error"
-                });
-            }
-        }
-
-        return res.json({ pages: paginas });
-
-    } catch (error) {
-        console.error("Error al procesar la URL:", error);
-        return res.status(500).json({ error: "Error interno del servidor al procesar la URL." });
     } finally {
         if (navegador) await navegador.close();
     }
