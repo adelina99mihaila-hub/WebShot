@@ -1,70 +1,78 @@
 const express = require("express"); // require dice: tráeme esta librería. coge la librería Express de node_modules, y la guarda dentro de la constante express
 const path = require("path"); // path viene incluido en Node. Sirve para construir rutas de carpetas que funcionen en cualquier sistema.
 const fs = require("fs"); // fs (file system) viene incluido en Node. Sirve para crear carpetas y trabajar con archivos.
+const archiver = require("archiver");
 const { chromium } = require("playwright");
 //Playwright trae varios navegadores, y las llaves { } significan “de todo lo que trae, dame solo chromium” (el Chrome que descargamos al principio desde la terminal con el comando npx playwright install chromium).
-const { hacerCaptura, generarVistaPrevia, VIEWPORTS } = require("./capturas"); //Conecta este archivo con capturas.js (importa la función y los tamaños válidos)
+const {
+    hacerCaptura,
+    generarCapturas,
+    generarTodo,
+    generarVistaPrevia,
+    VIEWPORTS
+} = require("./capturas"); //Conecta este archivo con capturas.js (importa la función y los tamaños válidos)
 const robotsParser = require("robots-parser"); //
 const app = express(); // Crea el servidor. A partir de aquí, app es tu servidor
 const { randomUUID } = require("crypto"); //Sirve para crear id aleatorios, lo usaremos para asociarlos a las urls
 
 
-app.use(express.json()); // Permite que el servidor entienda datos JSON enviados desde el navegador
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
 
+// Carpeta donde se guardarán las capturas (Sirve los archivos de la interfaz desde public)
 app.use(express.static(path.join(__dirname, "public"))); //Sirve archivos estáticos de la carpeta public (html, css, js del front)
 
 // Carpeta donde se guardarán las capturas NUEVO
 const CARPETA_CAPTURAS = path.join(__dirname, "capturas");
-fs.mkdirSync(CARPETA_CAPTURAS, { recursive: true }); // Crea la carpeta si no existe
-app.use("/capturas", express.static(CARPETA_CAPTURAS)); // Hace pública la carpeta capturas en la ruta /capturas
+fs.mkdirSync(CARPETA_CAPTURAS, { recursive: true });
+app.use("/capturas", express.static(CARPETA_CAPTURAS));
 
-// Ruta principal: hace una captura de pantalla con el tamaño indicado
-// Espera body JSON: { url: "...", tamano: "desktop" | "tablet" | "movil" }
+// ---------- Helper para ZIP/PDF ----------
+function nombresValidos(lista) {
+    if (!Array.isArray(lista) || lista.length === 0 || lista.length > 200) return [];
+    return lista
+        .filter(function (a) { return typeof a === "string"; })
+        .map(function (a) { return path.basename(a); })
+        .filter(function (n) {
+            return /^captura-[\w-]+\.png$/.test(n) && fs.existsSync(path.join(CARPETA_CAPTURAS, n));
+        });
+}
+
+// ---------- Captura individual ----------
 app.post("/api/captura", async (req, res) => {
     let { url, tamano } = req.body ?? {};
 
-    // Validación básica de URL
     if (typeof url !== "string" || url.trim() === "") {
         return res.status(400).json({ error: "URL inválida" });
     }
 
-    url = url.trim(); // Elimina espacios al principio y final
+    url = url.trim();
 
-    // Si trae protocolo distinto de http/https (ej: ftp://), lo bloqueamos
     if (/^[a-z][a-z\d+.-]*:\/\//i.test(url) && !/^https?:\/\//i.test(url)) {
-        return res.status(400).json({
-            error: "Solo se permiten URLs con http o https"
-        });
+        return res.status(400).json({ error: "Solo se permiten URLs con http o https" });
     }
 
-    // Si no trae protocolo, añadimos https://
     if (!/^https?:\/\//i.test(url)) {
         url = "https://" + url;
     }
 
-    // Verifica que la URL final sea válida
     try {
         new URL(url);
-    } catch (error) {
+    } catch {
         return res.status(400).json({ error: "URL inválida" });
     }
 
-    // Valida tamaño contra los tamaños exportados en capturas.js 
     if (!VIEWPORTS[tamano]) {
         return res.status(400).json({
             error: `Tamaño no válido. Usa: ${Object.keys(VIEWPORTS).join(", ")}`
         });
     }
 
-    // Nombre único para no sobrescribir imágenes anteriores
     const nombreArchivo = `captura-${Date.now()}-${tamano}.png`;
     const rutaArchivo = path.join(CARPETA_CAPTURAS, nombreArchivo);
 
     try {
-        // Llama a la función del otro archivo (capturas.js)
         await hacerCaptura(url, tamano, rutaArchivo);
-
-        // Devuelve la ruta pública de la imagen para mostrarla en el front
         return res.json({
             ok: true,
             imagen: `/capturas/${nombreArchivo}`,
@@ -73,9 +81,67 @@ app.post("/api/captura", async (req, res) => {
         });
     } catch (error) {
         console.error("Error al hacer la captura:", error);
-        return res.status(500).json({
-            error: "No se pudo hacer la captura."
-        });
+        return res.status(500).json({ error: "No se pudo hacer la captura." });
+    }
+});
+
+// ---------- ZIP ----------
+app.post("/api/zip", (req, res) => {
+    const nombres = nombresValidos(req.body?.archivos);
+    if (nombres.length === 0) {
+        return res.status(400).json({ error: "No hay capturas válidas para comprimir." });
+    }
+
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader("Content-Disposition", 'attachment; filename="capturas.zip"');
+
+    const zip = archiver("zip");
+
+    zip.on("error", function (error) {
+        console.error("Error al crear el ZIP:", error);
+        if (!res.headersSent) {
+            res.status(500).end();
+        } else {
+            res.end();
+        }
+    });
+
+    zip.pipe(res);
+
+    nombres.forEach(function (n) {
+        zip.file(path.join(CARPETA_CAPTURAS, n), { name: n });
+    });
+
+    zip.finalize();
+});
+
+// ---------- PDF ----------
+app.post("/api/pdf", async (req, res) => {
+    const nombres = nombresValidos(req.body?.archivos);
+    if (nombres.length === 0) {
+        return res.status(400).json({ error: "No hay capturas válidas para exportar." });
+    }
+
+    const imagenes = nombres.map(function (n) {
+        const base64 = fs.readFileSync(path.join(CARPETA_CAPTURAS, n)).toString("base64");
+        return `<img src="data:image/png;base64,${base64}" style="width:100%;display:block;page-break-after:always;">`;
+    }).join("");
+
+    let navegador;
+    try {
+        navegador = await chromium.launch();
+        const pagina = await navegador.newPage();
+        await pagina.setContent(`<html><body style="margin:0">${imagenes}</body></html>`);
+        const pdf = await pagina.pdf({ format: "A4", printBackground: true });
+
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", 'attachment; filename="capturas.pdf"');
+        return res.send(pdf);
+    } catch (error) {
+        console.error("Error al crear el PDF:", error);
+        return res.status(500).json({ error: "No se pudo crear el PDF." });
+    } finally {
+        if (navegador) await navegador.close();
     }
 });
 
@@ -548,5 +614,4 @@ app.post("/api/vista-previa", async (req, res) => {
 
 app.listen(3000, () => {
     console.log("WebShot funcionando en http://localhost:3000");
-}); // Enciende el servidor y lo deja escuchando en el puerto 3000
-// Importante: app.listen suele ir al final, cuando ya configuraste todo.
+});

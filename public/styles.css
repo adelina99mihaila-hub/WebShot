@@ -729,7 +729,7 @@ input[type="checkbox"] {
     background: #ffffff;
     border-radius: 20px;
     box-shadow: 0 4px 16px #1f293794;
-    overflow: hidden;
+  /*  overflow: hidden;*/
     border: 1px solid #dce2e9;
 }
 
@@ -908,11 +908,17 @@ input[type="checkbox"] {
 
 /* Bloque: acciones */
 #pag2 .acciones {
+    position: sticky;
+    bottom: 0;
     display: flex;
     justify-content: space-between;
     margin: 0;
     padding: 20px 28px;
     border-top: 1px solid #eee;
+    background: #ffffff;
+    z-index: 10;
+    border-radius:  0 0 20px 20px;
+
 }
 
 #pag2 .acciones__boton--secundario {
@@ -1313,10 +1319,6 @@ input[type="checkbox"] {
     border-top: 1px solid var(--color-borde);
 }
 
-/* #pag3 .nota-capturas {
-    margin: 16px 0;
-    font-size: 13px;
-} */
 
 @media (max-width: 1050px) {
     #pag3 main {
@@ -1361,8 +1363,70 @@ input[type="checkbox"] {
     border-radius: 12px;
 }
 
+.pantalla-generando {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgb(15 23 42 / 65%);
+}
 
+.pantalla-generando__capturas {
+    width: min(420px, 100%);
+    padding: 36px 24px;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 12px 40px rgb(0 0 0 / 20%);
+    text-align: center;
+}
 
+.pantalla-generando__capturas h2 {
+    margin: 20px 0 8px;
+    color: var(--color-texto);
+}
+
+.pantalla-generando__capturas p {
+    color: var(--color-texto-secundario);
+}
+/*
+.pantalla-generando__loader {
+    display: block;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto;
+    border-width: 5px;
+} Opcion loader o barra de carga
+*/
+.pantalla-generando__progreso {
+    position: relative;
+    height: 10px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e5e7eb;
+}
+
+.pantalla-generando__progreso::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 40%;
+    border-radius: inherit;
+    background: var(--color-principal);
+    animation: progreso-indeterminado 1.4s ease-in-out infinite;
+}
+
+@keyframes progreso-indeterminado {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(250%);
+    }
+}
 
 /* ================ PÁGINA 4 ================ */
 
@@ -1509,6 +1573,115 @@ input[type="checkbox"] {
 
 #pag4 .pag4__acciones {
     margin-top: 24px;
+}
+#pag4 .pag4__comparacion-controles {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    margin: 16px 0;
+}
+
+#pag4 .pag4__comparacion-controles p {
+    color: var(--color-texto-secundario);
+}
+
+#pag4 .pag4__comparacion-controles button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+#pag4 .pag4__seleccion {
+    position: absolute;
+    top: 44px;
+    left: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 0.8rem;
+}
+
+#pag4 .pag4__seleccion input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--color-principal);
+}
+
+#pag4-comparador {
+    width: min(1000px, 92vw);
+    max-width: none;
+    max-height: 85vh;
+    margin: auto;
+    padding: 24px;
+    border: 1px solid var(--color-borde);
+    border-radius: 16px;
+    color: var(--color-texto);
+}
+
+#pag4-comparador::backdrop {
+    background: rgb(15 23 42 / 65%);
+}
+
+.pag4__comparador-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.pag4__comparador-capturas {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.pag4__comparador-capturas figure {
+    min-width: 0;
+}
+
+.pag4__comparador-capturas figcaption {
+    position: static;
+    margin-bottom: 8px;
+    color: var(--color-texto);
+    text-align: left;
+}
+
+#pag4-comparador-captura-1,
+#pag4-comparador-captura-2 {
+    display: grid;
+    min-height: 240px;
+    place-items: center;
+    padding: 20px;
+    border: 1px dashed var(--color-borde);
+    border-radius: 12px;
+    background: var(--color-fondo-suave);
+    color: var(--color-texto-secundario);
+}
+
+#pag4-comparador-captura-1 img,
+#pag4-comparador-captura-2 img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 65vh;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+@media (max-width: 600px) {
+    #pag4 .pag4__comparacion-controles {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .pag4__comparador-capturas {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* El traductor del navegador mete etiquetas <font>: que hereden el color del padre, así que esta regla protege los colores de la página */

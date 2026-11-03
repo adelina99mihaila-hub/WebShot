@@ -10,14 +10,6 @@ const VIEWPORTS = {
 };
 
 // Hace una captura de una URL con un tamaño y la guarda en rutaArchivo
-//async function hacerCaptura(url, tamano, rutaArchivo)
-// Una función es un bloque de código con nombre que se puede usar muchas veces. Entre paréntesis van sus parámetros, los datos que necesita para trabajar:
-
-// url: qué web capturar.
-// tamano: "desktop", "tablet" o "movil".
-// rutaArchivo: dónde guardar la imagen.
-
-// Lleva async porque dentro usa await (Playwright tarda)
 async function hacerCaptura(url, tamano, rutaArchivo) {
     if (!VIEWPORTS[tamano]) {
         throw new Error("Tamaño no válido: " + tamano);
@@ -33,9 +25,6 @@ async function hacerCaptura(url, tamano, rutaArchivo) {
         await navegador.close();
     }
 }
-//.launch abre Chrome; .newPage abre una pestaña con el tamaño; .goto carga la web; .screenshot hace la foto y .close cierra Chrome.
-//try { } finally { } sin catch
-// Igual que antes, pero sin catch. Si algo falla (la web no carga, por ejemplo), el error sube hacia quien llamó a la función, es decir, hacia Pablo. El finally garantiza que Chrome se cierra siempre, aunque haya error.
 
 
 // Hace scroll hasta un porcentaje de la página (0 = arriba, 100 = abajo del todo)
