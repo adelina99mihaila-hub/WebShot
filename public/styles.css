@@ -1738,3 +1738,196 @@ font {
     font-size: 0.85rem;
     color: #dc2626;
 }
+
+/* ===== MINIATURAS: efecto al pasar el ratón ===== */
+
+/* Prepara la animación: cambia suavemente el tamaño y la sombra */
+#pag4 .pag4__miniatura {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Al pasar el ratón (o llegar con Tab), crece un poco y gana sombra */
+#pag4 .pag4__miniatura:hover,
+#pag4 .pag4__miniatura:focus-within {
+    transform: scale(1.05);
+    box-shadow: 0 10px 24px rgba(15, 47, 87, 0.25);
+    z-index: 1;
+}
+
+/* Franja con más información: escondida debajo de la miniatura */
+#pag4 .pag4__info-hover {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 14px;
+    background: rgba(15, 47, 87, 0.92);
+    font-size: 0.8rem;
+    opacity: 0;
+    transform: translateY(100%);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+}
+
+#pag4 .pag4__info-hover * {
+    color: #ffffff;
+}
+
+/* Al pasar el ratón, la franja sube y se hace visible */
+#pag4 .pag4__miniatura:hover .pag4__info-hover,
+#pag4 .pag4__miniatura:focus-within .pag4__info-hover {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Para quien tiene activado "reducir movimiento" en su ordenador */
+@media (prefers-reduced-motion: reduce) {
+    #pag4 .pag4__miniatura,
+    #pag4 .pag4__info-hover {
+        transition: none;
+    }
+        .visor[open] {
+        animation: none;
+    }
+}
+
+/* ================ NUEVOO VISOR AMPLIADO ================ */
+
+/* Las miniaturas indican que se pueden ampliar */
+#pag4 .pag4__miniatura img {
+    cursor: zoom-in;
+}
+
+/* La ventana: más pequeña y más resaltada */
+.visor {
+    width: min(960px, 90vw);
+    height: 82vh;
+    max-width: none;
+    max-height: none;
+    margin: auto;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+}
+
+/* Solo cuando está abierta: en columna y con una pequeña animación al aparecer */
+.visor[open] {
+    display: flex;
+    flex-direction: column;
+    animation: visor-aparecer 0.2s ease-out;
+}
+
+@keyframes visor-aparecer {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Fondo más oscuro y ligeramente desenfocado */
+.visor::backdrop {
+    background: rgba(5, 15, 30, 0.88);
+    backdrop-filter: blur(4px);
+}
+
+/* Barra superior */
+.visor__barra {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.visor__titulo {
+    flex: 1;
+    text-align: left;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.visor__contador {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.visor__boton {
+    display: inline-flex;
+    align-items: center;
+    height: 36px;
+    padding: 0 12px;
+    font-size: 15px;
+    text-decoration: none;
+}
+
+/* Zona de la imagen con las flechas */
+.visor__cuerpo {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+}
+
+.visor__imagen {
+    flex: 1;
+    height: 100%;
+    overflow: auto;
+    background: #f3f4f6;
+    border-radius: 10px;
+}
+
+.visor__imagen img {
+    display: block;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* Flechas: círculos blancos con el símbolo centrado */
+.visor__flecha {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0 0 4px;
+    font-size: 30px;
+    line-height: 1;
+    background: #ffffff;
+    color: var(--color-principal);
+    border: 1px solid #d1d5db;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(15, 47, 87, 0.15);
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.visor__flecha:hover:not(:disabled) {
+    background: var(--color-principal);
+    color: #ffffff;
+    transform: scale(1.08);
+}
+
+.visor__flecha:disabled {
+    opacity: 0.3;
+    cursor: default;
+    box-shadow: none;
+}
+
+/* Botón de cerrar: cuadrado y con la ✕ centrada */
+#visor-cerrar {
+    justify-content: center;
+    width: 36px;
+    padding: 0;
+}
