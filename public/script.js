@@ -53,10 +53,10 @@ function actualizarIndicador(pagina) {
 
     //Oculto en la página de inicio
     indicador.hidden = pagina === "inicio";
-    
+
     //Recorre los botones y obtiene el paso actual para modificar los estilos
     indicador.querySelectorAll("[data-pagina]").forEach(function (boton) {
-      
+
         const paso = paginasFlujo.indexOf(boton.dataset.pagina);
 
         boton.classList.toggle("activo", paso === pasoActual);
@@ -73,11 +73,20 @@ function actualizarIndicador(pagina) {
 //Recorre los botones y añade el evento de click
 document.querySelectorAll(".indicador-pasos [data-pagina]").forEach(function (boton) {
     boton.addEventListener("click", async function () {
-        
+
         const paginaVisible = document.querySelector(".pagina:not([hidden])");
         const destino = boton.dataset.pagina;
 
         if (!paginaVisible || paginaVisible.id === destino) return;
+
+        const pasoActual = paginasFlujo.indexOf(paginaVisible.id);
+        const pasoDestino = paginasFlujo.indexOf(destino);
+
+        // Al retroceder, navega sin volver a preparar la configuración.
+        if (pasoDestino < pasoActual) {
+            mostrarPagina(destino);
+            return;
+        }
 
         if (destino === "pag3" && !await window.prepararConfiguracionPorPagina()) {
             return;
@@ -101,11 +110,11 @@ function mostrarPagina(idPagina, guardarHistorial = true) {
     document.querySelectorAll(".pagina").forEach(function (pagina) {
         pagina.hidden = pagina.id !== idPagina;
     });
-    
+
     //Si estamos en inicio ocultamos el navbar
     const navbar = document.getElementById("navbar-menu");
 
-    if (navbar){
+    if (navbar) {
         navbar.hidden = idPagina === "inicio";
     }
     //Scroll al principio de la página
@@ -123,19 +132,6 @@ document.getElementById("nav-inicio").addEventListener("click", function () {
     mostrarPagina("inicio");
 });
 
-document.querySelectorAll(".indicador-pasos [data-pagina]").forEach(function (boton) {
-    boton.addEventListener("click", function () {
-        const paginaVisible = document.querySelector(".pagina:not([hidden])");
-        if (!paginaVisible) return;
-
-        const pasoActual = paginasFlujo.indexOf(paginaVisible.id);
-        const pasoDestino = paginasFlujo.indexOf(boton.dataset.pagina);
-
-        if (pasoDestino < pasoActual) {
-            mostrarPagina(boton.dataset.pagina);
-        }
-    });
-});
 // Escuchar el evento popstate para manejar la navegación hacia atrás y hacia adelante
 window.addEventListener("popstate", function (e) {
     const destino = (e.state && e.state.pagina) || "inicio";
@@ -1045,7 +1041,7 @@ casillasViewport.forEach(function (casilla) {
     document.getElementById('btn-volver').addEventListener('click', () => mostrarPagina('pagina-1'));
     document.getElementById('pag3-volver').addEventListener('click', () => mostrarPagina('pag2'));
 
-//Función que prepara y valida la configuración antes de pasar de página
+    //Función que prepara y valida la configuración antes de pasar de página
     async function prepararConfiguracionPorPagina() {
 
         //Obtiene las checkbox de las urls
@@ -1115,7 +1111,7 @@ casillasViewport.forEach(function (casilla) {
             return false;
         }
 
-       // Los tamaños de viewport marcados
+        // Los tamaños de viewport marcados
         const tamanos = Object.keys(anchos).filter(function (nombre) {
             return Array.from(casillasViewport).some(function (casilla) {
                 return casilla.value === anchos[nombre] && casilla.checked;
@@ -1129,7 +1125,7 @@ casillasViewport.forEach(function (casilla) {
         };
         //Confifuración seleccionada en la página 2
         const nuevoTipo = document.querySelector('#pag2 input[name="tipo"]:checked').value;
-       //Compara si se ha personalizado la configuración
+        //Compara si se ha personalizado la configuración
         const cambiaron =
             JSON.stringify(nuevosIniciales) !== JSON.stringify(inicial) ||
             tipo !== nuevoTipo;
@@ -1222,6 +1218,114 @@ let capturasGeneradas = [];
 
 const nombresTamano = { desktop: "Desktop", tablet: "Tablet", movil: "Móvil" };
 
+//Constantes para la función de comparar dos capturas
+const opcionesComparacion = []; //Almacena todas las capturas disponibles
+const botonComparar = document.getElementById("pag4-comparar");
+const estadoComparacion = document.getElementById("pag4-comparacion-estado");
+const dialogoComparador = document.getElementById("pag4-comparador");
+const botonCerrarComparador = document.getElementById("pag4-cierre-comparador");
+const seleccionesComparacion = []; //Almacena solo las dos capturas elegidas para comparar
+
+//Evento para el contenedor de resultado, se escuchan los cambios desde el contenedor
+listaResultados.addEventListener("change", function (evento) {
+
+    //Elemento que provoca el evento
+    const casilla = evento.target;
+
+    //Comprobamos que sea una casilla de comparar
+    if (!casilla.matches(".pag4__comparar-checkbox")) return;
+
+    //Pasamos a número el identificador de su casilla
+    const id = Number(casilla.dataset.miniaturaId);
+
+    //Comprobamos que sea numero y que sea valido
+    if (!Number.isInteger(id) || !opcionesComparacion[id]) {
+
+        casilla.checked = false;
+        console.error("La miniatura seleccionada no tiene un identificador válido.");
+        return;
+    }
+
+    //Si la casilla ha sido marcada dejamos comparar como mucho 2 capturas
+    if (casilla.checked) {
+
+        if (seleccionesComparacion.length === 2) {
+
+            casilla.checked = false;
+            estadoComparacion.textContent = "Puedes seleccionar como máximo dos capturas.";
+            return;
+        }
+
+        seleccionesComparacion.push(id);
+
+    } else {
+
+        const indice = seleccionesComparacion.indexOf(id);
+        if (indice !== -1) seleccionesComparacion.splice(indice, 1);
+    }
+    //Se actualiza el estado después de cada selección o deselección
+    actualizarComparacion();
+});
+
+
+//Función para actualizar la comparación en función del número de capturas seleccionadas
+function actualizarComparacion() {
+
+    const cantidad = seleccionesComparacion.length;
+
+    //Solo se activa el botón cuando se seleccionan dos capturas
+    botonComparar.disabled = cantidad !== 2;
+    estadoComparacion.textContent = cantidad === 0
+        ? "Selecciona dos capturas para compararlas."
+        : `${cantidad} de dos capturas seleccionadas.`;
+
+}
+
+//Función para el boton de comparar
+botonComparar.addEventListener("click", function () {
+
+    if (seleccionesComparacion.length !== 2) return;
+
+    const primera = opcionesComparacion[seleccionesComparacion[0]];
+    const segunda = opcionesComparacion[seleccionesComparacion[1]];
+
+    if (!primera || !segunda) {
+        console.error("No se encontraron las dos opciones seleccionadas.");
+        return;
+    }
+
+    //Mostramos los datos de las capturas
+
+    document.getElementById("pag4-comparador-1").textContent =
+        `${primera.url} · ${nombresTamano[primera.tamano]} · ${primera.etiqueta}`;
+
+    document.getElementById("pag4-comparador-2").textContent =
+        `${segunda.url} · ${nombresTamano[segunda.tamano]} · ${segunda.etiqueta}`;
+
+    const contenedorPrimera =
+        document.getElementById("pag4-comparador-captura-1");
+    const imagenPrimera = document.createElement("img");
+    imagenPrimera.src = primera.src;
+    imagenPrimera.alt = `Captura ${primera.etiqueta} de ${primera.url}`;
+    contenedorPrimera.replaceChildren(imagenPrimera);
+
+    const contenedorSegunda =
+        document.getElementById("pag4-comparador-captura-2");
+    const imagenSegunda = document.createElement("img");
+    imagenSegunda.src = segunda.src;
+    imagenSegunda.alt = `Captura ${segunda.etiqueta} de ${segunda.url}`;
+    contenedorSegunda.replaceChildren(imagenSegunda);
+    //Abrimos la ventana de diálogo en formato modal
+    //showModal() muestra el diálogo y bloquea la interacción
+    //con el resto de la página hasta que se cierre
+    dialogoComparador.showModal();
+});
+
+//Botón para cerrar el comparador
+botonCerrarComparador.addEventListener("click", function () {
+    dialogoComparador.close();
+});
+
 //Función para leer la configuración guardada en la pagina 3 desde sessionStorage y devolverla como un objeto
 function leerConfigPag3() {
 
@@ -1232,6 +1336,13 @@ function leerConfigPag3() {
 
 //NUEVO Función para leer el resultado de la última generación de capturas guardado en sessionStorage
 function leerResultado() {
+
+    //Limpiamos todo lo referente a la comparación de capturas
+    opcionesComparacion.length = 0;
+    seleccionesComparacion.length = 0;
+    actualizarComparacion();
+
+
     const guardado = sessionStorage.getItem("webshot-resultado");
     if (!guardado) {
         return null;
@@ -1239,8 +1350,12 @@ function leerResultado() {
     return JSON.parse(guardado);
 }
 
-//Crea la miniatura de UNA captura: imagen, etiqueta, tamaño y botón de descarga
-function crearMiniatura(captura) {
+//Función para crear las miniaturas de las capturas
+function crearMiniatura(captura, url) {
+
+    const opcion = document.createElement("div");
+    opcion.className = "pag4__opcion";
+
     const figura = document.createElement("figure");
     figura.className = "pag4__miniatura";
 
@@ -1253,11 +1368,37 @@ function crearMiniatura(captura) {
         aviso.className = "pag4__error";
         aviso.textContent = captura.error;
         figura.append(aviso, pie);
-        return figura;
+        opcion.appendChild(figura);
+        return opcion;
     }
 
+    //NUEVO
+    const src = captura.src || (
+        captura.archivo
+            ? `/capturas/${encodeURIComponent(captura.archivo)}`
+            : null
+    );
+
+    if (!src) {
+        const aviso = document.createElement("p");
+        aviso.className = "pag4__error";
+        aviso.textContent = "La captura no tiene una ruta de imagen disponible.";
+        figura.append(aviso, pie);
+        opcion.appendChild(figura);
+        return opcion;
+    }
+
+    const indice = opcionesComparacion.length;
+
+    opcionesComparacion.push({
+        url: url,
+        tamano: captura.tamano,
+        etiqueta: captura.etiqueta,
+        src: src
+    });
+
     const imagen = document.createElement("img");
-    imagen.src = captura.src;
+    imagen.src = src;
     imagen.alt = "Captura " + captura.etiqueta + " en " + pie.textContent;
     imagen.loading = "lazy";
 
@@ -1267,18 +1408,35 @@ function crearMiniatura(captura) {
 
     const descarga = document.createElement("a");
     descarga.className = "pag4__descarga boton-claro";
-    descarga.href = captura.src;
+    descarga.href = src;
     descarga.download = captura.archivo;
     descarga.textContent = "⬇";
     descarga.title = "Descargar captura";
+    descarga.setAttribute("aria-label", `Descargar captura ${captura.etiqueta}`);
 
     figura.append(imagen, etiqueta, descarga, pie);
-    return figura;
+
+    const labelComparar = document.createElement("label");
+    labelComparar.className = "pag4__seleccion";
+
+    const casilla = document.createElement("input");
+    casilla.type = "checkbox";
+    casilla.className = "pag4__comparar-checkbox";
+    casilla.dataset.miniaturaId = String(indice);
+
+    labelComparar.append(casilla, " Comparar");
+    opcion.append(figura, labelComparar);
+
+    return opcion;
 }
+
 
 //Crea la tarjeta de una URL con todas sus capturas
 function crearTarjetaResultado(pagina) {
 
+
+
+    //Crear el elemento de tarjeta con la información de la URL, cantidad de capturas y miniaturas
     const tarjeta = document.createElement("article");
     tarjeta.className = "pag4__tarjeta";
     tarjeta.dataset.url = pagina.url.toLowerCase();
@@ -1302,7 +1460,7 @@ function crearTarjetaResultado(pagina) {
 
     const contenedor = tarjeta.querySelector(".pag4__miniaturas");
     pagina.capturas.forEach(function (captura) {
-        contenedor.appendChild(crearMiniatura(captura));
+        contenedor.appendChild(crearMiniatura(captura, pagina.url));
     });
 
     return { tarjeta: tarjeta, cantidad: correctas };
@@ -1313,6 +1471,7 @@ function crearTarjetaResultado(pagina) {
 function mostrarResultados() {
 
     listaResultados.innerHTML = "";
+    seleccionesComparacion.length = 0;
 
     const resultado = leerResultado();
     if (!resultado) {
@@ -1340,19 +1499,22 @@ botonGenerar.addEventListener("click", async function () {
         return;
     }
 
+    const pantallaGenerando = document.getElementById("pantalla-generando");
+
     //Desactivamos el botón mientras se generan, para que no se pulse dos veces
     const textoOriginal = botonGenerar.textContent;
     botonGenerar.disabled = true;
     botonGenerar.textContent = "Generando capturas…";
+    pantallaGenerando.hidden = false;
 
     try {
         const respuesta = await fetch("/api/generar", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ tipo: config.tipo, datos: config.datos })
+            body: JSON.stringify({ crawlId: crawlIdActual, tipo: config.tipo, datos: config.datos })
         });
 
-//Si la ruta todavía no existe en el servidor (404), avisamos con un mensaje claro
+        //Si la ruta todavía no existe en el servidor (404), avisamos con un mensaje claro
         if (respuesta.status === 404) {
             throw new Error("la generación de capturas todavía no está disponible en el servidor.");
         }
@@ -1371,6 +1533,7 @@ botonGenerar.addEventListener("click", async function () {
         alert("No se pudieron generar las capturas: " + error.message);
 
     } finally {
+        pantallaGenerando.hidden = true;
         botonGenerar.disabled = false;
         botonGenerar.textContent = textoOriginal;
     }
