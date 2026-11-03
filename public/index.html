@@ -45,7 +45,8 @@
 
 
             <form class="search-box" id="search-box">
-                <input type="text" id="url-input" name="url" placeholder="Ingresa la URL de la web" required>
+                <input type="text" id="url-input" name="url" placeholder="Ingresa la URL de la web" aria
+                    aria-label="Buscar URL">
                 <button type="submit" class="boton-principal">Analizar</button>
             </form>
             <!--Loader para la espera-->
@@ -79,7 +80,7 @@
 
                     <div class="setting setting-toggle">
                         <label class="switch">
-                            <input type="checkbox" id="respect-robots" checked>
+                            <input type="checkbox" id="respect-robots">
                             <span class="slider"></span>
                         </label>
                         <span>Respetar robots.txt</span>
@@ -90,7 +91,7 @@
         </div>
         <!-- Historial de las búsquedas aneriores-->
         <section class="historico">
-            <h3>HISTORICO</h3>
+            <h2>HISTORICO</h2>
 
             <div id="lista-historico" class="lista-historico">
                 <!-- Las búsquedas se añaden automáticamente aquí -->
@@ -115,7 +116,8 @@
         </div>
 
         <div class="toolbar">
-            <input type="search" id="search-input" placeholder="Buscar por URL, dominio o parámetro...">
+            <input type="search" id="search-input" placeholder="Buscar por URL, dominio o parámetro..."
+                aria-label="Buscar Urls analizadas">
 
             <!-- Botones para filtrar las URLs por su estado -->
 
@@ -133,7 +135,7 @@
                 <thead>
                     <tr>
                         <th class="checkbox-column">
-                            <input type="checkbox" id="select-all">
+                            <input type="checkbox" id="select-all" aria-label="Seleccionar todo">
                         </th>
                         <th>Titulo</th>
                         <th>URL</th>
@@ -369,7 +371,8 @@
     <div id="pantalla-generando" class="pantalla-generando" role="status" aria-live="polite" hidden>
         <div class="pantalla-generando__capturas">
             <!-- <span class="loader pantalla-generando__loader" aria-hidden="true"></span>-->
-            <div class="pantalla-generando__progreso" role="progressbar" aria-label="Generando capturas"></div><!--Opción loader o barra de carga-->
+            <div class="pantalla-generando__progreso" role="progressbar" aria-label="Generando capturas"></div>
+            <!--Opción loader o barra de carga-->
             <h2>Generando capturas...</h2>
             <p>Esto puede tardar unos minutos.</p>
         </div>

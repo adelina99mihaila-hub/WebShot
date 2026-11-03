@@ -729,7 +729,6 @@ input[type="checkbox"] {
     background: #ffffff;
     border-radius: 20px;
     box-shadow: 0 4px 16px #1f293794;
-  /*  overflow: hidden;*/
     border: 1px solid #dce2e9;
 }
 
@@ -806,7 +805,7 @@ input[type="checkbox"] {
     font-size: 18px;
     line-height: 1;
     background: none;
-    color: #9aa3af;
+    color: var(--color-texto);
 }
 
 #pag2 .puntos__quitar:hover {
@@ -847,7 +846,7 @@ input[type="checkbox"] {
 
 #pag2 .viewports__opcion small {
     font-weight: 400;
-    color: var(--color-texto-secundario);
+    color: var(--color-texto);
 }
 
 #pag2 .viewports__opcion input {
@@ -897,7 +896,7 @@ input[type="checkbox"] {
 }
 
 #pag2 .opciones__item small {
-    color: var(--color-texto-secundario);
+    color: var(--color-texto);
 }
 
 #pag2 .opciones__item:has(input:checked) {
@@ -1737,4 +1736,13 @@ font {
     padding: 16px;
     font-size: 0.85rem;
     color: #dc2626;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid var(--color-principal);
+    outline-offset: 3px;
 }
