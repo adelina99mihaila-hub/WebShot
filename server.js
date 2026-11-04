@@ -1,7 +1,7 @@
 const express = require("express"); // require dice: tráeme esta librería. coge la librería Express de node_modules, y la guarda dentro de la constante express
 const path = require("path"); // path viene incluido en Node. Sirve para construir rutas de carpetas que funcionen en cualquier sistema.
 const fs = require("fs"); // fs (file system) viene incluido en Node. Sirve para crear carpetas y trabajar con archivos.
-const archiver = require("archiver");
+const { ZipArchive } = require("archiver");
 const { chromium } = require("playwright");
 //Playwright trae varios navegadores, y las llaves { } significan “de todo lo que trae, dame solo chromium” (el Chrome que descargamos al principio desde la terminal con el comando npx playwright install chromium).
 const {
@@ -28,14 +28,36 @@ fs.mkdirSync(CARPETA_CAPTURAS, { recursive: true });
 app.use("/capturas", express.static(CARPETA_CAPTURAS));
 
 // ---------- Helper para ZIP/PDF ----------
-function nombresValidos(lista) {
-    if (!Array.isArray(lista) || lista.length === 0 || lista.length > 200) return [];
-    return lista
-        .filter(function (a) { return typeof a === "string"; })
-        .map(function (a) { return path.basename(a); })
-        .filter(function (n) {
-            return /^captura-[\w-]+\.png$/.test(n) && fs.existsSync(path.join(CARPETA_CAPTURAS, n));
+//Función que obtiene las capturas generadas a traves de su id
+function listaCapturasGeneradas(id) {
+
+    //Comprueba el id
+    if (typeof id !== "string" || !/^\d+$/.test(id)) {
+        return { error: "Identificador de generación no válido." };
+    }
+
+    //Ruta de la carpeta con las capturas en funcion de su id
+    const carpeta = path.join(CARPETA_CAPTURAS, id);
+
+    //Comprueba que exista la carpeta
+    if (!fs.existsSync(carpeta) || !fs.statSync(carpeta).isDirectory()) {
+        return { error: "No se encontraron capturas para esa generación." };
+    }
+
+    //Lee el contenido y obtiene los archivos y directorios
+    const archivos = fs.readdirSync(carpeta, { withFileTypes: true })
+        .filter(function (entrada) { //Nos quedamos con los archivos
+            return entrada.isFile() && entrada.name.endsWith(".png");
+        }) //y lo pasamos a un array
+        .map(function (entrada) {
+            return entrada.name;
         });
+
+    if (archivos.length === 0) {
+        return { error: "Esa generación no contiene capturas." };
+    }
+    //Devuelve el objeto con la ruta de la carpeta y el array de las capturas
+    return { carpeta, archivos };
 }
 
 // ---------- Captura individual ----------
@@ -86,19 +108,28 @@ app.post("/api/captura", async (req, res) => {
 });
 
 // ---------- ZIP ----------
+//Ruta POST en Express para generar y descargar el archivo ZIP
 app.post("/api/zip", (req, res) => {
-    const nombres = nombresValidos(req.body?.archivos);
-    if (nombres.length === 0) {
-        return res.status(400).json({ error: "No hay capturas válidas para comprimir." });
+
+    //Obtiene las capturas a traves de su id
+    const generacion = listaCapturasGeneradas(req.body?.id);
+
+    if (generacion.error) {
+        return res.status(400).json({ error: generacion.error });
     }
 
+    //Indica a la repuesta HTTP que se envia un archivo ZIP
     res.setHeader("Content-Type", "application/zip");
+    //Indica que debe descargarse como un adjunto con nombre capturas.zip
     res.setHeader("Content-Disposition", 'attachment; filename="capturas.zip"');
 
-    const zip = archiver("zip");
 
+    const zip = new ZipArchive();
+
+    //Evento para el manejo de errores 
     zip.on("error", function (error) {
         console.error("Error al crear el ZIP:", error);
+
         if (!res.headersSent) {
             res.status(500).end();
         } else {
@@ -106,28 +137,51 @@ app.post("/api/zip", (req, res) => {
         }
     });
 
+    //Conecta el flujo de salida del ZIP con la respuesta HTTP
+    //permite enviar el archivo mientras se genera sin guardarlo en el disco
     zip.pipe(res);
 
-    nombres.forEach(function (n) {
-        zip.file(path.join(CARPETA_CAPTURAS, n), { name: n });
+    //Recorre los archivos y los añade al ZIP
+    generacion.archivos.forEach(function (archivo) {
+        zip.file(path.join(generacion.carpeta, archivo), { name: archivo });
     });
 
     zip.finalize();
 });
 
 // ---------- PDF ----------
+//Ruta POST con Express para generar y descargar las capturas en PDF
 app.post("/api/pdf", async (req, res) => {
-    const nombres = nombresValidos(req.body?.archivos);
-    if (nombres.length === 0) {
-        return res.status(400).json({ error: "No hay capturas válidas para exportar." });
+
+    //Se obtienen las capturas por su id
+    const generacion = listaCapturasGeneradas(req.body?.id);
+
+    if (generacion.error) {
+        return res.status(400).json({ error: generacion.error });
     }
 
-    const imagenes = nombres.map(function (n) {
-        const base64 = fs.readFileSync(path.join(CARPETA_CAPTURAS, n)).toString("base64");
+    //Recorre los archivos y los transforma en una etiqueta HTML <img>
+    const imagenes = generacion.archivos.map(function (archivo) {
+
+        //Lee el contenido de la imagen desde el sistema de archivos.
+        //path.join construye la ruta completa de la imagen.
+        //toString("base64") convierte el contenido binario
+        //de la imagen en una cadena de texto codificada en Base64.
+        const base64 = fs.readFileSync(
+            path.join(generacion.carpeta, archivo)
+        ).toString("base64");
+
+        //Devuelve la etiqueta html con la imagen que se introduce mediante Base64,
+        //por tanto no necesita acceder a una ruta externa
+        //Se fuerza un salto de página despues de cada imagen
         return `<img src="data:image/png;base64,${base64}" style="width:100%;display:block;page-break-after:always;">`;
     }).join("");
 
+    //Variable para la instancia del navegador
     let navegador;
+
+    //Instancia el navegador, crea una nueva página dentro de el e introduce el contenido
+    //Chromium interpreta las imagenes y se genera el PDF a partir del html
     try {
         navegador = await chromium.launch();
         const pagina = await navegador.newPage();
@@ -137,14 +191,15 @@ app.post("/api/pdf", async (req, res) => {
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader("Content-Disposition", 'attachment; filename="capturas.pdf"');
         return res.send(pdf);
+
     } catch (error) {
         console.error("Error al crear el PDF:", error);
         return res.status(500).json({ error: "No se pudo crear el PDF." });
-    } finally {
+    
+    } finally {//Se cierra el navegador al final siempre, tanto si hay error como si no
         if (navegador) await navegador.close();
     }
 });
-
 //---------------------------Buscador url-----------------------------------------------------
 
 //Metodo "POST" para recibir datos del navegador. La ruta es /api/crawl. Cuando el navegador haga un POST a esa ruta, se ejecuta la función que recibe req y res.
@@ -392,13 +447,13 @@ app.post("/api/crawl", async (req, res) => {
 
                 const titulo = await page.title();
                 const urlFinal = page.url();
-               
+
                 paginas.push({
                     title: titulo || "Sin titulo",
                     url: urlFinal,
                     depth: paginaActual.depth,
                     status: respuesta && respuesta.ok() ? "ok" : "error",
-                    
+
                 });
 
                 const urlFinalNormalizada = new URL(urlFinal);
@@ -552,7 +607,7 @@ app.post("/api/seleccion", (req, res) => {
 
         sesionesRastreo.delete(crawlId);
         return res.status(410).json({ error: "El rastreo ha caducado" }); //Error 410 recurso eliminado
-    
+
     }
     //comprobamos que sea texto y este entre las encontradas y que no haya duplicidad
     if (urls.some(url => typeof url !== "string" || !sesion.urlsEncontradas.has(url))
@@ -560,7 +615,7 @@ app.post("/api/seleccion", (req, res) => {
 
         return res.status(400).json({ error: "La selección contiene páginas invalidas" });
     }
-    
+
     //Convertimos el array en un set, que guarda valores unicos y permite comprobar la duplicidad
     sesion.urlsSeleccionadas = new Set(urls);
     //Renovamos la sesión
@@ -609,6 +664,110 @@ app.post("/api/vista-previa", async (req, res) => {
     } catch (error) {
         console.error("Error al generar la vista previa:", url, error);
         return res.status(500).json({ error: "No se pudo generar la vista previa." });
+    }
+});
+
+// ---------- Generar TODAS las capturas de la configuración de la página 3 ----------
+// Recibe: { crawlId?, tipo: "viewport" | "completa", datos: { "https://...": { puntos: [...], tamanos: [...] } } }
+// Devuelve: { id, paginas: [{ url, capturas: [{ tamano, etiqueta, archivo, src } | { tamano, error }] }] }
+app.post("/api/generar", async (req, res) => {
+    const { crawlId, tipo, datos } = req.body ?? {};
+
+    if (tipo !== "viewport" && tipo !== "completa") {
+        return res.status(400).json({ error: "Tipo de captura no válido" });
+    }
+
+    if (typeof datos !== "object" || datos === null || Array.isArray(datos)) {
+        return res.status(400).json({ error: "No hay páginas para capturar" });
+    }
+
+    const urls = Object.keys(datos);
+    if (urls.length === 0 || urls.length > 100) {
+        return res.status(400).json({ error: "Número de páginas no válido (entre 1 y 100)" });
+    }
+
+    // Seguridad de sesión: solo se aplica si este servidor tiene sesiones de rastreo (versión de main)
+    let sesion = null;
+    if (typeof sesionesRastreo !== "undefined") {
+        if (typeof crawlId !== "string") {
+            return res.status(400).json({ error: "Falta el identificador del rastreo" });
+        }
+        sesion = sesionesRastreo.get(crawlId);
+        if (!sesion || sesion.expira <= Date.now()) {
+            sesionesRastreo.delete(crawlId);
+            return res.status(410).json({ error: "El rastreo ha caducado. Vuelve a analizar la web." });
+        }
+    }
+
+    for (const url of urls) {
+        const ajustes = datos[url];
+
+        // La URL debe ser http o https válida
+        let direccion;
+        try {
+            direccion = new URL(url);
+        } catch {
+            return res.status(400).json({ error: "URL inválida: " + url });
+        }
+        if (direccion.protocol !== "http:" && direccion.protocol !== "https:") {
+            return res.status(400).json({ error: "Solo se permiten URLs http o https: " + url });
+        }
+
+        if (sesion && (!sesion.urlsSeleccionadas || !sesion.urlsSeleccionadas.has(url))) {
+            return res.status(403).json({ error: "Esta página no forma parte de la selección: " + url });
+        }
+
+        // Tamaños: lista no vacía y todos válidos
+        if (
+            !Array.isArray(ajustes?.tamanos) ||
+            ajustes.tamanos.length === 0 ||
+            !ajustes.tamanos.every(t => typeof t === "string" && VIEWPORTS[t])
+        ) {
+            return res.status(400).json({
+                error: `Tamaños no válidos en ${url}. Usa: ${Object.keys(VIEWPORTS).join(", ")}`
+            });
+        }
+
+        // Puntos de scroll: solo importan en modo viewport
+        if (tipo === "viewport") {
+            const puntos = ajustes.puntos;
+            if (
+                !Array.isArray(puntos) ||
+                puntos.length === 0 ||
+                puntos.length > 20 ||
+                !puntos.every(p => Number.isInteger(p) && p >= 0 && p <= 100)
+            ) {
+                return res.status(400).json({
+                    error: "Los puntos de scroll deben ser enteros entre 0 y 100: " + url
+                });
+            }
+        }
+    }
+
+    if (sesion && typeof DURACION_SESION_RASTREO !== "undefined") {
+        sesion.expira = Date.now() + DURACION_SESION_RASTREO;
+    }
+
+    // Una carpeta por generación: capturas/<id>/
+    const id = Date.now().toString();
+    const carpeta = path.join(CARPETA_CAPTURAS, id);
+
+    try {
+        const resultados = await generarTodo({ tipo, datos, carpeta });
+
+        // Añadimos a cada captura correcta su dirección web, para el <img> de la página 4
+        for (const pagina of resultados) {
+            for (const captura of pagina.capturas) {
+                if (captura.archivo) {
+                    captura.src = `/capturas/${id}/${captura.archivo}`;
+                }
+            }
+        }
+
+        return res.json({ id, paginas: resultados });
+    } catch (error) {
+        console.error("Error al generar las capturas:", error);
+        return res.status(500).json({ error: "No se pudieron generar las capturas." });
     }
 });
 

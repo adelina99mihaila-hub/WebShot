@@ -1262,7 +1262,6 @@ const botonAtras = document.getElementById("pag4-volver");
 
 const botonGenerar = document.getElementById("pag3-generar");
 
-let capturasGeneradas = [];
 
 const nombresTamano = { desktop: "Desktop", tablet: "Tablet", movil: "Móvil" };
 
@@ -1756,29 +1755,52 @@ async function pedirCaptura(url, tamano) {
 
     return datos.imagen;
 }
-
+//Función para la descarga del archivo
 async function descargarArchivo(ruta, nombre) {
-    if (capturasGeneradas.length === 0) {
-        alert("Primero genera las capturas.");
-        return;
+
+    //Recupera el resultado de la generación de capturas
+    const guardado = sessionStorage.getItem("webshot-resultado");
+
+    if (!guardado) {
+        throw new Error("Primero genera las capturas.");
+    }
+    //Guardamos el resultado a JSON
+    let resultado;
+    try {
+        resultado = JSON.parse(guardado);
+    } catch (error) {
+        throw new Error("No se pudo leer el resultado de la generación.");
+    }
+    //Comprueba el identificador de la generación
+    if (typeof resultado.id !== "string" || resultado.id === "") {
+        throw new Error("El resultado no contiene un identificador de generación válido.");
     }
 
+    //Realiza la petición al servidor y manda el id en formato json
     const respuesta = await fetch(ruta, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ archivos: capturasGeneradas })
+        body: JSON.stringify({ id: resultado.id })
     });
 
     if (!respuesta.ok) {
         const datos = await respuesta.json();
         throw new Error(datos.error || "Error en la descarga");
     }
-
+    //Convierte el contenido en un Blob
     const blob = await respuesta.blob();
+
+    //Elemento html <a> para iniciar la descarga 
     const enlace = document.createElement("a");
+
+    //Url para el blob que permite acceder al archivo generado
     enlace.href = URL.createObjectURL(blob);
+    //Se le asigna el nombre al archivo
     enlace.download = nombre;
+    //Simula un click en el enlace para iniciar la descarga
     enlace.click();
+
+    //Libera la url
     URL.revokeObjectURL(enlace.href);
 }
 

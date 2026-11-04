@@ -1589,11 +1589,15 @@ input[type="checkbox"] {
     opacity: 0.55;
     cursor: not-allowed;
 }
-
+#pag4 .pag4__opcion {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    width: 200px;
+}
 #pag4 .pag4__seleccion {
-    position: absolute;
-    top: 44px;
-    left: 8px;
+    position: static;
     display: flex;
     align-items: center;
     gap: 4px;
