@@ -10,6 +10,10 @@ WebShot es una aplicación web para analizar páginas web y realizar capturas en
 - Permite configurar los puntos de scroll y los tamaños de pantalla por página.
 - Muestra una vista previa de la página y permite colocar marcadores en los puntos de captura.
 - Guarda búsquedas anteriores en el historial del navegador.
+- Realiza capturas de pantalla con la configuración seleccionada.
+- Permite visionar las capturas en el mismo navegador sin necesidad de descargarlas.
+- Permite descargar las capturas individualmente, en formato ZIP y en PDF.
+- Permite comparar dos capturas sin necesidad de descargarlas.
 
 ## Requisitos
 
@@ -37,7 +41,3 @@ WebShot es una aplicación web para analizar páginas web y realizar capturas en
 - Node.js y Express
 - Playwright
 - HTML, CSS y JavaScript
-
-## Pendiente
-
-La generación final de todas las capturas configuradas y su integración completa con la pantalla de resultados todavía están pendientes.
