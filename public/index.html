@@ -45,8 +45,7 @@
 
 
             <form class="search-box" id="search-box">
-                <input type="text" id="url-input" name="url" placeholder="Ingresa la URL de la web" aria
-                    aria-label="Buscar URL">
+                <input type="text" id="url-input" name="url" placeholder="Ingresa la URL de la web" aria-label="Buscar URL">
                 <button type="submit" class="boton-principal">Analizar</button>
             </form>
             <!--Loader para la espera-->
@@ -79,13 +78,9 @@
                     </div>
 
                     <div class="setting setting-toggle">
-                        <label class="switch">
-                            <input type="checkbox" id="respect-robots">
-                            <span class="slider"></span>
-                        </label>
-                        <span>Respetar robots.txt</span>
+                        <input type="checkbox" id="respect-robots">
+                        <label for="respect-robots">Respetar robots.txt</label>
                     </div>
-
                 </div>
             </details>
         </div>
@@ -200,8 +195,8 @@
 
             <!--Bloque 2: viewports-->
 
-            <div class="config-card__bloque">
-                <h3>Viewports</h3>
+            <fieldset class="config-card__bloque">
+                <legend>Viewports</legend>
                 <p>Selecciona uno o varios. Cada punto de scroll se captura en cada viewport.</p>
                 <div class="viewports">
                     <label class="viewports__opcion">
@@ -220,12 +215,12 @@
                         <small>390px</small>
                     </label>
                 </div>
-            </div>
+            </fieldset>
 
             <!--Bloque 3: tipo de captura-->
 
-            <div class="config-card__bloque">
-                <h3>Tipo de captura</h3>
+            <fieldset class="config-card__bloque">
+                <legend>Tipo de captura</legend>
                 <div class="opciones">
                     <label class="opciones__item">
                         <input type="radio" name="tipo" value="viewport" checked>
@@ -238,7 +233,7 @@
                         <small>Una captura larga de toda la pagina</small>
                     </label>
                 </div>
-            </div>
+            </fieldset>
             <!-- Botones de acción -->
 
             <div class="acciones">
@@ -391,7 +386,8 @@
                 <p id="pag4-resumen">0 capturas · 0 páginas</p>
             </div>
             <div class="pag4__herramientas">
-                <input type="search" id="pag4-filtro" placeholder="Filtrar por URL...">
+                <input type="search" id="pag4-filtro" aria-label="Filtrar url por nombre"
+                    placeholder="Filtrar por URL...">
                 <button type="button" class="pag4__btn boton-claro" id="pag4-zip">Descargar todo (ZIP)</button>
                 <button type="button" class="pag4__btn pag4__btn--oscuro boton-principal" id="pag4-pdf">Exportar
                     PDF</button>
@@ -427,7 +423,8 @@
                 <div class="visor__imagen">
                     <img id="visor-imagen" alt="">
                 </div>
-                <button type="button" id="visor-siguiente" class="visor__flecha" aria-label="Captura siguiente">›</button>
+                <button type="button" id="visor-siguiente" class="visor__flecha"
+                    aria-label="Captura siguiente">›</button>
             </div>
         </dialog>
         <!-- aria-label es un nombre para los lectores de pantalla, que usan las personas ciegas. Como el ✕ o las flechas no tienen texto que se entienda leído en voz alta, les ponemos uno: “Cerrar”, “Captura anterior”… -->
