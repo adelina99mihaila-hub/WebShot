@@ -1453,7 +1453,7 @@ function crearMiniatura(captura, url) {
     imagen.alt = "Captura " + captura.etiqueta + " en " + pie.textContent;
     imagen.loading = "lazy";
 
-        // NUEVOO Al hacer clic (o pulsar Enter) en la imagen, se abre en el visor ampliado
+    // NUEVOO Al hacer clic (o pulsar Enter) en la imagen, se abre en el visor ampliado
     imagen.tabIndex = 0;
     imagen.addEventListener("click", function () {
         abrirVisor(captura.src);
@@ -1476,7 +1476,7 @@ function crearMiniatura(captura, url) {
     descarga.title = "Descargar captura";
     descarga.setAttribute("aria-label", `Descargar captura ${captura.etiqueta}`);
 
-        //Franja con más información que aparece al pasar el ratón por la miniatura
+    //Franja con más información que aparece al pasar el ratón por la miniatura
     const anchoPx = anchosTamanoPx[captura.tamano];
 
     const infoHover = document.createElement("div");
@@ -1504,7 +1504,10 @@ function crearMiniatura(captura, url) {
     casilla.type = "checkbox";
     casilla.className = "pag4__comparar-checkbox";
     casilla.dataset.miniaturaId = String(indice);
-
+    casilla.setAttribute(
+        "aria-label",
+        `Comparar captura ${captura.etiqueta}, ${pie.textContent}, ${url}`
+    );
     labelComparar.append(casilla, " Comparar");
     opcion.append(figura, labelComparar);
 

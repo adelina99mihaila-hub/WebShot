@@ -294,7 +294,18 @@ body {
     align-self: end;
     /* alinea el toggle con la base de la columna de al lado */
 }
+.setting-toggle input[type="checkbox"] {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    margin: 0;
+}
 
+.setting-toggle label {
+    display: inline;
+    margin: 0;
+}
 .advanced-toggle-wrapper summary {
     list-style: none;
     cursor: pointer;
@@ -742,6 +753,18 @@ input[type="checkbox"] {
     border-bottom: 1px solid #eee;
 }
 
+#pag2 fieldset.config-card__bloque {
+    min-width: 0;
+    border: 0;
+    border-bottom: 1px solid #eee;
+}
+
+#pag2 .config-card__bloque legend {
+    padding: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-principal);
+}
 #pag2 .config-card__bloque:last-child {
     border-bottom: none;
 }
@@ -861,6 +884,11 @@ input[type="checkbox"] {
     border-color: #0F2F57;
     box-shadow: 0 0 0 1px #0F2F57;
     background: #f0f4fa;
+}
+#pag2 .viewports__opcion:focus-within,
+#pag2 .opciones__item:focus-within {
+    outline: 3px solid var(--color-principal);
+    outline-offset: 3px;
 }
 
 /* Bloque: opciones (tipo de captura) */
