@@ -880,9 +880,33 @@ casillasViewport.forEach(function (casilla) {
 
             numero.type = 'number'; numero.min = 0; numero.max = 100; numero.value = punto;
             numero.setAttribute('aria-label', 'Porcentaje del punto ' + (posicion + 1));
+           
+            //Función para cuando se modifica el campo númerico de un punto de scroll
             numero.onchange = function () {
-                if (numero.value !== '') cambiar(posicion, Number(numero.value));
+
+                //Comprueba si el campo numérico tenía el foco antes de actualizar la lista.
+                const conservarFoco = document.activeElement === numero;
+                const valorAnterior = pagina.puntos[posicion];
+                const valorNuevo = Number(numero.value);
+
+                const cambioAceptado =
+                    numero.value !== "" && cambiar(posicion, valorNuevo);
+
+                const valorObjetivo = cambioAceptado ? valorNuevo : valorAnterior;
+
                 mostrar();
+                //Si el foco estaba en el campo antes de actualizarlo recupera
+                if (conservarFoco) {
+                    const campoActualizado = Array.from(
+                        lista.querySelectorAll('input[type="number"]')
+                    ).find(function (campo) {
+                        return Number(campo.value) === valorObjetivo;
+                    });
+                    //Devuelve el foco
+                    if (campoActualizado) {
+                        campoActualizado.focus();
+                    }
+                }
             };
             // Botón para eliminar el punto de scroll, solo si hay más de uno
             let quitar = document.createElement('button');
