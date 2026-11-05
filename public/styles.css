@@ -1772,55 +1772,63 @@ font {
 
 /* ===== MINIATURAS: efecto al pasar el ratón ===== */
 
-/* Prepara la animación: cambia suavemente el tamaño y la sombra */
+/* Prepara la animación de la miniatura y de su pie */
 #pag4 .pag4__miniatura {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Al pasar el ratón (o llegar con Tab), crece un poco y gana sombra */
+#pag4 .pag4__miniatura figcaption {
+    transition: background-color 0.25s ease;
+}
+
+/* Al pasar el ratón (o llegar con el teclado), crece un poco y gana sombra */
 #pag4 .pag4__miniatura:hover,
-#pag4 .pag4__miniatura:focus-within {
+#pag4 .pag4__miniatura:has(:focus-visible) {
     transform: scale(1.05);
     box-shadow: 0 10px 24px rgba(15, 47, 87, 0.25);
     z-index: 1;
 }
 
-/* Franja con más información: escondida debajo de la miniatura */
-#pag4 .pag4__info-hover {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 10px 14px;
-    background: rgba(15, 47, 87, 0.92);
-    font-size: 0.8rem;
-    opacity: 0;
-    transform: translateY(100%);
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    pointer-events: none;
+/* El pie se pone azul y con el texto en blanco */
+#pag4 .pag4__miniatura:hover figcaption,
+#pag4 .pag4__miniatura:has(:focus-visible) figcaption {
+    background: rgba(15, 47, 87, 0.95);
 }
 
-#pag4 .pag4__info-hover * {
+#pag4 .pag4__miniatura:hover figcaption,
+#pag4 .pag4__miniatura:hover figcaption *,
+#pag4 .pag4__miniatura:has(:focus-visible) figcaption,
+#pag4 .pag4__miniatura:has(:focus-visible) figcaption * {
     color: #ffffff;
 }
 
-/* Al pasar el ratón, la franja sube y se hace visible */
-#pag4 .pag4__miniatura:hover .pag4__info-hover,
-#pag4 .pag4__miniatura:focus-within .pag4__info-hover {
+/* La información extra: plegada (altura 0) mientras no se pasa el ratón */
+#pag4 .pag4__pie-extra {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    font-size: 0.78rem;
+    transition: max-height 0.25s ease, opacity 0.25s ease, margin-top 0.25s ease;
+}
+
+/* Al pasar el ratón se despliega, y como el pie está pegado abajo, crece hacia arriba */
+#pag4 .pag4__miniatura:hover .pag4__pie-extra,
+#pag4 .pag4__miniatura:has(:focus-visible) .pag4__pie-extra {
+    max-height: 4.5em;
     opacity: 1;
-    transform: translateY(0);
+    margin-top: 4px;
 }
 
 /* Para quien tiene activado "reducir movimiento" en su ordenador */
 @media (prefers-reduced-motion: reduce) {
     #pag4 .pag4__miniatura,
-    #pag4 .pag4__info-hover {
+    #pag4 .pag4__miniatura figcaption,
+    #pag4 .pag4__pie-extra,
+    .visor[open] {
         transition: none;
-    }
-        .visor[open] {
         animation: none;
     }
 }

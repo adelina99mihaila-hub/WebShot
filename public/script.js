@@ -1426,6 +1426,7 @@ function leerResultado() {
 }
 
 //Función para crear las miniaturas de las capturas
+
 function crearMiniatura(captura, url) {
 
     const opcion = document.createElement("div");
@@ -1500,14 +1501,14 @@ function crearMiniatura(captura, url) {
     descarga.title = "Descargar captura";
     descarga.setAttribute("aria-label", `Descargar captura ${captura.etiqueta}`);
 
-    //Franja con más información que aparece al pasar el ratón por la miniatura
+        //Información extra dentro del pie: se despliega al pasar el ratón
     const anchoPx = anchosTamanoPx[captura.tamano];
 
-    const infoHover = document.createElement("div");
-    infoHover.className = "pag4__info-hover";
+    const extra = document.createElement("span");
+    extra.className = "pag4__pie-extra";
 
-    const lineaTamano = document.createElement("strong");
-    lineaTamano.textContent = pie.textContent + (anchoPx ? " · " + anchoPx + " px" : "");
+    const lineaAncho = document.createElement("span");
+    lineaAncho.textContent = anchoPx ? anchoPx + " px de ancho" : "";
 
     const lineaPunto = document.createElement("span");
     lineaPunto.textContent = captura.etiqueta === "Completa"
@@ -1517,9 +1518,10 @@ function crearMiniatura(captura, url) {
     const lineaAccion = document.createElement("span");
     lineaAccion.textContent = "🔍 Clic para ampliar";
 
-    infoHover.append(lineaTamano, lineaPunto, lineaAccion);
+    extra.append(lineaAncho, lineaPunto, lineaAccion);
+    pie.append(extra);
 
-    figura.append(imagen, etiqueta, descarga, infoHover, pie);
+    figura.append(imagen, etiqueta, descarga, pie);
 
     const labelComparar = document.createElement("label");
     labelComparar.className = "pag4__seleccion";
