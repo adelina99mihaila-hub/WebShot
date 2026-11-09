@@ -195,13 +195,17 @@ app.post("/api/pdf", async (req, res) => {
     } catch (error) {
         console.error("Error al crear el PDF:", error);
         return res.status(500).json({ error: "No se pudo crear el PDF." });
-    
+
     } finally {//Se cierra el navegador al final siempre, tanto si hay error como si no
         if (navegador) await navegador.close();
     }
 });
 //---------------------------Buscador url-----------------------------------------------------
 
+//Se permite buscar páginas sin www
+function normalizarHost(host) {
+    return host.replace(/^www\./i, "");
+}
 //Metodo "POST" para recibir datos del navegador. La ruta es /api/crawl. Cuando el navegador haga un POST a esa ruta, se ejecuta la función que recibe req y res.
 
 app.post("/api/crawl", async (req, res) => {
@@ -447,6 +451,16 @@ app.post("/api/crawl", async (req, res) => {
 
                 const titulo = await page.title();
                 const urlFinal = page.url();
+
+                //Comprobamos si se ha redireccionado al dominio principal
+                const hostInicial = normalizarHost(urlPrueba.hostname);
+                const urlFinalParseada = new URL(urlFinal);
+                const hostFinal = normalizarHost(urlFinalParseada.hostname);
+
+                if (hostInicial === hostFinal) {
+                    hostPermitidos.add(urlFinalParseada.hostname.toLowerCase());
+                }
+
 
                 paginas.push({
                     title: titulo || "Sin titulo",
