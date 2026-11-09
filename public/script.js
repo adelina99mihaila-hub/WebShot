@@ -1292,6 +1292,12 @@ const nombresTamano = { desktop: "Desktop", tablet: "Tablet", movil: "Móvil" };
 //Ancho en píxeles de cada tamaño, para mostrarlo en la información de las miniaturas
 const anchosTamanoPx = { desktop: 1440, tablet: 768, movil: 390 };
 
+//Orden en que se muestran los tamaños en la página 4 (y en el visor)
+const ordenTamanos = ["desktop", "tablet", "movil"];
+
+//Máximo de capturas por línea en cada tamaño (las que sobran pasan a la línea de abajo)
+const maxPorFila = { desktop: 4, tablet: 6, movil: 6 };
+
 //Constantes para la función de comparar dos capturas
 const opcionesComparacion = []; //Almacena todas las capturas disponibles
 const botonComparar = document.getElementById("pag4-comparar");
@@ -1412,12 +1418,6 @@ function leerConfigPag3() {
 //NUEVO Función para leer el resultado de la última generación de capturas guardado en sessionStorage
 function leerResultado() {
 
-    //Limpiamos todo lo referente a la comparación de capturas
-    opcionesComparacion.length = 0;
-    seleccionesComparacion.length = 0;
-    actualizarComparacion();
-
-
     const guardado = sessionStorage.getItem("webshot-resultado");
     if (!guardado) {
         return null;
@@ -1426,6 +1426,7 @@ function leerResultado() {
 }
 
 //Función para crear las miniaturas de las capturas
+
 function crearMiniatura(captura, url) {
 
     const opcion = document.createElement("div");
@@ -1479,13 +1480,20 @@ function crearMiniatura(captura, url) {
 
     // NUEVOO Al hacer clic (o pulsar Enter) en la imagen, se abre en el visor ampliado
     imagen.tabIndex = 0;
-    imagen.addEventListener("click", function () {
-        abrirVisor(captura.src);
-    });
+    
     imagen.addEventListener("keydown", function (evento) {
         if (evento.key === "Enter") {
             abrirVisor(captura.src);
         }
+    });
+
+        //Al hacer clic en cualquier parte de la miniatura (imagen o barra azul), se abre el visor
+    figura.addEventListener("click", function (evento) {
+        //El botón de descarga no debe abrir el visor
+        if (evento.target.closest(".pag4__descarga")) {
+            return;
+        }
+        abrirVisor(captura.src);
     });
 
     const etiqueta = document.createElement("span");
@@ -1500,14 +1508,14 @@ function crearMiniatura(captura, url) {
     descarga.title = "Descargar captura";
     descarga.setAttribute("aria-label", `Descargar captura ${captura.etiqueta}`);
 
-    //Franja con más información que aparece al pasar el ratón por la miniatura
+        //Información extra dentro del pie: se despliega al pasar el ratón
     const anchoPx = anchosTamanoPx[captura.tamano];
 
-    const infoHover = document.createElement("div");
-    infoHover.className = "pag4__info-hover";
+    const extra = document.createElement("span");
+    extra.className = "pag4__pie-extra";
 
-    const lineaTamano = document.createElement("strong");
-    lineaTamano.textContent = pie.textContent + (anchoPx ? " · " + anchoPx + " px" : "");
+    const lineaAncho = document.createElement("span");
+    lineaAncho.textContent = anchoPx ? anchoPx + " px de ancho" : "";
 
     const lineaPunto = document.createElement("span");
     lineaPunto.textContent = captura.etiqueta === "Completa"
@@ -1517,9 +1525,10 @@ function crearMiniatura(captura, url) {
     const lineaAccion = document.createElement("span");
     lineaAccion.textContent = "🔍 Clic para ampliar";
 
-    infoHover.append(lineaTamano, lineaPunto, lineaAccion);
+    extra.append(lineaAncho, lineaPunto, lineaAccion);
+    pie.append(extra);
 
-    figura.append(imagen, etiqueta, descarga, infoHover, pie);
+    figura.append(imagen, etiqueta, descarga, pie);
 
     const labelComparar = document.createElement("label");
     labelComparar.className = "pag4__seleccion";
@@ -1567,8 +1576,37 @@ function crearTarjetaResultado(pagina) {
     tarjeta.querySelector(".pag4__contador").textContent = correctas + " capturas";
 
     const contenedor = tarjeta.querySelector(".pag4__miniaturas");
-    pagina.capturas.forEach(function (captura) {
-        contenedor.appendChild(crearMiniatura(captura, pagina.url));
+
+    //Una fila por cada tamaño: primero desktop, luego tablet y luego móvil
+    ordenTamanos.forEach(function (tamano) {
+
+        //Las capturas de este tamaño
+        const capturasTamano = pagina.capturas.filter(function (captura) {
+            return captura.tamano === tamano;
+        });
+
+        //Si no hay ninguna de este tamaño, no se crea la fila
+        if (capturasTamano.length === 0) {
+            return;
+        }
+
+        const grupo = document.createElement("section");
+        grupo.className = "pag4__grupo";
+
+        const titulo = document.createElement("h4");
+        titulo.className = "pag4__grupo-titulo";
+        titulo.textContent = nombresTamano[tamano] + " · " + anchosTamanoPx[tamano] + " px";
+
+        const fila = document.createElement("div");
+        fila.className = "pag4__fila pag4__fila--" + tamano;
+                fila.style.setProperty("--columnas", Math.min(capturasTamano.length, maxPorFila[tamano]));
+
+        capturasTamano.forEach(function (captura) {
+            fila.appendChild(crearMiniatura(captura, pagina.url));
+        });
+
+        grupo.append(titulo, fila);
+        contenedor.appendChild(grupo);
     });
 
     return { tarjeta: tarjeta, cantidad: correctas };
@@ -1578,8 +1616,11 @@ function crearTarjetaResultado(pagina) {
 //Función para mostrar los resultados en la página 4, a partir de la última generación de capturas
 function mostrarResultados() {
 
+        //Al volver a dibujar las tarjetas, empezamos la comparación desde cero
     listaResultados.innerHTML = "";
+    opcionesComparacion.length = 0;
     seleccionesComparacion.length = 0;
+    actualizarComparacion();
 
     const resultado = leerResultado();
     if (!resultado) {
@@ -1694,10 +1735,13 @@ function abrirVisor(src) {
         if (!pagina.url.toLowerCase().includes(texto)) {
             return;
         }
-        pagina.capturas.forEach(function (captura) {
-            if (!captura.error) {
-                capturasVisor.push({ ...captura, url: pagina.url });
-            }
+              //Mismo orden que en pantalla: desktop, tablet y móvil
+        ordenTamanos.forEach(function (tamano) {
+            pagina.capturas.forEach(function (captura) {
+                if (captura.tamano === tamano && !captura.error) {
+                    capturasVisor.push({ ...captura, url: pagina.url });
+                }
+            });
         });
     });
 
