@@ -1833,6 +1833,75 @@ font {
     }
 }
 
+/* Toda la miniatura se puede pulsar para ampliar (también la barra azul) */
+#pag4 .pag4__miniatura {
+    cursor: zoom-in;
+}
+
+/* Salvo el botón de descarga, que mantiene la mano de "pulsar" */
+#pag4 .pag4__descarga {
+    cursor: pointer;
+}
+
+/* ===== MINIATURAS AGRUPADAS POR TAMAÑO ===== */
+
+/* Los grupos (desktop, tablet, móvil) van uno debajo de otro */
+#pag4 .pag4__miniaturas {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 24px;
+}
+
+#pag4 .pag4__grupo-titulo {
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+/* Cada fila tiene tantas columnas como capturas, y nunca más anchas que su máximo */
+#pag4 .pag4__fila {
+    display: grid;
+    grid-template-columns: repeat(var(--columnas), minmax(0, var(--max-ancho)));
+    gap: 12px;
+}
+
+/* Ancho máximo de cada miniatura según el tamaño de pantalla */
+#pag4 .pag4__fila--desktop {
+    --max-ancho: 480px;
+}
+
+#pag4 .pag4__fila--tablet {
+    --max-ancho: 300px;
+}
+
+#pag4 .pag4__fila--movil {
+    --max-ancho: 220px;
+}
+
+/* Dentro de las filas, las miniaturas ocupan su columna en vez de medir 200 px fijos */
+#pag4 .pag4__fila .pag4__opcion {
+    width: auto;
+    min-width: 0;
+}
+
+#pag4 .pag4__fila .pag4__miniatura {
+    width: 100%;
+    height: auto;
+}
+
+/* Cada miniatura con la forma real de su pantalla */
+#pag4 .pag4__fila--desktop .pag4__miniatura {
+    aspect-ratio: 16 / 10;
+}
+
+#pag4 .pag4__fila--tablet .pag4__miniatura {
+    aspect-ratio: 3 / 4;
+}
+
+#pag4 .pag4__fila--movil .pag4__miniatura {
+    aspect-ratio: 9 / 16;
+}
+
 /* ================ NUEVOO VISOR AMPLIADO ================ */
 
 /* Las miniaturas indican que se pueden ampliar */
