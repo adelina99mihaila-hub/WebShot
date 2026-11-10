@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { error } from 'node:console';
 
 test.describe('URLs inválidas', () => {
 
@@ -72,6 +73,49 @@ test.describe('URLs inválidas', () => {
 
         //Comprobamos que el loader sigue oculto
         await expect(loader).toBeHidden();
+
+    });
+    //--------------------------------------------------------------------------------------------------------
+
+    //Test para una url que no existe-------------------------------------------------------------------------
+    test('Búsqueda de una url inexistente', async ({ page }) => {
+
+        await page.goto('http://localhost:3000');
+
+        const formulario = page.locator('#search-box');
+        const pagina1 = page.locator('#pagina-1');
+
+        //Introducimos la URL que no existe
+        await formulario.getByRole('textbox', { name: 'Buscar URL' }).fill('www.sitioinventado.com');
+
+        //Esperamos la respuesta del servidor
+        const respuestaCrawl = page.waitForResponse(response =>
+            response.url().includes('/api/crawl') &&
+            response.request().method() === 'POST'
+        );
+
+        //Pulsamos Analizar
+        await formulario.getByRole('button').click();
+
+        //Recogemos la respuesta del servidor
+        const respuesta = await respuestaCrawl;
+        expect(respuesta.status()).toBe(200);
+
+        //Comprobamos los datos
+        const datos = await respuesta.json();
+
+        expect(datos.pages.length).toBe(1);
+
+        expect(datos.pages[0].title).toBe('Sin titulo');
+
+        expect(datos.pages[0].status).toBe('error');
+
+        await expect(pagina1).toBeVisible();
+
+        const filas = page.locator('#results-body tr');
+
+        expect(await filas.count()).toBe(1);
+
 
     });
 
