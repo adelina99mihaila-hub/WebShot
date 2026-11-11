@@ -1301,6 +1301,7 @@ const maxPorFila = { desktop: 4, tablet: 6, movil: 6 };
 //Constantes para la función de comparar dos capturas
 const opcionesComparacion = []; //Almacena todas las capturas disponibles
 const botonComparar = document.getElementById("pag4-comparar");
+const botonLimpiarSeleccion = document.getElementById("pag4-limpiar-seleccion");
 const estadoComparacion = document.getElementById("pag4-comparacion-estado");
 const dialogoComparador = document.getElementById("pag4-comparador");
 const botonCerrarComparador = document.getElementById("pag4-cierre-comparador");
@@ -1355,6 +1356,9 @@ function actualizarComparacion() {
 
     //Solo se activa el botón cuando se seleccionan dos capturas
     botonComparar.disabled = cantidad !== 2;
+        
+    //"Quitar selección" solo se puede pulsar si hay alguna casilla marcada
+    botonLimpiarSeleccion.disabled = cantidad === 0;
     estadoComparacion.textContent = cantidad === 0
         ? "Selecciona dos capturas para compararlas."
         : `${cantidad} de dos capturas seleccionadas.`;
@@ -1405,6 +1409,17 @@ botonComparar.addEventListener("click", function () {
 //Botón para cerrar el comparador
 botonCerrarComparador.addEventListener("click", function () {
     dialogoComparador.close();
+});
+
+//Botón para quitar la selección: desmarca todas las casillas sin tener que buscarlas
+botonLimpiarSeleccion.addEventListener("click", function () {
+
+    listaResultados.querySelectorAll(".pag4__comparar-checkbox:checked").forEach(function (casilla) {
+        casilla.checked = false;
+    });
+
+    seleccionesComparacion.length = 0;
+    actualizarComparacion();
 });
 
 //Función para leer la configuración guardada en la pagina 3 desde sessionStorage y devolverla como un objeto
