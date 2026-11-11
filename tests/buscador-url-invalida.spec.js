@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { error } from 'node:console';
 
 test.describe('URLs inválidas', () => {
 
