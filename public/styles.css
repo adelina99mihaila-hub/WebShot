@@ -1601,12 +1601,22 @@ input[type="checkbox"] {
 #pag4 .pag4__acciones {
     margin-top: 24px;
 }
+/* Barra de comparar: se queda anclada arriba al hacer scroll */
 #pag4 .pag4__comparacion-controles {
+    position: sticky;
+    top: 12px;
+    z-index: 5;
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 16px;
     margin: 16px 0;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #dce2e9;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(15, 47, 87, 0.12);
+    backdrop-filter: blur(4px);
 }
 
 #pag4 .pag4__comparacion-controles p {
