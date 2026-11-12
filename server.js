@@ -251,7 +251,7 @@ app.post("/api/crawl", async (req, res) => {
     const opciones = req.body ?? {}; //Si req.body es undefined, se le asigna un objeto vacío. Esto evita errores si el navegador no envía ningún dato.
 
     // Extrae las opciones del objeto que envió el navegador. 
-    const { maxDepth, maxUrls, allowedDomains, respectRobots } = opciones;
+    const { maxDepth, maxUrls, allowedDomains, respectRobots, modoDiagnostico = false } = opciones;
 
     ////Validacion de las opciones desde el lado del servidor
 
@@ -420,6 +420,8 @@ app.post("/api/crawl", async (req, res) => {
         const paginas = []; //Guarda las páginas que el servidor ya ha visitado
         const cola = [];    //Guarda las páginas pendientes de visitar
 
+        const medicionesNavegacion = []; //Array para las mediciones NUEVO
+
         const urlPrincipal = new URL(urlPrueba.href);
         urlPrincipal.hash = "";
 
@@ -443,11 +445,23 @@ app.post("/api/crawl", async (req, res) => {
                 continue;
             }
 
+            const inicioNavegacion = performance.now(); //Mediciones
             try {
                 const respuesta = await page.goto(paginaActual.url, {
                     waitUntil: "domcontentloaded",
                     timeout: 30000
                 });
+
+                //Mediciones---------------------------
+                const finNavegacion = performance.now();
+                const tiempoNavegacion = finNavegacion - inicioNavegacion;
+                medicionesNavegacion.push({
+                    url: paginaActual.url,
+                    profundidad: paginaActual.depth,
+                    tiempo: Number((tiempoNavegacion / 1000).toFixed(3)),
+                    estado: respuesta && respuesta.ok() ? "ok" : "error"
+                });
+                //-------------------------------------------
 
                 const titulo = await page.title();
                 const urlFinal = page.url();
@@ -529,6 +543,16 @@ app.post("/api/crawl", async (req, res) => {
                 }
             } catch (error) {
                 console.error("Error al visitar la página:", paginaActual.url, error);
+                //Mediciones-------------------------
+                const finNavegacion = performance.now();
+
+                medicionesNavegacion.push({
+                    url: paginaActual.url,
+                    profundidad: paginaActual.depth,
+                    tiempo: Number(((finNavegacion - inicioNavegacion) / 1000).toFixed(3)),
+                    estado: "error"
+                });
+                //-----------------------------------                
                 paginas.push({
                     title: "Sin titulo",
                     url: paginaActual.url,
@@ -551,7 +575,10 @@ app.post("/api/crawl", async (req, res) => {
         });
         return res.json({
             crawlId,
-            pages: paginas
+            pages: paginas,
+            ...(modoDiagnostico && {
+                medicionesNavegacion
+            })
         });
 
     } catch (error) {

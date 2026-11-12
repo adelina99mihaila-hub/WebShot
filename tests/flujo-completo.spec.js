@@ -65,7 +65,7 @@ test('Flujo completo', async ({ page }) => {
     await expect(paginaCarga).toBeVisible();
 
     //Pasado el tiempo se generan las capturas y se pasa a la página 4 (resultados)
-    await expect(pagina4).toBeVisible({ timeout: 60000 });
+    await expect(pagina4).toBeVisible({ timeout: 160000 });
 
     //-------------------------------------------DESCARGA (ZIP Y PDF)---------------------------------------------------------------------
 

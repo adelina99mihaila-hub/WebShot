@@ -1,0 +1,34 @@
+{
+  "ejecuciones": [
+    {
+      "id": 1,
+      "fecha": "2026-11-12T13:57:52.929Z",
+      "url": "www.cofre.io",
+      "profundidad": 1,
+      "repeticiones": 10,
+      "urlsEncontradas": 18,
+      "variaciones": false,
+      "tiempos": [
+        3.66,
+        3.81,
+        3.7,
+        4.56,
+        5.34,
+        3.77,
+        3.63,
+        3.73,
+        3.79,
+        3.55
+      ],
+      "estadisticas": {
+        "minimo": 3.55,
+        "maximo": 5.34,
+        "media": 3.95,
+        "mediana": 3.75,
+        "desviacionTipica": 0.53,
+        "rango": 1.79,
+        "coeficienteVariacion": 13.48
+      }
+    }
+  ]
+}

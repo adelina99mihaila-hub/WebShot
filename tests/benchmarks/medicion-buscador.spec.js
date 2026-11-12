@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test';
 
+import fs from 'node:fs';
+import path from 'node:path';
+
 test('Medición del buscador', async ({ page }) => {
 
     test.setTimeout(600000);
@@ -44,6 +47,9 @@ test('Medición del buscador', async ({ page }) => {
 
         //Comprobamos los datos
         const datos = await respuesta.json();
+
+        console.log('URLs recibidas del servidor:', datos.pages.length);
+        console.log('Primera URL:', datos.pages[0]?.url);
 
         const urlsEncontradas = datos.pages.length;
 
@@ -103,14 +109,76 @@ test('Medición del buscador', async ({ page }) => {
         ? (desviacionTipica / media) * 100
         : 0;
 
-        
+
     console.log(`URLs encontradas: ${urlsEsperadas}`);
 
     if (hayVariaciones) {
 
         console.log(`Hay variaciones en las URLs encontradas`);
     }
+    //-------------------------------------------------------------------------------------------------
+    console.log('URLs esperadas para el histórico:', urlsEsperadas);
+    const resultados = {
+        fecha: new Date().toISOString(),
+        url: URL_PRUEBA,
+        profundidad: PROFUNDIDAD,
+        repeticiones: REPETICIONES,
+        urlsEncontradas: urlsEsperadas,
+        variaciones: hayVariaciones,
+        tiempos,
+        estadisticas: {
+            minimo,
+            maximo,
+            media: Number(media.toFixed(2)),
+            mediana: Number(mediana.toFixed(2)),
+            desviacionTipica: Number(desviacionTipica.toFixed(2)),
+            rango: Number(rango.toFixed(2)),
+            coeficienteVariacion: Number(coeficienteVariacion.toFixed(2))
+        }
+    };
 
+    const rutaArchivo = path.join(
+        process.cwd(),
+        'tests',
+        'benchmarks',
+        'resultados-benchmark.json'
+    );
+
+    fs.mkdirSync(path.dirname(rutaArchivo), { recursive: true });
+
+    let historico = { ejecuciones: [] };
+
+    if (fs.existsSync(rutaArchivo)) {
+
+        historico = JSON.parse(fs.readFileSync(rutaArchivo, 'utf-8'));
+
+        if (!Array.isArray(historico.ejecuciones)) {
+            throw new Error('El formato del histórico no es válido.');
+        }
+    }
+
+    const siguienteId = historico.ejecuciones.reduce(
+        (maximo, ejecucion) => Math.max(maximo, ejecucion.id || 0),
+        0
+    ) + 1;
+
+    historico.ejecuciones.push({
+        id: siguienteId,
+        ...resultados
+    });
+
+    const archivoTemporal = `${rutaArchivo}.tmp`;
+
+    fs.writeFileSync(
+        archivoTemporal,
+        JSON.stringify(historico, null, 2),
+        'utf-8'
+    );
+
+    fs.renameSync(archivoTemporal, rutaArchivo);
+
+
+    //-------------------------------------------------------------------------------------------------
     console.log('\n========== RESULTADOS ==========');
 
     console.log('URL:', URL_PRUEBA);
