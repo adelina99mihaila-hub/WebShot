@@ -11,7 +11,7 @@ const directorioResultados = path.join(directoroProyecto, 'tests', 'benchmarks')
 //Archivo del historico
 const archivoResultados = path.join(directorioResultados, 'resultados-navegacion.json');
 
-test('Medición interna del buscador', async ({ request }) => {
+test('@benchmark Medición interna del buscador', async ({ request }) => {
 
     const opciones = {
         url: 'www.cofre.io',
@@ -47,9 +47,8 @@ test('Medición interna del buscador', async ({ request }) => {
     console.log('Total de navegaciones:', datos.medicionesNavegacion.length);
 
     console.log('=========================================');
-    // -----------------------------------------
-    // ALMACENAMIENTO HISTÓRICO
-    // -----------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    //Guardado de los resultados
 
     fs.mkdirSync(directorioResultados, { recursive: true });
 
@@ -109,7 +108,8 @@ test('Medición interna del buscador', async ({ request }) => {
 
     // Sustituimos el archivo anterior por el actualizado
     fs.renameSync(archivoTemporal, archivoResultados);
-
+    //--------------------------------------------------------------------------------------------
+    
     console.log('\n========== HISTÓRICO GUARDADO ==========');
     console.log('Ejecución:', nuevaEjecucion.id);
     console.log('Total de ejecuciones:', historico.ejecuciones.length);

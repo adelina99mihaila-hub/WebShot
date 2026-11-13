@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 
-test('Medición del buscador', async ({ page }) => {
+test('@benchmark Medición del buscador', async ({ page }) => {
 
     test.setTimeout(600000);
 
@@ -117,6 +117,8 @@ test('Medición del buscador', async ({ page }) => {
         console.log(`Hay variaciones en las URLs encontradas`);
     }
     //-------------------------------------------------------------------------------------------------
+    //Guardado de los resultados
+    
     console.log('URLs esperadas para el histórico:', urlsEsperadas);
     const resultados = {
         fecha: new Date().toISOString(),

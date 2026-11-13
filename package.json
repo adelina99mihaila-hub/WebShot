@@ -4,6 +4,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "test": "playwright test --grep-invert @benchmark",
+    "test:bench": "playwright test --grep @benchmark --project=chromium --workers=1",
     "postinstall": "playwright install chromium"
   },
   "dependencies": {
