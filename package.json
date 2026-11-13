@@ -2,6 +2,9 @@
   "name": "webshot",
   "version": "1.0.0",
   "main": "server.js",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "start": "node server.js",
     "test": "playwright test --grep-invert @benchmark",
