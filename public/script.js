@@ -153,6 +153,7 @@ window.addEventListener("popstate", function (e) {
         reiniciarFlujo();
         return;
     }
+    mostrarPagina(destino, false);
 });
 
 //======  PÁGINA 1  ========
