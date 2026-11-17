@@ -40,6 +40,17 @@ const estadoBusqueda = document.getElementById("estadoCarga");
 
 //NAVEGACIÓN ENTRE PÁGINAS
 
+function reiniciarFlujo(){
+    const clavesSesion = ["crawlIdActual", "paginaActual", "historialActivoKey", "filasTabla", "webshot-configuracion-pag3", "webshot-resultado",
+        "webshot-config-generada"];
+
+        clavesSesion.forEach(function(clave){
+            sessionStorage.removeItem(clave);
+        });
+        window.location.reload();
+
+}
+
 const paginasFlujo = ["pagina-1", "pag2", "pag3", "pag4"];
 
 //Función encargada de actualizar el indicador de pasos (navbar)
@@ -93,8 +104,12 @@ document.querySelectorAll(".indicador-pasos [data-pagina]").forEach(function (bo
         }
 
         if (destino === "pag4") {
+
             if (paginaVisible.id !== "pag3" || !leerConfigPag3()) {
                 if (!await window.prepararConfiguracionPorPagina()) return;
+            }
+            if(!await generarCapturas({reutilizar: true})){
+                return;
             }
 
             mostrarResultados();
@@ -103,6 +118,7 @@ document.querySelectorAll(".indicador-pasos [data-pagina]").forEach(function (bo
         mostrarPagina(destino);
     });
 });
+
 //Función para mostrar la página correspondiente y ocultar las demás
 function mostrarPagina(idPagina, guardarHistorial = true) {
 
@@ -128,13 +144,15 @@ function mostrarPagina(idPagina, guardarHistorial = true) {
         history.pushState({ pagina: idPagina }, "", "#" + idPagina);
     }
 }
-document.getElementById("nav-inicio").addEventListener("click", function () {
-    mostrarPagina("inicio");
-});
+document.getElementById("nav-inicio").addEventListener("click", reiniciarFlujo);
 
 // Escuchar el evento popstate para manejar la navegación hacia atrás y hacia adelante
 window.addEventListener("popstate", function (e) {
     const destino = (e.state && e.state.pagina) || "inicio";
+    if(destino === "inicio"){
+        reiniciarFlujo();
+        return;
+    }
     mostrarPagina(destino, false);
 });
 
@@ -880,7 +898,7 @@ casillasViewport.forEach(function (casilla) {
 
             numero.type = 'number'; numero.min = 0; numero.max = 100; numero.value = punto;
             numero.setAttribute('aria-label', 'Porcentaje del punto ' + (posicion + 1));
-           
+
             //Función para cuando se modifica el campo númerico de un punto de scroll
             numero.onchange = function () {
 
@@ -1248,6 +1266,14 @@ casillasViewport.forEach(function (casilla) {
 
 })(); //Fin del bloque aislado de la página 3
 
+function firmaConfiguracion(config) {
+    return JSON.stringify({
+        crawlId: crawlIdActual,
+        tipo: config.tipo,
+        datos: config.datos
+    });
+}
+
 
 // ===== RESTAURAR ESTADO AL RECARGAR =====
 
@@ -1285,7 +1311,8 @@ const botonExportar = document.getElementById("pag4-pdf");
 const botonAtras = document.getElementById("pag4-volver");
 
 const botonGenerar = document.getElementById("pag3-generar");
-
+const CLAVE_CONFIG_GENERADA = "webshot-config-generada";
+let generacionEnCurso = false;
 
 const nombresTamano = { desktop: "Desktop", tablet: "Tablet", movil: "Móvil" };
 
@@ -1356,7 +1383,7 @@ function actualizarComparacion() {
 
     //Solo se activa el botón cuando se seleccionan dos capturas
     botonComparar.disabled = cantidad !== 2;
-        
+
     //"Quitar selección" solo se puede pulsar si hay alguna casilla marcada
     botonLimpiarSeleccion.disabled = cantidad === 0;
     estadoComparacion.textContent = cantidad === 0
@@ -1408,19 +1435,27 @@ botonComparar.addEventListener("click", function () {
 
 //Botón para cerrar el comparador
 botonCerrarComparador.addEventListener("click", function () {
+
     dialogoComparador.close();
 });
+//Comportamiento para el cierre del comparador
+dialogoComparador.addEventListener("close", desmarcarSeleccion);
 
 //Botón para quitar la selección: desmarca todas las casillas sin tener que buscarlas
 botonLimpiarSeleccion.addEventListener("click", function () {
+    desmarcarSeleccion();
 
+});
+
+function desmarcarSeleccion() {
     listaResultados.querySelectorAll(".pag4__comparar-checkbox:checked").forEach(function (casilla) {
         casilla.checked = false;
     });
 
     seleccionesComparacion.length = 0;
     actualizarComparacion();
-});
+
+}
 
 //Función para leer la configuración guardada en la pagina 3 desde sessionStorage y devolverla como un objeto
 function leerConfigPag3() {
@@ -1495,14 +1530,14 @@ function crearMiniatura(captura, url) {
 
     // NUEVOO Al hacer clic (o pulsar Enter) en la imagen, se abre en el visor ampliado
     imagen.tabIndex = 0;
-    
+
     imagen.addEventListener("keydown", function (evento) {
         if (evento.key === "Enter") {
             abrirVisor(captura.src);
         }
     });
 
-        //Al hacer clic en cualquier parte de la miniatura (imagen o barra azul), se abre el visor
+    //Al hacer clic en cualquier parte de la miniatura (imagen o barra azul), se abre el visor
     figura.addEventListener("click", function (evento) {
         //El botón de descarga no debe abrir el visor
         if (evento.target.closest(".pag4__descarga")) {
@@ -1523,7 +1558,7 @@ function crearMiniatura(captura, url) {
     descarga.title = "Descargar captura";
     descarga.setAttribute("aria-label", `Descargar captura ${captura.etiqueta}`);
 
-        //Información extra dentro del pie: se despliega al pasar el ratón
+    //Información extra dentro del pie: se despliega al pasar el ratón
     const anchoPx = anchosTamanoPx[captura.tamano];
 
     const extra = document.createElement("span");
@@ -1614,7 +1649,7 @@ function crearTarjetaResultado(pagina) {
 
         const fila = document.createElement("div");
         fila.className = "pag4__fila pag4__fila--" + tamano;
-                fila.style.setProperty("--columnas", Math.min(capturasTamano.length, maxPorFila[tamano]));
+        fila.style.setProperty("--columnas", Math.min(capturasTamano.length, maxPorFila[tamano]));
 
         capturasTamano.forEach(function (captura) {
             fila.appendChild(crearMiniatura(captura, pagina.url));
@@ -1631,7 +1666,7 @@ function crearTarjetaResultado(pagina) {
 //Función para mostrar los resultados en la página 4, a partir de la última generación de capturas
 function mostrarResultados() {
 
-        //Al volver a dibujar las tarjetas, empezamos la comparación desde cero
+    //Al volver a dibujar las tarjetas, empezamos la comparación desde cero
     listaResultados.innerHTML = "";
     opcionesComparacion.length = 0;
     seleccionesComparacion.length = 0;
@@ -1653,15 +1688,23 @@ function mostrarResultados() {
 
     resumen.textContent = totalCapturas + " capturas · " + resultado.paginas.length + " páginas";
 }
-
-//Botón para generar las capturas: envía la configuración al servidor y muestra el resultado en la página 4
-botonGenerar.addEventListener("click", async function () {
+async function generarCapturas({ reutilizar = false } = {}) {
 
     const config = leerConfigPag3();
     if (!config || Object.keys(config.datos).length === 0) {
         alert("No hay páginas configuradas para capturar.");
-        return;
+        return false;
     }
+
+    if (generacionEnCurso) return false;
+
+    const firmaActual = firmaConfiguracion(config);
+    const resultadoGuardado = sessionStorage.getItem("webshot-resultado");
+    if (reutilizar && resultadoGuardado && sessionStorage.getItem(CLAVE_CONFIG_GENERADA) === firmaActual) {
+        return true;
+    }
+    generacionEnCurso = true;
+
 
     const pantallaGenerando = document.getElementById("pantalla-generando");
 
@@ -1690,17 +1733,29 @@ botonGenerar.addEventListener("click", async function () {
         }
 
         sessionStorage.setItem("webshot-resultado", JSON.stringify(resultado));
-        mostrarResultados();
-        mostrarPagina("pag4");
-
+        sessionStorage.setItem(CLAVE_CONFIG_GENERADA, firmaActual);
+        return true;
     } catch (error) {
         alert("No se pudieron generar las capturas: " + error.message);
-
+        return false;
     } finally {
+        generacionEnCurso = false;
         pantallaGenerando.hidden = true;
         botonGenerar.disabled = false;
         botonGenerar.textContent = textoOriginal;
     }
+
+
+}
+//Botón para generar las capturas: envía la configuración al servidor y muestra el resultado en la página 4
+botonGenerar.addEventListener("click", async function () {
+    //Genera de nuevo explicitamente
+    if (await generarCapturas()) {
+        mostrarResultados();
+        mostrarPagina("pag4");
+
+    }
+
 });
 
 //Filtro paralas tarjetas de resultados según la URL
@@ -1750,7 +1805,7 @@ function abrirVisor(src) {
         if (!pagina.url.toLowerCase().includes(texto)) {
             return;
         }
-              //Mismo orden que en pantalla: desktop, tablet y móvil
+        //Mismo orden que en pantalla: desktop, tablet y móvil
         ordenTamanos.forEach(function (tamano) {
             pagina.capturas.forEach(function (captura) {
                 if (captura.tamano === tamano && !captura.error) {

@@ -17,7 +17,7 @@ WebShot es una aplicación web para analizar páginas web y realizar capturas en
 
 ## Requisitos
 
-- Node.js y npm.
+- Node.js 22.12.0 o posterior y npm.
 - Chromium instalado para Playwright.
 
 ## Instalación y ejecución
@@ -35,6 +35,26 @@ WebShot es una aplicación web para analizar páginas web y realizar capturas en
    ```
 
 3. Abre [http://localhost:3000](http://localhost:3000) en el navegador.
+
+## Pruebas
+
+Si Playwright aún no tiene Chromium instalado, ejecuta:
+
+```bash
+npx playwright install chromium
+```
+
+Para ejecutar las pruebas:
+
+```bash
+npm test
+```
+
+Para ejecutar los benchmarks:
+
+```bash
+npm run test:bench
+```
 
 ## Tecnologías
 

@@ -1,0 +1,154 @@
+{
+  "ejecuciones": [
+    {
+      "id": 1,
+      "fecha": "2026-11-12T13:57:52.929Z",
+      "url": "www.cofre.io",
+      "profundidad": 1,
+      "repeticiones": 10,
+      "urlsEncontradas": 18,
+      "variaciones": false,
+      "tiempos": [
+        3.66,
+        3.81,
+        3.7,
+        4.56,
+        5.34,
+        3.77,
+        3.63,
+        3.73,
+        3.79,
+        3.55
+      ],
+      "estadisticas": {
+        "minimo": 3.55,
+        "maximo": 5.34,
+        "media": 3.95,
+        "mediana": 3.75,
+        "desviacionTipica": 0.53,
+        "rango": 1.79,
+        "coeficienteVariacion": 13.48
+      }
+    },
+    {
+      "id": 2,
+      "fecha": "2026-11-17T11:30:34.198Z",
+      "url": "www.cofre.io",
+      "profundidad": 1,
+      "repeticiones": 10,
+      "urlsEncontradas": 1,
+      "variaciones": true,
+      "tiempos": [
+        31.48,
+        32.79,
+        12.8,
+        69.06,
+        80.86,
+        12.19,
+        29.65,
+        46.01,
+        30.12,
+        13.44
+      ],
+      "estadisticas": {
+        "minimo": 12.19,
+        "maximo": 80.86,
+        "media": 35.84,
+        "mediana": 30.8,
+        "desviacionTipica": 22.19,
+        "rango": 68.67,
+        "coeficienteVariacion": 61.92
+      }
+    },
+    {
+      "id": 3,
+      "fecha": "2026-11-17T11:30:49.392Z",
+      "url": "www.cofre.io",
+      "profundidad": 1,
+      "repeticiones": 10,
+      "urlsEncontradas": 18,
+      "variaciones": true,
+      "tiempos": [
+        50.61,
+        25.95,
+        69.46,
+        80.55,
+        17.42,
+        32.39,
+        42.86,
+        29.77,
+        8.53,
+        20.25
+      ],
+      "estadisticas": {
+        "minimo": 8.53,
+        "maximo": 80.55,
+        "media": 37.78,
+        "mediana": 31.08,
+        "desviacionTipica": 21.99,
+        "rango": 72.02,
+        "coeficienteVariacion": 58.2
+      }
+    },
+    {
+      "id": 4,
+      "fecha": "2026-11-17T11:37:28.198Z",
+      "url": "www.cofre.io",
+      "profundidad": 1,
+      "repeticiones": 10,
+      "urlsEncontradas": 18,
+      "variaciones": false,
+      "tiempos": [
+        9.39,
+        9.79,
+        9.18,
+        15.89,
+        9.08,
+        20.07,
+        46.13,
+        28.36,
+        15.48,
+        11.94
+      ],
+      "estadisticas": {
+        "minimo": 9.08,
+        "maximo": 46.13,
+        "media": 17.53,
+        "mediana": 13.71,
+        "desviacionTipica": 11.17,
+        "rango": 37.05,
+        "coeficienteVariacion": 63.7
+      }
+    },
+    {
+      "id": 5,
+      "fecha": "2026-11-17T11:42:51.969Z",
+      "url": "www.cofre.io",
+      "profundidad": 1,
+      "repeticiones": 10,
+      "urlsEncontradas": 18,
+      "variaciones": false,
+      "tiempos": [
+        13.26,
+        19.13,
+        16.55,
+        22.25,
+        19.32,
+        52.39,
+        15.67,
+        16.71,
+        16.78,
+        15.8
+      ],
+      "estadisticas": {
+        "minimo": 13.26,
+        "maximo": 52.39,
+        "media": 20.79,
+        "mediana": 16.75,
+        "desviacionTipica": 10.79,
+        "rango": 39.13,
+        "coeficienteVariacion": 51.91
+      }
+    }
+  ]
+}
