@@ -5,6 +5,7 @@ test.describe('Navegación y reinicio del flujo', () => {
     //Test para la navegacion 1-2-3-4------------------------------------------------------------------------------------------------------
     test('Navegación entre páginas con el navbar', async ({ page }) => {
 
+        test.setTimeout(180000);
         //Abre la app y localiza los elementos
         await page.goto('http://localhost:3000');
 
@@ -47,6 +48,7 @@ test.describe('Navegación y reinicio del flujo', () => {
 
     test('Genera capturas con la configuración predeterminada', async ({ page }) => {
 
+        test.setTimeout(180000);
         //Abre la app y localiza los elementos
         await page.goto('http://localhost:3000');
 

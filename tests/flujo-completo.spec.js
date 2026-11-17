@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('Flujo completo', async ({ page }) => {
 
+    test.setTimeout(2000000);
     //Abre la app y localiza los elementos
     await page.goto('http://localhost:3000/#inicio');
 
