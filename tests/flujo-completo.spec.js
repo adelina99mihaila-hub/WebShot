@@ -69,11 +69,13 @@ test('Flujo completo', async ({ page }) => {
     await expect(pagina4).toBeVisible({ timeout: 160000 });
 
     //-------------------------------------------DESCARGA (ZIP Y PDF)---------------------------------------------------------------------
-
+console.log('Llega a resultados');
     //Descarga de una captura en formato png
     const descarga = page.waitForEvent('download');
     await page.getByRole('link', { name: 'Descargar captura 0%' }).first().click();
+    console.log('Se ha pulsado descargar');
     const descargaCaptura = await descarga;
+    console.log('Evento download recibido');
     expect(descargaCaptura.suggestedFilename()).toMatch(/\.png$/);
 
     //Descarga de todas las capturas en formato ZIP

@@ -1911,7 +1911,19 @@ font {
 #pag4 .pag4__fila--movil .pag4__miniatura {
     aspect-ratio: 9 / 16;
 }
+/* Mantiene la descarga por encima del pie de la miniatura */
+#pag4 .pag4__descarga {
+    z-index: 2;
+}
 
+/* En pantallas táctiles, no dejar abierto el detalle por el :hover persistente */
+@media (hover: none) {
+    #pag4 .pag4__miniatura:hover .pag4__pie-extra {
+        max-height: 0;
+        opacity: 0;
+        margin-top: 0;
+    }
+}
 /* ================ NUEVOO VISOR AMPLIADO ================ */
 
 /* Las miniaturas indican que se pueden ampliar */
