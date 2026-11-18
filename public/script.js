@@ -40,14 +40,14 @@ const estadoBusqueda = document.getElementById("estadoCarga");
 
 //NAVEGACIÓN ENTRE PÁGINAS
 
-function reiniciarFlujo(){
+function reiniciarFlujo() {
     const clavesSesion = ["crawlIdActual", "paginaActual", "historialActivoKey", "filasTabla", "webshot-configuracion-pag3", "webshot-resultado",
         "webshot-config-generada"];
 
-        clavesSesion.forEach(function(clave){
-            sessionStorage.removeItem(clave);
-        });
-        window.location.reload();
+    clavesSesion.forEach(function (clave) {
+        sessionStorage.removeItem(clave);
+    });
+    window.location.reload();
 
 }
 
@@ -108,7 +108,7 @@ document.querySelectorAll(".indicador-pasos [data-pagina]").forEach(function (bo
             if (paginaVisible.id !== "pag3" || !leerConfigPag3()) {
                 if (!await window.prepararConfiguracionPorPagina()) return;
             }
-            if(!await generarCapturas({reutilizar: true})){
+            if (!await generarCapturas({ reutilizar: true })) {
                 return;
             }
 
@@ -149,7 +149,7 @@ document.getElementById("nav-inicio").addEventListener("click", reiniciarFlujo);
 // Escuchar el evento popstate para manejar la navegación hacia atrás y hacia adelante
 window.addEventListener("popstate", function (e) {
     const destino = (e.state && e.state.pagina) || "inicio";
-    if(destino === "inicio"){
+    if (destino === "inicio") {
         reiniciarFlujo();
         return;
     }
@@ -676,6 +676,7 @@ const btnAnadirPunto = document.getElementById("btn-anadir-punto");
 
 // Puntos de scroll por defecto
 const puntosPorDefecto = [0, 40, 80];
+const MAX_PUNTOS_SCROLL = 20;
 
 //Crea los puntos de scroll por defecto 
 puntosPorDefecto.forEach(function (valor) {
@@ -685,6 +686,11 @@ puntosPorDefecto.forEach(function (valor) {
 //Añade el punto de scroll al hacer click en el botón "Añadir punto"
 btnAnadirPunto.addEventListener("click", function () {
 
+    const cantidadPuntos = contenedorPuntosScroll.querySelectorAll(".puntos__item").length;
+    if (cantidadPuntos >= MAX_PUNTOS_SCROLL) {
+        alert(`El máximo es ${MAX_PUNTOS_SCROLL} puntos de scroll.`);
+        return;
+    }
     const nuevaPastilla = crearPunto(0);
     contenedorPuntosScroll.insertBefore(nuevaPastilla, btnAnadirPunto);
     repartirPuntosScroll();
@@ -1079,6 +1085,10 @@ casillasViewport.forEach(function (casilla) {
         if (!Number.isInteger(valor) || valor < 0 || valor > 100) return;
 
         if (datos[paginaActual].puntos.includes(valor)) { mensaje.textContent = 'Ese punto ya existe.'; return; }
+        if (datos[paginaActual].puntos.length >= MAX_PUNTOS_SCROLL) {
+            mensaje.textContent = 'Máximo 20 puntos de scroll por página.';
+            return;
+        }
         datos[paginaActual].puntos.push(valor); mensaje.textContent = ''; mostrar();
 
     }
