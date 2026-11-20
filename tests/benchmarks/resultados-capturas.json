@@ -1,0 +1,30 @@
+{
+  "ejecuciones": [
+    {
+      "id": 1,
+      "fecha": "2026-11-20T11:45:55.452Z",
+      "url": "www.cofre.io",
+      "repeticiones": 5,
+      "capturas": 3,
+      "errores": 0,
+      "variaciones": false,
+      "tiempos": [
+        13.045,
+        6.626,
+        6.348,
+        6.398,
+        6.009
+      ],
+      "estadisticas": {
+        "minimo": 6.009,
+        "maximo": 13.045,
+        "media": 7.69,
+        "mediaCapturas": 2.56,
+        "mediana": 6.4,
+        "desviacionTipica": 2.69,
+        "rango": 7.04,
+        "coeficienteVariacion": 34.97
+      }
+    }
+  ]
+}

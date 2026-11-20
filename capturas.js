@@ -1,6 +1,7 @@
 const { chromium } = require("playwright");
 const path = require("path");
 const fs = require("fs");
+const { createHash } = require("node:crypto");
 
 // Tamaños de ventana para cada viewport
 const VIEWPORTS = {
@@ -102,7 +103,7 @@ function nombreSeguro(url) {
         .replace(/[^a-z0-9]+/gi, "_")//Cualquier grupo de caracteres que no sea letra ni número se cambia por _. Las letras g e i del final significan “todas las veces” y “da igual mayúscula o minúscula”.
         .replace(/^_+|_+$/g, "")//Guiones bajos al principio o al final se borran.
         .slice(0, 60);//Se queda con los primeros 60 caracteres. Hay URLs larguísimas y Windows tiene un límite de longitud de ruta.
-}//Coge el texto de la URL y le aplica una cadena de transformaciones, una debajo de otra. Cada línea recibe el resultado de la anterior. Lo escribimos en varias líneas solo para que se lea mejor. “reemplaza”. Busca algo en el texto y lo cambia por otra cosa. Lo que se busca va entre barras /.../
+    }//Coge el texto de la URL y le aplica una cadena de transformaciones, una debajo de otra. Cada línea recibe el resultado de la anterior. Lo escribimos en varias líneas solo para que se lea mejor. “reemplaza”. Busca algo en el texto y lo cambia por otra cosa. Lo que se busca va entre barras /.../
 
 // Hace TODAS las capturas de una URL con un tamaño:
 // - tipo "viewport": una captura por cada punto de scroll
