@@ -523,6 +523,24 @@ function aplicarFiltros() {
 
         fila.hidden = !(coincideBusqueda && coincideFiltro);
     });
+    actualizarEstadoSeleccionTodo();
+}
+function obtenerCheckboxesSeleccionables() {
+    return Array.from(tabla.querySelectorAll("tr"))
+        .filter(fila => !fila.hidden && fila.dataset.estado === "ok")
+        .map(fila => fila.querySelector("input[type='checkbox']"))
+        .filter(Boolean);
+}
+
+function actualizarEstadoSeleccionTodo() {
+    const checkboxes = obtenerCheckboxesSeleccionables();
+    const seleccionados = checkboxes.filter(checkbox => checkbox.checked).length;
+
+    selectAll.disabled = checkboxes.length === 0;
+    selectAll.checked =
+        checkboxes.length > 0 && seleccionados === checkboxes.length;
+    selectAll.indeterminate =
+        seleccionados > 0 && seleccionados < checkboxes.length;
 }
 
 searchInput.addEventListener("input", aplicarFiltros);
@@ -597,10 +615,10 @@ function actualizarContadores() {
 
 //Listener para el checkbox "Seleccionar todo"
 selectAll.addEventListener("change", function () {
-    const checkboxesFilas = tabla.querySelectorAll("input[type='checkbox']");
-    checkboxesFilas.forEach(function (c) {
-        c.checked = selectAll.checked;
+    obtenerCheckboxesSeleccionables().forEach(function (checkbox) {
+        checkbox.checked = selectAll.checked;
     });
+
     actualizarContadores();
 });
 
