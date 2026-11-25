@@ -149,6 +149,36 @@
         "rango": 39.13,
         "coeficienteVariacion": 51.91
       }
+    },
+    {
+      "id": 6,
+      "fecha": "2026-11-24T17:05:24.351Z",
+      "url": "www.cofre.io",
+      "profundidad": 1,
+      "repeticiones": 10,
+      "urlsEncontradas": 18,
+      "variaciones": false,
+      "tiempos": [
+        18.86,
+        15.59,
+        20.55,
+        16.88,
+        11.56,
+        9.09,
+        13.94,
+        16.23,
+        11.61,
+        9.6
+      ],
+      "estadisticas": {
+        "minimo": 9.09,
+        "maximo": 20.55,
+        "media": 14.39,
+        "mediana": 14.77,
+        "desviacionTipica": 3.69,
+        "rango": 11.46,
+        "coeficienteVariacion": 25.62
+      }
     }
   ]
 }
