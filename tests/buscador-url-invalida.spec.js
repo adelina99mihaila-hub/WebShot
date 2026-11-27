@@ -9,13 +9,6 @@ test.describe('URLs inválidas', () => {
 
         const formulario = page.locator('#search-box');
 
-        //Escuchamos la alerta
-        page.once('dialog', async dialog => {
-            expect(dialog.message()).toBe('Solo se permiten URLs con http o https');
-            await dialog.accept();
-        });
-
-
         //Introducimos la URL FTP
         await formulario.getByRole('textbox', { name: 'Buscar URL' }).fill('ftp://ejemplo.com');
 
@@ -32,6 +25,12 @@ test.describe('URLs inválidas', () => {
         const respuesta = await respuestaCrawl;
 
         expect(respuesta.status()).toBe(400);
+
+
+        await expect(page.locator("#mensaje-busqueda"))
+            .toHaveText("Solo se permiten URLs con http o https");
+
+
 
         const datos = await respuesta.json();
 
