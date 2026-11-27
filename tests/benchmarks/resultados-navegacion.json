@@ -834,6 +834,240 @@
           "estado": "ok"
         }
       ]
+    },
+    {
+      "id": 10,
+      "fecha": "2026-11-24T16:37:18.390Z",
+      "urlReferencia": "https://www.cofre.io/",
+      "profundidadMaxima": 1,
+      "totalNavegaciones": 18,
+      "mediciones": [
+        {
+          "url": "https://www.cofre.io/",
+          "profundidad": 0,
+          "tiempo": 1.329,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/notificaciones",
+          "profundidad": 1,
+          "tiempo": 0.662,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/cofre-air",
+          "profundidad": 1,
+          "tiempo": 0.349,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/emision-de-certificados",
+          "profundidad": 1,
+          "tiempo": 1.069,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/planes",
+          "profundidad": 1,
+          "tiempo": 0.671,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/mx/",
+          "profundidad": 1,
+          "tiempo": 1.014,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/br/",
+          "profundidad": 1,
+          "tiempo": 1.986,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/pt/",
+          "profundidad": 1,
+          "tiempo": 1.949,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/it/",
+          "profundidad": 1,
+          "tiempo": 0.2,
+          "estado": "error"
+        },
+        {
+          "url": "https://www.cofre.io/en/",
+          "profundidad": 1,
+          "tiempo": 0.006,
+          "estado": "error"
+        },
+        {
+          "url": "https://www.cofre.io/agendar-demo",
+          "profundidad": 1,
+          "tiempo": 0.005,
+          "estado": "error"
+        },
+        {
+          "url": "https://www.cofre.io/sobre-nosotros",
+          "profundidad": 1,
+          "tiempo": 0.006,
+          "estado": "error"
+        },
+        {
+          "url": "https://www.cofre.io/asesorias",
+          "profundidad": 1,
+          "tiempo": 0.01,
+          "estado": "error"
+        },
+        {
+          "url": "https://www.cofre.io/terminos-condiciones",
+          "profundidad": 1,
+          "tiempo": 0.004,
+          "estado": "error"
+        },
+        {
+          "url": "https://www.cofre.io/aviso-legal",
+          "profundidad": 1,
+          "tiempo": 0.006,
+          "estado": "error"
+        },
+        {
+          "url": "https://www.cofre.io/politica-de-privacidad",
+          "profundidad": 1,
+          "tiempo": 0.006,
+          "estado": "error"
+        },
+        {
+          "url": "https://www.cofre.io/cookies",
+          "profundidad": 1,
+          "tiempo": 0.005,
+          "estado": "error"
+        },
+        {
+          "url": "https://www.cofre.io/contacto",
+          "profundidad": 1,
+          "tiempo": 0.008,
+          "estado": "error"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "fecha": "2026-11-24T17:03:11.555Z",
+      "urlReferencia": "https://www.cofre.io/",
+      "profundidadMaxima": 1,
+      "totalNavegaciones": 18,
+      "mediciones": [
+        {
+          "url": "https://www.cofre.io/",
+          "profundidad": 0,
+          "tiempo": 2.349,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/notificaciones",
+          "profundidad": 1,
+          "tiempo": 0.742,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/cofre-air",
+          "profundidad": 1,
+          "tiempo": 0.479,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/emision-de-certificados",
+          "profundidad": 1,
+          "tiempo": 0.749,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/planes",
+          "profundidad": 1,
+          "tiempo": 0.79,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/mx/",
+          "profundidad": 1,
+          "tiempo": 1.34,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/br/",
+          "profundidad": 1,
+          "tiempo": 0.446,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/pt/",
+          "profundidad": 1,
+          "tiempo": 0.577,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/it/",
+          "profundidad": 1,
+          "tiempo": 0.637,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/en/",
+          "profundidad": 1,
+          "tiempo": 0.995,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/agendar-demo",
+          "profundidad": 1,
+          "tiempo": 0.325,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/sobre-nosotros",
+          "profundidad": 1,
+          "tiempo": 1.502,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/asesorias",
+          "profundidad": 1,
+          "tiempo": 0.83,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/terminos-condiciones",
+          "profundidad": 1,
+          "tiempo": 0.745,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/aviso-legal",
+          "profundidad": 1,
+          "tiempo": 1,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/politica-de-privacidad",
+          "profundidad": 1,
+          "tiempo": 0.897,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/cookies",
+          "profundidad": 1,
+          "tiempo": 0.907,
+          "estado": "ok"
+        },
+        {
+          "url": "https://www.cofre.io/contacto",
+          "profundidad": 1,
+          "tiempo": 0.766,
+          "estado": "ok"
+        }
+      ]
     }
   ]
 }

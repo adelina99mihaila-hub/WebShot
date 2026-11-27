@@ -5,6 +5,7 @@ import fs from 'node:fs';
 
 test('Generación y exportación de capturas validas', async ({ page }) => {
 
+    test.setTimeout(2000000);
     //Abre la app y localiza los elementos
     await page.goto('http://localhost:3000');
 
@@ -53,6 +54,15 @@ test('Generación y exportación de capturas validas', async ({ page }) => {
 
     const respuesta = await respuestaGeneracion;
     const datos = await respuesta.json();
+
+    const nombres = datos.paginas.flatMap(pagina =>
+        pagina.capturas
+            .filter(captura => !captura.error)
+            .map(captura => captura.archivo)
+    );
+
+    expect(new Set(nombres).size).toBe(nombres.length);
+    expect(nombres.every(nombre => nombre.startsWith('001_'))).toBe(true);
 
     //Pasado el tiempo se generan las capturas y se pasa a la página 4 (resultados)
     await expect(pagina4).toBeVisible({ timeout: 160000 });

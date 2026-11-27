@@ -38,17 +38,49 @@ WebShot es una aplicación web para analizar páginas web y realizar capturas en
 
 ## Pruebas
 
-Si Playwright aún no tiene Chromium instalado, ejecuta:
+La aplicación incluye una suite de pruebas automatizadas desarrollada con Playwright.
+
+### Pruebas funcionales
+
+Las pruebas funcionales verifican los principales flujos de uso de la aplicación:
+
+- Búsqueda de URLs válidas.
+- Gestión de URLs inválidas.
+- Tratamiento de redirecciones.
+- Navegación entre páginas.
+- Generación y exportación de capturas.
+- Flujo completo de usuario.
+
+Si Playwright aún no tiene Chromium instalado:
 
 ```bash
 npx playwright install chromium
 ```
 
-Para ejecutar las pruebas:
+Para ejecutar las pruebas funcionales:
 
 ```bash
 npm test
 ```
+
+### Benchmarks
+
+La aplicación incluye benchmarks destinados a medir el rendimiento de los procesos más costosos:
+
+- Rastreo de URLs.
+- Generación de capturas.
+
+Cada benchmark ejecuta múltiples iteraciones y calcula métricas estadísticas como:
+
+- Tiempo mínimo.
+- Tiempo máximo.
+- Tiempo medio.
+- Mediana.
+- Desviación típica.
+- Rango.
+- Coeficiente de variación.
+
+Los resultados se almacenan en formato JSON para permitir la comparación entre ejecuciones.
 
 Para ejecutar los benchmarks:
 
@@ -58,6 +90,9 @@ npm run test:bench
 
 ## Tecnologías
 
-- Node.js y Express
+- Node.js
+- Express
 - Playwright
-- HTML, CSS y JavaScript
+- HTML
+- CSS
+- JavaScript
