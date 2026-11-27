@@ -38,6 +38,9 @@ const respetarRobots = document.getElementById("respect-robots");
 //Activación del loader al analizar la página
 const estadoBusqueda = document.getElementById("estadoCarga");
 
+//Mensajes de error
+const mensajeBusqueda = document.getElementById("mensaje-busqueda");
+
 //NAVEGACIÓN ENTRE PÁGINAS
 
 function reiniciarFlujo() {
@@ -362,6 +365,8 @@ formulario.addEventListener("submit", async function (evento) {
 
     //Si el texto está vacío, no hacemos nada
     if (texto === "") return;
+    mensajeBusqueda.textContent = "";
+    mensajeBusqueda.hidden = true;
 
     const seleccionSolicitada = seleccionHistoriaPendiente;
     seleccionHistoriaPendiente = null;
@@ -395,7 +400,8 @@ formulario.addEventListener("submit", async function (evento) {
         //Si el servidor devuelve un error, mostramos un mensaje de alerta y salimos de la función
         if (!response.ok) {
 
-            alert(resultado.error || "Error al analizar la URL");
+            mensajeBusqueda.textContent = resultado.error || "Error al analizar la URL";
+            mensajeBusqueda.hidden = false;
             return;
         }
 
@@ -503,7 +509,8 @@ formulario.addEventListener("submit", async function (evento) {
 
     } catch (e) {
 
-        alert("Error al analizar la URL: " + e.message);
+        mensajeBusqueda.textContent = "Error al analizar la URL: " + e.message;
+        mensajeBusqueda.hidden = false;
 
     } finally { //Vuelve a ocultar el loader
         estadoBusqueda.hidden = true;
